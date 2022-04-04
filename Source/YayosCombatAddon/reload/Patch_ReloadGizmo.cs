@@ -30,59 +30,71 @@ namespace YayosCombatAddon
 				&& pawn.Drafted
 				&& !pawn.WorkTagIsDisabled(WorkTags.Violent))
 			{
-				var weapons = new List<Thing>(pawn.equipment.AllEquipmentListForReading);
+				var comps = new List<CompReloadable>();
+				var weapons = pawn.equipment.AllEquipmentListForReading;
+
 #warning TODO SimpleSidearms compatibility
 
 				foreach (var thing in weapons)
 				{
 					var comp = thing.TryGetComp<CompReloadable>();
 					if (comp != null)
+						comps.Add(comp);
+				}
+
+				if (comps.Count > 0)
+				{
+					bool disabled = false;
+					string disableReason = null;
+
+					if (pawn.Downed) // should actually never happen, since pawns can't be drafted when downed
 					{
-						bool disabled = false;
-						string disableReason = null;
+						disabled = true;
+						disableReason = "pawnDowned".Translate();
+					}
+					else if (!AnyWeaponRequiresReloading(comps))
+					{
+						disabled = true;
+						disableReason = "ammoFull".Translate();
+					}
 
-						if (pawn.Downed) // should actually never happen, since pawns can't be drafted when downed
-						{
-							disabled = true;
-							disableReason = "pawnDowned".Translate();
-						}
-						else if (comp.RemainingCharges >= comp.MaxCharges)
-						{
-							disabled = true;
-							disableReason = "ammoFull".Translate();
-						}
+					yield return new Command_Action()
+					{
+						defaultLabel = "reloadWeaponInventory_title".Translate(),
+						defaultDesc = "reloadWeaponInventory_desc".Translate(),
+						disabled = disabled,
+						disabledReason = disableReason,
+						icon = GizmoTexture.AmmoReloadInventory,
 
+						action = () => ReloadUtility.TryForcedReloadFromInventory(pawn, comps),
+					};
+
+					if (yayoCombat.yayoCombat.supplyAmmoDist > 0)
+					{
 						yield return new Command_Action()
 						{
-							defaultLabel = "reloadWeaponInventory_title".Translate(),
-							defaultDesc = "reloadWeaponInventory_desc".Translate(),
+							defaultLabel = "reloadWeaponSurrounding_title".Translate(),
+							defaultDesc = "reloadWeaponSurrounding_desc".Translate(),
 							disabled = disabled,
 							disabledReason = disableReason,
-							icon = GizmoTexture.AmmoReloadInventory,
+							icon = GizmoTexture.AmmoReloadSurrounding,
 
-							action = () => ReloadUtility.TryForcedReloadFromInventory(comp),
+							action = () => ReloadUtility.TryForcedReloadFromSurrounding(pawn, comps),
 						};
-
-						if (yayoCombat.yayoCombat.supplyAmmoDist > 0)
-						{
-							yield return new Command_Action()
-							{
-								defaultLabel = "reloadWeaponSurrounding_title".Translate(),
-								defaultDesc = "reloadWeaponSurrounding_desc".Translate(),
-								disabled = disabled,
-								disabledReason = disableReason,
-								icon = GizmoTexture.AmmoReloadSurrounding,
-
-								action = () => ReloadUtility.TryForcedReloadFromSurrounding(comp),
-							};
-						}
 					}
-					break;
 				}
 			}
 
 			foreach (var gizmo in __result)
 				yield return gizmo;
+
+			bool AnyWeaponRequiresReloading(IEnumerable<CompReloadable> comps)
+			{
+				foreach (var comp in comps)
+					if (comp.RemainingCharges < comp.MaxCharges)
+						return true;
+				return false;
+			}
 		}
 	}
 }

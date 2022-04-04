@@ -47,7 +47,7 @@
     <Compile Include="Main.cs" />
     <Compile Include="loadout\PawnColumnWorker_CarryAmmo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="reload\patch_ReloadGizmo.cs" />
+    <Compile Include="reload\Patch_ReloadGizmo.cs" />
     <Compile Include="reload\ReloadUtility.cs" />
   </ItemGroup>
   <ItemGroup>

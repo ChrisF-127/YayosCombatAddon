@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+  
+	<Operation Class="PatchOperationAdd">
+		<xpath>Defs/PawnTableDef[defName = "Assign"]/columns</xpath>
+		<value>
+			<li>yy_ammo1</li>
+			<li>yy_ammo2</li>
+			<!-- <li>yy_ammo3</li> -->
+		</value>
+	</Operation>
+  
+</Patch>

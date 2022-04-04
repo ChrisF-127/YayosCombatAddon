@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <reloadWeaponInventory_title>Reload (Inventory)</reloadWeaponInventory_title>
+  <reloadWeaponInventory_desc>Reload weapon using carried ammo.</reloadWeaponInventory_desc>
+  
+  <reloadWeaponSurrounding_title>Reload (Surrounding)</reloadWeaponSurrounding_title>
+  <reloadWeaponSurrounding_desc>Reload weapon using ammo found nearby.</reloadWeaponSurrounding_desc>
+  
+  <pawnDowned>Cannot reload weapon when downed</pawnDowned>
+  <ammoFull>Nothing to reload</ammoFull>
+  
+  <showReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</showReloadWeaponGizmo_title>
+  <showReloadWeaponGizmo_desc>Activate the "Reload Weapon" gizmo for selected drafted pawns using weapons which require ammo.</showReloadWeaponGizmo_desc>
+
+</LanguageData>

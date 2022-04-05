@@ -5,7 +5,7 @@
   <reloadWeaponInventory_desc>Reload weapon using carried ammo.</reloadWeaponInventory_desc>
   
   <reloadWeaponSurrounding_title>Reload (Surrounding)</reloadWeaponSurrounding_title>
-  <reloadWeaponSurrounding_desc>Reload weapon using ammo found nearby.</reloadWeaponSurrounding_desc>
+  <reloadWeaponSurrounding_desc>Reload weapon using ammo found nearby and restock inventory.</reloadWeaponSurrounding_desc>
   
   <pawnDowned>Cannot reload weapon when downed</pawnDowned>
   <ammoFull>Nothing to reload</ammoFull>

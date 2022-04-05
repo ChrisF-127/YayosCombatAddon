@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<JobDef>
+		<defName>ReloadFromInventory</defName>
+		<driverClass>YayosCombatAddon.JobDriver_ReloadFromInventory</driverClass>
+		<reportString>reloading TargetA.</reportString>
+		<suspendable>false</suspendable>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+
+</Defs>

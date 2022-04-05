@@ -33,7 +33,7 @@ namespace YayosCombatAddon
 				var comps = new List<CompReloadable>();
 				var weapons = pawn.equipment.AllEquipmentListForReading;
 
-#warning TODO SimpleSidearms compatibility
+#warning TODO SimpleSidearms compatibility: get all weapons in inventory
 
 				foreach (var thing in weapons)
 				{

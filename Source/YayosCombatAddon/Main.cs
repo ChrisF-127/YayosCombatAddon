@@ -14,6 +14,8 @@ namespace YayosCombatAddon
         private SettingHandle<bool> showReloadWeaponGizmoSetting;
         public static bool showReloadWeaponGizmo = true;
 
+#warning TODO setting to enable SimpleSidearms compatibility
+
         public override void DefsLoaded()
         {
             showReloadWeaponGizmoSetting = Settings.GetHandle("showReloadButton", "showReloadWeaponGizmo_title".Translate(), "showReloadWeaponGizmo_desc".Translate(), true);

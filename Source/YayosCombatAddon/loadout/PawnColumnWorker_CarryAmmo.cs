@@ -16,7 +16,7 @@ namespace YayosCombatAddon
 			if (pawn.inventoryStock != null)
 			{
 				// lazy way for finding the appropiate def: just named them the same
-				InventoryStockGroupDef group = DefDatabase<InventoryStockGroupDef>.AllDefs.First((def) => def.defName == this.def.defName);
+				var group = DefDatabase<InventoryStockGroupDef>.AllDefs.First((def) => def.defName == this.def.defName);
 
 				int localI = 0;
 				if (yayoCombat.yayoCombat.ammo)
@@ -49,7 +49,7 @@ namespace YayosCombatAddon
 							rect.height - 4f),
 						ref localI,
 						ref buffer,
-						max: 1e3f);
+						max: 1e4f);
 				}
 				pawn.inventoryStock.SetCountForGroup(group, localI);
 			}
@@ -95,7 +95,7 @@ namespace YayosCombatAddon
 			if (pawn.inventoryStock != null)
 			{
 				// lazy way for finding the appropiate def: just named them the same
-				InventoryStockGroupDef group = DefDatabase<InventoryStockGroupDef>.AllDefs.First((def) => def.defName == this.def.defName);
+				var group = DefDatabase<InventoryStockGroupDef>.AllDefs.First((def) => def.defName == this.def.defName);
 				return pawn.inventoryStock.GetDesiredCountForGroup(group);
 			}
 			return int.MinValue;

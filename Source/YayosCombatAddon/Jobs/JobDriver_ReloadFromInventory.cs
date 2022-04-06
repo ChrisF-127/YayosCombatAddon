@@ -13,72 +13,57 @@ namespace YayosCombatAddon
 	{
 		private Thing Gear => job.GetTarget(TargetIndex.A).Thing;
 
-		public override bool TryMakePreToilReservations(bool errorOnFailed)
-		{
-			return true;
-		}
+		public override bool TryMakePreToilReservations(bool errorOnFailed) =>
+			true;
 
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
 			var comp = Gear?.TryGetComp<CompReloadable>();
+			this.FailOn(() => pawn == null);
+			this.FailOn(() => pawn.Downed);
 			this.FailOn(() => comp == null);
 			this.FailOn(() => comp.Wearer != pawn);
-			this.FailOn(() => !comp.NeedsReload(true));
 
-			if (pawn.carryTracker.CarriedThing != null)
-				yield return Toils_General.PutCarriedThingInInventory();
+			yield return Toils_General.PutCarriedThingInInventory();
 
 			var done = Toils_General.Label();
-			var start = Toils_Jump.JumpIf(done, () =>
+			yield return Toils_Jump.JumpIf(done, () =>
 			{
-				Log.Message($"Start: '{comp}' needs reload {comp.NeedsReload(false)}");
 				var output = true;
 				if (comp.NeedsReload(false))
 				{
-					foreach (var thing in pawn.inventory.innerContainer)
+					var innerContainer = pawn.inventory.innerContainer;
+					for (int i = innerContainer.Count - 1; i >= 0; i--)
 					{
+						var thing = innerContainer[i];
 						if (thing.def == comp.AmmoDef)
 						{
-							output = !pawn.inventory.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer);
-							break;
+							if (pawn.inventory.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, true))
+								output = false;
+							else
+								Log.Warning($"Could not move/merge '{thing}' into CarriedThing (carrying: '{pawn.carryTracker.CarriedThing}')");
 						}
 					}
 				}
 				return output;
 			});
-			yield return start;
 			yield return Toils_General.Wait(comp.Props.baseReloadTicks).WithProgressBarToilDelay(TargetIndex.A);
-
-			yield return Toils_Jump.JumpIf(start, () =>
-			{
-				var carriedThing = pawn.carryTracker.CarriedThing;
-				Log.Message($"Trying to reload '{comp}' with '{carriedThing}'");
-				if (carriedThing?.def == comp.AmmoDef)
-				{
-					comp.ReloadFrom(carriedThing);
-					return true;
-				}
-				Log.Warning($"Not carrying ammo / invalid thing: '{carriedThing}' '{comp.AmmoDef}'");
-				return false;
-			});
-			yield return done;
 
 			yield return new Toil
 			{
-				initAction = delegate
+				initAction = () =>
 				{
-					Thing carriedThing = pawn.carryTracker.CarriedThing;
-					Log.Message($"End: '{comp}' need reload {comp.NeedsReload(false)} carrying '{carriedThing}'");
-					if (carriedThing != null && !carriedThing.Destroyed)
-					{
-#warning TODO move carried thing back into inventory
-						//if (!pawn.carryTracker.innerContainer.TryTransferToContainer(carriedThing, pawn.inventory.innerContainer))
-						if (!pawn.inventory.GetDirectlyHeldThings().TryAdd(carriedThing))
-							pawn.carryTracker.TryDropCarriedThing(pawn.Position, ThingPlaceMode.Near, out var _);
-					}
+					var carriedThing = pawn.carryTracker.CarriedThing;
+					if (carriedThing?.def == comp.AmmoDef)
+						comp.ReloadFrom(carriedThing);
+					else
+						Log.Warning($"Invalid carried thing: '{carriedThing}' (needed: '{comp.AmmoDef}')");
 				},
-				defaultCompleteMode = ToilCompleteMode.Instant
+				defaultCompleteMode = ToilCompleteMode.Instant,
 			};
+			yield return done;
+
+			yield return Toils_General.PutCarriedThingInInventory();
 		}
 	}
 

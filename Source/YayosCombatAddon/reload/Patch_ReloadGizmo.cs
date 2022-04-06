@@ -25,18 +25,14 @@ namespace YayosCombatAddon
 #pragma warning restore IDE0051 // Remove unused private members
 		{
 			if (yayoCombat.yayoCombat.ammo
-				&& Main.showReloadWeaponGizmo
+				&& Main.ShowReloadWeaponGizmo
 				&& __instance?.pawn is Pawn pawn
 				&& pawn.Faction?.IsPlayer == true
 				&& pawn.Drafted
 				&& !pawn.WorkTagIsDisabled(WorkTags.Violent))
 			{
 				var comps = new List<CompReloadable>();
-				var weapons = pawn.equipment.AllEquipmentListForReading;
-
-#warning TODO SimpleSidearms compatibility: get all weapons in inventory
-
-				foreach (var thing in weapons)
+				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
 				{
 					var comp = thing.TryGetComp<CompReloadable>();
 					if (comp != null)
@@ -44,7 +40,7 @@ namespace YayosCombatAddon
 				}
 
 				if (comps.Count > 0)
-					yield return new Command_ReloadActions(pawn, comps);
+					yield return new Command_ReloadActions(pawn);
 			}
 
 			foreach (var gizmo in __result)
@@ -55,18 +51,37 @@ namespace YayosCombatAddon
 	internal class Command_ReloadActions : Command_Action
 	{
 		private readonly Pawn Pawn = null;
-		private readonly IEnumerable<CompReloadable> Comps;
+		private readonly List<CompReloadable> EquippedComps;
+		private readonly List<CompReloadable> EquippedAndInventoryComps;
 
-		public Command_ReloadActions(Pawn pawn, IEnumerable<CompReloadable> comps)
+		public Command_ReloadActions(Pawn pawn)
 		{
 			Pawn = pawn;
-			Comps = comps;
+
+			EquippedComps = new List<CompReloadable>();
+			foreach (var thing in pawn.equipment.AllEquipmentListForReading)
+			{
+				var comp = thing.TryGetComp<CompReloadable>();
+				if (comp != null)
+					EquippedComps.Add(comp);
+			}
+
+			if (Main.ReloadAllWeaponsInInventoryOption)
+			{
+				EquippedAndInventoryComps = new List<CompReloadable>(EquippedComps);
+				foreach (var thing in pawn.inventory.innerContainer)
+				{
+					var comp = thing.TryGetComp<CompReloadable>();
+					if (comp != null)
+						EquippedAndInventoryComps.Add(comp);
+				}
+			}
 
 			defaultLabel = "SY_YCA.ReloadGizmo_title".Translate();
 			defaultDesc = "SY_YCA.ReloadGizmo_desc".Translate();
 			icon = GizmoTexture.AmmoReload;
 
-			action = () => ReloadUtility.TryForcedReloadFromInventory(pawn, comps);
+			action = () => ReloadUtility.TryForcedReloadFromInventory(pawn, EquippedComps);
 		}
 
 		public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
@@ -75,24 +90,42 @@ namespace YayosCombatAddon
 			{
 				yield return new FloatMenuOption(
 					"SY_YCA.ReloadWeaponFromInventory_label".Translate(),
-					() => ReloadUtility.TryForcedReloadFromInventory(Pawn, Comps))
+					() => ReloadUtility.TryForcedReloadFromInventory(Pawn, EquippedComps))
 				{
 					tooltip = "SY_YCA.ReloadWeaponFromInventory_tooltip".Translate(),
 				};
-
 				if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
 				{
 					yield return new FloatMenuOption(
 						"SY_YCA.ReloadWeaponFromSurrounding_label".Translate(),
-						() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, Comps))
+						() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedComps))
 					{ 
 						tooltip = "SY_YCA.ReloadWeaponFromSurrounding_tooltip".Translate(),
 					};
 				}
 
+				if (Main.ReloadAllWeaponsInInventoryOption)
+				{
+					yield return new FloatMenuOption(
+						"SY_YCA.ReloadAllWeaponFromInventory_label".Translate(),
+						() => ReloadUtility.TryForcedReloadFromInventory(Pawn, EquippedAndInventoryComps))
+					{
+						tooltip = "SY_YCA.ReloadAllWeaponFromInventory_tooltip".Translate(),
+					};
+					if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+					{
+						yield return new FloatMenuOption(
+							"SY_YCA.ReloadAllWeaponFromSurrounding_label".Translate(),
+							() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedAndInventoryComps))
+						{
+							tooltip = "SY_YCA.ReloadAllWeaponFromSurrounding_tooltip".Translate(),
+						};
+					}
+				}
+
 				yield return new FloatMenuOption(
 					"SY_YCA.RestockAmmoFromSurrounding_label".Translate(),
-					() => Log.Warning("NOT IMPLEMENTED")) 
+					() => ReloadUtility.TryRestockInventoryFromSurrounding(Pawn)) 
 				{ 
 					tooltip = "SY_YCA.RestockAmmoFromSurrounding_tooltip".Translate(), 
 				};

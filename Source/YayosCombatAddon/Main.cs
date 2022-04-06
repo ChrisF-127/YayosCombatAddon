@@ -11,19 +11,31 @@ namespace YayosCombatAddon
 {
     public class Main : ModBase
     {
-        private SettingHandle<bool> showReloadWeaponGizmoSetting;
-        public static bool showReloadWeaponGizmo = true;
+        private SettingHandle<bool> _showReloadWeaponGizmoSetting;
+        public static bool ShowReloadWeaponGizmo = true;
 
-#warning TODO setting to enable SimpleSidearms compatibility
+        private SettingHandle<bool> _reloadAllWeaponsInInventoryOption;
+        public static bool ReloadAllWeaponsInInventoryOption = false;
+
+#warning TODO implement Eject Ammo designator
 
         public override void DefsLoaded()
         {
-            showReloadWeaponGizmoSetting = Settings.GetHandle(
+            _showReloadWeaponGizmoSetting = Settings.GetHandle(
                 "showReloadButton", 
                 "SY_YCA.ShowReloadWeaponGizmo_title".Translate(), 
                 "SY_YCA.ShowReloadWeaponGizmo_desc".Translate(), 
                 true);
-            showReloadWeaponGizmo = showReloadWeaponGizmoSetting.Value;
+            _showReloadWeaponGizmoSetting.ValueChanged += value => ShowReloadWeaponGizmo = (SettingHandle<bool>)value;
+            ShowReloadWeaponGizmo = _showReloadWeaponGizmoSetting.Value;
+
+            _reloadAllWeaponsInInventoryOption = Settings.GetHandle(
+                "reloadAllWeaponsInInventoryOption",
+                "SY_YCA.ReloadAllWeaponsInInventoryOption_title".Translate(),
+                "SY_YCA.ReloadAllWeaponsInInventoryOption_desc".Translate(),
+                false);
+            _reloadAllWeaponsInInventoryOption.ValueChanged += value => ReloadAllWeaponsInInventoryOption = (SettingHandle<bool>)value;
+            ReloadAllWeaponsInInventoryOption = _reloadAllWeaponsInInventoryOption.Value;
         }
     }
 }

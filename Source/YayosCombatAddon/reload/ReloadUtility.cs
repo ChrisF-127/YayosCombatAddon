@@ -84,6 +84,12 @@ namespace YayosCombatAddon
 		}
 
 
+		public static void TryRestockInventoryFromSurrounding(Pawn pawn)
+		{
+#warning TODO implement Restock Inventory
+		}
+
+
 		public static void ShowRejectMessage(string text) =>
 			Messages.Message(text, MessageTypeDefOf.RejectInput, historical: false);
 

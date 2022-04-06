@@ -1,16 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
-  <reloadWeaponInventory_title>Reload (Inventory)</reloadWeaponInventory_title>
-  <reloadWeaponInventory_desc>Reload weapon using carried ammo.</reloadWeaponInventory_desc>
+  <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
+  <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory
+Right click for more options</SY_YCA.ReloadGizmo_desc>
   
-  <reloadWeaponSurrounding_title>Reload (Surrounding)</reloadWeaponSurrounding_title>
-  <reloadWeaponSurrounding_desc>Reload weapon using ammo found nearby and restock inventory.</reloadWeaponSurrounding_desc>
+  <SY_YCA.ReloadWeaponFromInventory_label>Reload (Inventory)</SY_YCA.ReloadWeaponFromInventory_label>
+  <SY_YCA.ReloadWeaponFromInventory_tooltip>Reload currently equipped weapon using ammo in inventory</SY_YCA.ReloadWeaponFromInventory_tooltip>
+  <SY_YCA.ReloadWeaponFromSurrounding_label>Reload (Surrounding)</SY_YCA.ReloadWeaponFromSurrounding_label>
+  <SY_YCA.ReloadWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload the currently equipped weapon</SY_YCA.ReloadWeaponFromSurrounding_tooltip>
+  <SY_YCA.RestockAmmoFromSurrounding_label>Restock inventory ammo</SY_YCA.RestockAmmoFromSurrounding_label>
+  <SY_YCA.RestockAmmoFromSurrounding_tooltip>Restock inventory with ammo assigned to the pawn via the "assign" ammo settings or assigned drug policy
+Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurrounding_tooltip>
   
-  <pawnDowned>Cannot reload weapon when downed</pawnDowned>
-  <ammoFull>Nothing to reload</ammoFull>
+  <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
+  <SY_YCA.NoAmmo>No ammo found</SY_YCA.NoAmmo>
   
-  <showReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</showReloadWeaponGizmo_title>
-  <showReloadWeaponGizmo_desc>Activate the "Reload Weapon" gizmo for selected drafted pawns using weapons which require ammo.</showReloadWeaponGizmo_desc>
+  
+  <SY_YCA.ShowReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</SY_YCA.ShowReloadWeaponGizmo_title>
+  <SY_YCA.ShowReloadWeaponGizmo_desc>Activate the "Reload Weapon" gizmo for selected drafted pawns using weapons which require ammo.</SY_YCA.ShowReloadWeaponGizmo_desc>
 
 </LanguageData>

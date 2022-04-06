@@ -18,7 +18,11 @@ namespace YayosCombatAddon
 
         public override void DefsLoaded()
         {
-            showReloadWeaponGizmoSetting = Settings.GetHandle("showReloadButton", "showReloadWeaponGizmo_title".Translate(), "showReloadWeaponGizmo_desc".Translate(), true);
+            showReloadWeaponGizmoSetting = Settings.GetHandle(
+                "showReloadButton", 
+                "SY_YCA.ShowReloadWeaponGizmo_title".Translate(), 
+                "SY_YCA.ShowReloadWeaponGizmo_desc".Translate(), 
+                true);
             showReloadWeaponGizmo = showReloadWeaponGizmoSetting.Value;
         }
     }

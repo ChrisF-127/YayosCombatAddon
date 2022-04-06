@@ -9,18 +9,22 @@ using Verse.Sound;
 
 namespace YayosCombatAddon
 {
-	class ReloadUtility
+	public static class ReloadUtility
 	{
 		public static void TryForcedReloadFromInventory(Pawn pawn, IEnumerable<CompReloadable> comps)
 		{
 			var first = true;
+			var noAmmo = true;
+			var noWeaponToReload = true;
 			foreach (var comp in comps)
 			{
 				if (comp.RemainingCharges < comp.MaxCharges)
 				{
+					noWeaponToReload = false;
 					var ammo = pawn.inventory.innerContainer.FirstOrDefault((item) => item.def == comp.AmmoDef);
 					if (ammo != null)
 					{
+						noAmmo = false;
 						var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory, comp.parent);
 						if (first)
 						{
@@ -32,6 +36,10 @@ namespace YayosCombatAddon
 					}
 				}
 			}
+			if (noWeaponToReload) // nothing to reload
+				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
+			else if (noAmmo) // no ammo
+				ShowRejectMessage("SY_YCA.NoAmmo".Translate());
 		}
 
 		public static void TryForcedReloadFromSurrounding(Pawn pawn, IEnumerable<CompReloadable> comps)
@@ -40,10 +48,13 @@ namespace YayosCombatAddon
 				return;
 			
 			var first = true;
+			var noAmmo = true;
+			var noWeaponToReload = true;
 			foreach (var comp in comps)
 			{
 				if (comp.RemainingCharges < comp.MaxCharges)
 				{
+					noWeaponToReload = false;
 					var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
 						pawn,
 						pawn.Position,
@@ -52,6 +63,7 @@ namespace YayosCombatAddon
 
 					if (ammoList?.Count > 0)
 					{
+						noAmmo = false;
 						var job = JobGiver_Reload.MakeReloadJob(comp, ammoList);
 						if (first)
 						{
@@ -63,12 +75,28 @@ namespace YayosCombatAddon
 					}
 				}
 			}
-
-			// go back
-			pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
+			if (noWeaponToReload) // nothing to reload
+				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
+			else if (noAmmo) // no ammo
+				ShowRejectMessage("SY_YCA.NoAmmo".Translate());
+			else // make pawn go back to where they were
+				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 		}
 
-		public static bool IsAmmo(ThingDef def) =>
+
+		public static void ShowRejectMessage(string text) =>
+			Messages.Message(text, MessageTypeDefOf.RejectInput, historical: false);
+
+
+		public static bool IsAmmo(this ThingDef def) =>
 			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
+
+		public static bool RequiresReloading(this IEnumerable<CompReloadable> comps)
+		{
+			foreach (var comp in comps)
+				if (comp.RemainingCharges < comp.MaxCharges)
+					return true;
+			return false;
+		}
 	}
 }

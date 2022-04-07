@@ -13,7 +13,8 @@ namespace YayosCombatAddon
 	{
 		public static void TryForcedReloadFromInventory(Pawn pawn, IEnumerable<CompReloadable> comps)
 		{
-			var first = true;
+			var reloads = new List<Thing>();
+
 			var noAmmo = true;
 			var noWeaponToReload = true;
 			foreach (var comp in comps)
@@ -25,17 +26,19 @@ namespace YayosCombatAddon
 					if (ammo != null)
 					{
 						noAmmo = false;
-						var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory, comp.parent);
-						if (first)
-						{
-							pawn.jobs.TryTakeOrderedJob(job);
-							first = false;
-						}
-						else
-							pawn.jobs.jobQueue.EnqueueFirst(job);
+						reloads.Add(comp.parent);
 					}
 				}
 			}
+
+			if (reloads.Count > 0)
+			{
+				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
+				foreach (var thing in reloads)
+					job.AddQueuedTarget(TargetIndex.A, thing);
+				pawn.jobs.TryTakeOrderedJob(job);
+			}
+
 			if (noWeaponToReload) // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 			else if (noAmmo) // no ammo

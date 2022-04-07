@@ -5,14 +5,14 @@
   <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory
 Right click for more options</SY_YCA.ReloadGizmo_desc>
   
-  <SY_YCA.ReloadWeaponFromInventory_label>Reload (Inventory)</SY_YCA.ReloadWeaponFromInventory_label>
+  <SY_YCA.ReloadWeaponFromInventory_label>Reload from Inventory</SY_YCA.ReloadWeaponFromInventory_label>
   <SY_YCA.ReloadWeaponFromInventory_tooltip>Reload currently equipped weapon using ammo from inventory</SY_YCA.ReloadWeaponFromInventory_tooltip>
-  <SY_YCA.ReloadWeaponFromSurrounding_label>Reload (Surrounding)</SY_YCA.ReloadWeaponFromSurrounding_label>
-  <SY_YCA.ReloadWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload the currently equipped weapon</SY_YCA.ReloadWeaponFromSurrounding_tooltip>
+  <SY_YCA.ReloadWeaponFromSurrounding_label>Reload from Surrounding</SY_YCA.ReloadWeaponFromSurrounding_label>
+  <SY_YCA.ReloadWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload currently equipped weapon</SY_YCA.ReloadWeaponFromSurrounding_tooltip>
     
-  <SY_YCA.ReloadAllWeaponFromInventory_label>Reload All (Inventory)</SY_YCA.ReloadAllWeaponFromInventory_label>
+  <SY_YCA.ReloadAllWeaponFromInventory_label>Reload All from Inventory</SY_YCA.ReloadAllWeaponFromInventory_label>
   <SY_YCA.ReloadAllWeaponFromInventory_tooltip>Reload all weapons equipped and in inventory using ammo from inventory</SY_YCA.ReloadAllWeaponFromInventory_tooltip>
-  <SY_YCA.ReloadAllWeaponFromSurrounding_label>Reload All (Surrounding)</SY_YCA.ReloadAllWeaponFromSurrounding_label>
+  <SY_YCA.ReloadAllWeaponFromSurrounding_label>Reload All from Surrounding</SY_YCA.ReloadAllWeaponFromSurrounding_label>
   <SY_YCA.ReloadAllWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload all weapons equipped or in inventory</SY_YCA.ReloadAllWeaponFromSurrounding_tooltip>
   
   <SY_YCA.RestockAmmoFromSurrounding_label>Restock inventory ammo</SY_YCA.RestockAmmoFromSurrounding_label>
@@ -26,8 +26,8 @@ Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurr
   <SY_YCA.ShowReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</SY_YCA.ShowReloadWeaponGizmo_title>
   <SY_YCA.ShowReloadWeaponGizmo_desc>Activate the "Reload Weapon" gizmo for selected drafted pawns using weapons which require ammo.</SY_YCA.ShowReloadWeaponGizmo_desc>
 
-  <SY_YCA.ReloadAllWeaponsInInventoryOption_title># Show "Reload All Weapons in Inventory" Options</SY_YCA.ReloadAllWeaponsInInventoryOption_title>
-  <SY_YCA.ReloadAllWeaponsInInventoryOption_desc>Adds reloading options for all weapons in inventory. 
-E.g. useful when using Simple Sidearms or other mods that allow pawns to carry more than one weapon (in their inventory).</SY_YCA.ReloadAllWeaponsInInventoryOption_desc>
+  <SY_YCA.ReloadAllWeaponsInInventoryOption_title># Show "Reload All" Options</SY_YCA.ReloadAllWeaponsInInventoryOption_title>
+  <SY_YCA.ReloadAllWeaponsInInventoryOption_desc>Adds options for reloading all weapons in inventory. 
+E.g. useful when using Simple Sidearms or other mods that allow pawns to carry more than one weapon where additional weapons are stored in the inventory. (These options will reload ALL weapons in inventory, no matter if remembered or not.)</SY_YCA.ReloadAllWeaponsInInventoryOption_desc>
   
 </LanguageData>

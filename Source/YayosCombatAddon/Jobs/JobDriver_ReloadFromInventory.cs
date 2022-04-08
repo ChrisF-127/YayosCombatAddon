@@ -18,7 +18,6 @@ namespace YayosCombatAddon
 
 		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			Log.Message($"'{pawn}'");
 			this.FailOn(() => pawn == null);
 			this.FailOn(() => pawn.Downed);
 			this.FailOnIncapable(PawnCapacityDefOf.Manipulation);
@@ -27,16 +26,16 @@ namespace YayosCombatAddon
 			var done = Toils_General.Label();
 
 			// save currently equipped weapon
-			// -- NEXT
+			// NEXT:
 			// move carried thing into inventory
 			// get next weapon to reload out of Target A queue
-			// if not reloadable or no ammo -> goto DONE
+			// if not reloadable or no ammo -> goto DONE:
 			// equip weapon
 			// take ammo out of inventory as carried thing
 			// wait
 			// reload
-			// if more things in queue -> goto NEXT
-			// -- DONE
+			// if more things in queue -> goto NEXT:
+			// DONE:
 			// put carried thing back into inventory
 			// switch back to original weapon
 
@@ -57,7 +56,6 @@ namespace YayosCombatAddon
 
 		private bool CheckReloadableAmmo()
 		{
-			Log.Message($"CheckReloadableAmmo '{TargetThingA}'");
 			var comp = TargetThingA?.TryGetComp<CompReloadable>();
 			if (comp?.NeedsReload(true) == true)
 			{
@@ -86,7 +84,6 @@ namespace YayosCombatAddon
 			{
 				initAction = () =>
 				{
-					Log.Message($"Ammo '{TargetThingA}'");
 					var comp = TargetThingA?.TryGetComp<CompReloadable>();
 					if (comp?.NeedsReload(true) == true)
 					{
@@ -110,9 +107,7 @@ namespace YayosCombatAddon
 				initAction = () =>
 				{
 					var thing = staticThing ?? TargetThingA;
-					Log.Message($"Equip '{thing}'");
 					var equipment = pawn.equipment;
-					var inventory = pawn.inventory;
 					var primary = equipment.Primary;
 					if (thing is ThingWithComps thingWithComps)
 					{
@@ -137,7 +132,6 @@ namespace YayosCombatAddon
 			{
 				initAction = () =>
 				{
-					Log.Message($"Reload '{TargetThingA}'");
 					var comp = TargetThingA?.TryGetComp<CompReloadable>();
 					if (comp?.NeedsReload(true) == true)
 					{

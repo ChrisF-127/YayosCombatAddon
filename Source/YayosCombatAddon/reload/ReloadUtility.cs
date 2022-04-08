@@ -15,20 +15,10 @@ namespace YayosCombatAddon
 		{
 			var reloads = new List<Thing>();
 
-			var noAmmo = true;
-			var noWeaponToReload = true;
 			foreach (var comp in comps)
 			{
 				if (comp.RemainingCharges < comp.MaxCharges)
-				{
-					noWeaponToReload = false;
-					var ammo = pawn.inventory.innerContainer.FirstOrDefault((item) => item.def == comp.AmmoDef);
-					if (ammo != null)
-					{
-						noAmmo = false;
-						reloads.Add(comp.parent);
-					}
-				}
+					reloads.Add(comp.parent);
 			}
 
 			if (reloads.Count > 0)
@@ -38,58 +28,91 @@ namespace YayosCombatAddon
 					job.AddQueuedTarget(TargetIndex.A, thing);
 				pawn.jobs.TryTakeOrderedJob(job);
 			}
-
-			if (noWeaponToReload) // nothing to reload
+			else // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
-			else if (noAmmo) // no ammo
-				ShowRejectMessage("SY_YCA.NoAmmo".Translate());
 		}
 
 		public static void TryForcedReloadFromSurrounding(Pawn pawn, IEnumerable<CompReloadable> comps)
 		{
 			if (yayoCombat.yayoCombat.supplyAmmoDist < 0)
 				return;
-			
-			var first = true;
-			var noAmmo = true;
+
+			var reloads = new List<Thing>();
+
 			var noWeaponToReload = true;
 			foreach (var comp in comps)
 			{
 				if (comp.RemainingCharges < comp.MaxCharges)
 				{
 					noWeaponToReload = false;
-					var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
-						pawn,
-						pawn.Position,
-						new IntRange(comp.MinAmmoNeeded(false), comp.MaxAmmoNeeded(false)),
-						t => t.def == comp.AmmoDef && IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist);
-
-					if (ammoList?.Count > 0)
-					{
-						noAmmo = false;
-						var job = JobGiver_Reload.MakeReloadJob(comp, ammoList);
-						if (first)
-						{
-							pawn.jobs.TryTakeOrderedJob(job);
-							first = false;
-						}
-						else
-							pawn.jobs.jobQueue.EnqueueLast(job);
-					}
+					reloads.Add(comp.parent);
 				}
 			}
+
+			if (reloads.Count > 0)
+			{
+				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
+				foreach (var thing in reloads)
+					job.AddQueuedTarget(TargetIndex.A, thing);
+				pawn.jobs.TryTakeOrderedJob(job);
+			}
+
 			if (noWeaponToReload) // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
-			else if (noAmmo) // no ammo
-				ShowRejectMessage("SY_YCA.NoAmmo".Translate());
 			else // make pawn go back to where they were
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
+
+
+			//var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
+			//	pawn,
+			//	pawn.Position,
+			//	new IntRange(comp.MinAmmoNeeded(false), comp.MaxAmmoNeeded(false)),
+			//	t => t.def == comp.AmmoDef && IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist);
+
+			//if (ammoList?.Count > 0)
+			//{
+			//	noAmmo = false;
+			//	var job = JobGiver_Reload.MakeReloadJob(comp, ammoList);
+			//	if (first)
+			//	{
+			//		pawn.jobs.TryTakeOrderedJob(job);
+			//		first = false;
+			//	}
+			//	else
+			//		pawn.jobs.jobQueue.EnqueueLast(job);
+			//}
 		}
 
 
 		public static void TryRestockInventoryFromSurrounding(Pawn pawn)
 		{
-#warning TODO implement Restock Inventory
+			var required = new Dictionary<Def, int>();
+			for (int i = 0; i < pawn.drugs.CurrentPolicy.Count; i++)
+			{
+				var entry = pawn.drugs.CurrentPolicy[i];
+				var def = entry.drug;
+				var count = entry.takeToInventory;
+				if (def.IsAmmo() && count > 0)
+					required.IncreaseOrAdd(def, count);
+			}
+			foreach (var entry in pawn.inventoryStock.stockEntries)
+			{
+				var def = entry.Value.thingDef;
+				var count = entry.Value.count;
+				if (def.IsAmmo() && count > 0)
+					required.IncreaseOrAdd(def, count);
+			}
+
+			foreach (var thing in pawn.inventory.innerContainer)
+			{
+				if (thing.def.IsAmmo() && required.ContainsKey(thing.def))
+					required.DecreaseOrRemove(thing.def, thing.stackCount);
+			}
+
+			foreach (var entry in required)
+				Log.Message($"{pawn} requires {entry.Key.defName} {entry.Value}");
+
+#warning TODO implement Restock Inventory job
 		}
 
 
@@ -106,6 +129,25 @@ namespace YayosCombatAddon
 				if (comp.RemainingCharges < comp.MaxCharges)
 					return true;
 			return false;
+		}
+
+		public static void IncreaseOrAdd<T>(this Dictionary<T, int> dictionary, T t, int count)
+		{
+			if (dictionary.ContainsKey(t))
+				dictionary[t] += count;
+			else
+				dictionary.Add(t, count);
+		}
+		public static void DecreaseOrRemove<T>(this Dictionary<T, int> dictionary, T t, int count)
+		{
+			if (dictionary.ContainsKey(t))
+			{
+				var value = dictionary[t] - count;
+				if (value > 0)
+					dictionary[t] = value;
+				else
+					dictionary.Remove(t);
+			}
 		}
 	}
 }

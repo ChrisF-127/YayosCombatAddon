@@ -20,7 +20,8 @@ Right click for more options</SY_YCA.ReloadGizmo_desc>
 Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurrounding_tooltip>
   
   <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
-  <SY_YCA.NoAmmo>No ammo found</SY_YCA.NoAmmo>
+  <SY_YCA.NoAmmoNearby>{pawn} found no ammo for {weapon} nearby</SY_YCA.NoAmmoNearby>
+  <SY_YCA.NoAmmoInventory>{pawn} found no ammo for {weapon} in their inventory</SY_YCA.NoAmmoInventory>
   
   
   <SY_YCA.ShowReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</SY_YCA.ShowReloadWeaponGizmo_title>

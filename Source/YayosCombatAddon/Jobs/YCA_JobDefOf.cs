@@ -13,6 +13,7 @@ namespace YayosCombatAddon
 	{
 #pragma warning disable 0649 // disable "never assigned to" warning
 		public static JobDef ReloadFromInventory;
+		public static JobDef ReloadFromSurrounding;
 #pragma warning restore 0649
 	}
 }

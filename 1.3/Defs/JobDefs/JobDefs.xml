@@ -9,4 +9,12 @@
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
 
+	<JobDef>
+		<defName>ReloadFromSurrounding</defName>
+		<driverClass>YayosCombatAddon.JobDriver_ReloadFromSurrounding</driverClass>
+		<reportString>reloading TargetA.</reportString>
+		<suspendable>false</suspendable>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+	</JobDef>
+
 </Defs>

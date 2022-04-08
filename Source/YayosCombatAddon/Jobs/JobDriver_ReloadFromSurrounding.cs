@@ -10,7 +10,7 @@ using Verse.AI;
 
 namespace YayosCombatAddon
 {
-	internal class JobDriver_ReloadFromInventory : JobDriver
+	internal class JobDriver_ReloadFromSurrounding : JobDriver
 	{
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
 
@@ -26,6 +26,8 @@ namespace YayosCombatAddon
 			var next = Toils_General.Label();
 			var repeat = Toils_General.Label();
 			var done = Toils_General.Label();
+
+#warning TODO
 
 			// save currently equipped weapon
 			// NEXT:
@@ -79,7 +81,7 @@ namespace YayosCombatAddon
 			return false;
 		}
 
-		private Thing GetPrimary() => 
+		private Thing GetPrimary() =>
 			pawn?.equipment?.Primary;
 
 		private Toil Ammo()
@@ -110,7 +112,7 @@ namespace YayosCombatAddon
 									throw new Exception($"{nameof(YayosCombatAddon)}: count should never be less than 0: {count}");
 								if (count == 0) // carrying max amount of ammo
 									break;
-								
+
 								pawn.inventory.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, count, true);
 								carriedThing = pawn.carryTracker.CarriedThing;
 								if (carriedThing?.stackCount != prevCount + count)

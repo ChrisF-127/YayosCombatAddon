@@ -120,7 +120,8 @@ namespace YayosCombatAddon
 						{
 							if (primary != null && !equipment.TryTransferEquipmentToContainer(primary, pawn.inventory.innerContainer))
 								Log.Warning($"Yayo's Combat Addon: could not move '{primary}' into inventory");
-							equipment.AddEquipment(thingWithComps); // TODO Try Add / Transfer ??? See Error ingame
+							thingWithComps.holdingOwner?.Remove(thingWithComps);
+							equipment.AddEquipment(thingWithComps);
 						}
 					}
 					else

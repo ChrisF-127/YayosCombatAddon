@@ -21,8 +21,8 @@ Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurr
   
   <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
   <SY_YCA.NothingToRestock>Nothing requires restocking</SY_YCA.NothingToRestock>
-  <SY_YCA.NoAmmoNearby>{pawn} found no ammo for {weapon} nearby</SY_YCA.NoAmmoNearby>
-  <SY_YCA.NoAmmoInventory>{pawn} found no ammo for {weapon} in their inventory</SY_YCA.NoAmmoInventory>
+  <SY_YCA.NoAmmoNearby>{pawn} found insufficient ammo for {weapon} nearby</SY_YCA.NoAmmoNearby>
+  <SY_YCA.NoAmmoInventory>{pawn} found insufficient ammo for {weapon} in their inventory</SY_YCA.NoAmmoInventory>
   <SY_YCA.NoAmmoRestock>{pawn} could not find enough {ammo}, missing {count} out of {max}</SY_YCA.NoAmmoRestock>
   
   
@@ -31,6 +31,6 @@ Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurr
 
   <SY_YCA.ReloadAllWeaponsInInventoryOption_title># Show 'Reload All' Options</SY_YCA.ReloadAllWeaponsInInventoryOption_title>
   <SY_YCA.ReloadAllWeaponsInInventoryOption_desc>Makes reloading options reload all weapons in inventory
-E.g. useful when using Simple Sidearms or other mods that allow pawns to carry more than one weapon where additional weapons are stored in the inventory. (These options will reload ALL weapons in inventory, no matter if remembered or not.)</SY_YCA.ReloadAllWeaponsInInventoryOption_desc>
+Recommended when using "Simple sidearms" or other mods that allow pawns to carry more than one weapon where additional weapons are stored in the inventory. (These options will reload ALL weapons in inventory, no matter if remembered or not!)</SY_YCA.ReloadAllWeaponsInInventoryOption_desc>
   
 </LanguageData>

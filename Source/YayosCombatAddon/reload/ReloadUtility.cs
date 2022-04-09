@@ -63,7 +63,6 @@ namespace YayosCombatAddon
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 		}
 
-
 		public static void TryRestockInventoryFromSurrounding(Pawn pawn)
 		{
 			var required = new Dictionary<Def, int>();

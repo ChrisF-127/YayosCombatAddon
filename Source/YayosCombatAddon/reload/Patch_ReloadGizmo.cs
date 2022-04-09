@@ -88,20 +88,23 @@ namespace YayosCombatAddon
 		{
 			get
 			{
-				yield return new FloatMenuOption(
-					"SY_YCA.ReloadWeaponFromInventory_label".Translate(),
-					() => ReloadUtility.TryForcedReloadFromInventory(Pawn, EquippedComps))
-				{
-					tooltip = "SY_YCA.ReloadWeaponFromInventory_tooltip".Translate(),
-				};
-				if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+				if (!Main.ReloadAllWeaponsInInventoryOption)
 				{
 					yield return new FloatMenuOption(
-						"SY_YCA.ReloadWeaponFromSurrounding_label".Translate(),
-						() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedComps))
-					{ 
-						tooltip = "SY_YCA.ReloadWeaponFromSurrounding_tooltip".Translate(),
+					"SY_YCA.ReloadWeaponFromInventory_label".Translate(),
+					() => ReloadUtility.TryForcedReloadFromInventory(Pawn, EquippedComps))
+					{
+						tooltip = "SY_YCA.ReloadWeaponFromInventory_tooltip".Translate(),
 					};
+					if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+					{
+						yield return new FloatMenuOption(
+							"SY_YCA.ReloadWeaponFromSurrounding_label".Translate(),
+							() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedComps))
+						{
+							tooltip = "SY_YCA.ReloadWeaponFromSurrounding_tooltip".Translate(),
+						};
+					}
 				}
 
 				if (Main.ReloadAllWeaponsInInventoryOption)

@@ -29,6 +29,26 @@ namespace YayosCombatAddon
 
 #warning TODO
 
+
+			//var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
+			//	pawn,
+			//	pawn.Position,
+			//	new IntRange(comp.MinAmmoNeeded(false), comp.MaxAmmoNeeded(false)),
+			//	t => t.def == comp.AmmoDef && IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist);
+
+			//if (ammoList?.Count > 0)
+			//{
+			//	noAmmo = false;
+			//	var job = JobGiver_Reload.MakeReloadJob(comp, ammoList);
+			//	if (first)
+			//	{
+			//		pawn.jobs.TryTakeOrderedJob(job);
+			//		first = false;
+			//	}
+			//	else
+			//		pawn.jobs.jobQueue.EnqueueLast(job);
+			//}
+
 			// save currently equipped weapon
 			// NEXT:
 			// if no more items in queue -> goto DONE: (job ends)

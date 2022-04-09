@@ -61,26 +61,6 @@ namespace YayosCombatAddon
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 			else // make pawn go back to where they were
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
-
-
-			//var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
-			//	pawn,
-			//	pawn.Position,
-			//	new IntRange(comp.MinAmmoNeeded(false), comp.MaxAmmoNeeded(false)),
-			//	t => t.def == comp.AmmoDef && IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist);
-
-			//if (ammoList?.Count > 0)
-			//{
-			//	noAmmo = false;
-			//	var job = JobGiver_Reload.MakeReloadJob(comp, ammoList);
-			//	if (first)
-			//	{
-			//		pawn.jobs.TryTakeOrderedJob(job);
-			//		first = false;
-			//	}
-			//	else
-			//		pawn.jobs.jobQueue.EnqueueLast(job);
-			//}
 		}
 
 
@@ -109,10 +89,51 @@ namespace YayosCombatAddon
 					required.DecreaseOrRemove(thing.def, thing.stackCount);
 			}
 
-			foreach (var entry in required)
-				Log.Message($"{pawn} requires {entry.Key.defName} {entry.Value}");
+			if (required.Count > 0)
+			{
+				var hasJob = false;
+				foreach (var entry in required)
+				{
+					var def = entry.Key;
+					var count = entry.Value;
+					var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
+						pawn,
+						pawn.Position,
+						new IntRange(1, count),
+						t => t.def == def);
 
-#warning TODO implement Restock Inventory job
+					if (ammoList?.Count > 0)
+					{
+						foreach (var ammo in ammoList)
+						{
+							var job = JobMaker.MakeJob(JobDefOf.TakeCountToInventory, ammo);
+							job.count = Mathf.Min(ammo.stackCount, count);
+							count -= job.count;
+							pawn.jobs.TryTakeOrderedJob(job, requestQueueing: hasJob);
+
+							hasJob = true;
+							if (count == 0)
+								break;
+						}
+					}
+
+					if (count > 0)
+					{
+						ShowRejectMessage("SY_YCA.NoAmmoRestock".Translate(
+							new NamedArgument(pawn, "pawn"),
+							new NamedArgument(def.label, "ammo"),
+							new NamedArgument(count, "count"),
+							new NamedArgument(entry.Value, "max")));
+					}
+				}
+
+				if (hasJob)
+					pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
+			}
+			else
+			{
+				ShowRejectMessage("SY_YCA.NothingToRestock".Translate());
+			}
 		}
 
 

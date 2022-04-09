@@ -29,34 +29,33 @@ namespace YayosCombatAddon
 
 			// save currently equipped weapon
 			// NEXT:
+			// put carried thing into inventory
 			// if no more items in queue -> goto DONE: (job ends)
-			// get next reloadable out of TargetA queue
-			// move carried thing into inventory
+			// get next weapon out of TargetA queue
 			// REPEAT:
-			// if no ammo or not reloadable -> goto NEXT: (get next reloadable)
+			// if no ammo found or not reloadable -> goto NEXT: (get next weapon)
 			// equip weapon
 			// take ammo out of inventory as carried thing
 			// wait (progress bar)
-			// reload
+			// reload weapon from carried ammo
 			// goto REPEAT: (make sure weapon is fully loaded)
 			// DONE:
-			// put carried thing into inventory
 			// switch to original weapon
 
 			var primary = GetPrimary();
+			yield return YCA_JobUtility.DropCarriedThing();
 			yield return next;
+			yield return Toils_General.PutCarriedThingInInventory();
 			yield return Toils_Jump.JumpIf(done, () => job.GetTargetQueue(TargetIndex.A).NullOrEmpty());
 			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A);
-			yield return Toils_General.PutCarriedThingInInventory();
 			yield return repeat;
 			yield return Toils_Jump.JumpIf(next, () => !CheckReloadableAmmo());
-			yield return Equip();
 			yield return Ammo();
+			yield return Equip();
 			yield return Wait;
 			yield return Reload();
 			yield return Toils_Jump.Jump(repeat);
 			yield return done;
-			yield return Toils_General.PutCarriedThingInInventory();
 			yield return Equip(primary);
 		}
 
@@ -84,7 +83,7 @@ namespace YayosCombatAddon
 
 		private Toil Ammo()
 		{
-			return new Toil
+			var toil = new Toil
 			{
 				initAction = () =>
 				{
@@ -108,7 +107,7 @@ namespace YayosCombatAddon
 								var count = Mathf.Min(comp.AmmoDef.stackLimit - prevCount, thing.stackCount);
 								if (count < 0)
 									throw new Exception($"{nameof(YayosCombatAddon)}: count should never be less than 0: {count}");
-								if (count == 0) // carrying max amount of ammo
+								if (count == 0) // already carrying max amount of ammo
 									break;
 								
 								pawn.inventory.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, count, true);
@@ -123,13 +122,13 @@ namespace YayosCombatAddon
 						}
 					}
 				},
-				defaultCompleteMode = ToilCompleteMode.Instant,
 			};
+			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A);
 		}
 
 		private Toil Equip(Thing staticThing = null)
 		{
-			return new Toil
+			var toil = new Toil
 			{
 				initAction = () =>
 				{
@@ -149,13 +148,13 @@ namespace YayosCombatAddon
 					else
 						Log.Warning($"{nameof(YayosCombatAddon)}: '{thing}' is not {nameof(ThingWithComps)}");
 				},
-				defaultCompleteMode = ToilCompleteMode.Instant,
 			};
+			return staticThing == null ? toil.FailOnDestroyedNullOrForbidden(TargetIndex.A) : toil;
 		}
 
 		private Toil Reload()
 		{
-			return new Toil
+			var toil = new Toil
 			{
 				initAction = () =>
 				{
@@ -171,8 +170,8 @@ namespace YayosCombatAddon
 					else
 						Log.Warning($"{nameof(YayosCombatAddon)}: failed getting comp / does not need reloading: '{TargetThingA}'");
 				},
-				defaultCompleteMode = ToilCompleteMode.Instant,
 			};
+			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A);
 		}
 	}
 }

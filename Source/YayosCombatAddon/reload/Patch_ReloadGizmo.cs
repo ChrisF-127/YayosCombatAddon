@@ -88,25 +88,6 @@ namespace YayosCombatAddon
 		{
 			get
 			{
-				if (!Main.ReloadAllWeaponsInInventoryOption)
-				{
-					yield return new FloatMenuOption(
-					"SY_YCA.ReloadWeaponFromInventory_label".Translate(),
-					() => ReloadUtility.TryForcedReloadFromInventory(Pawn, EquippedComps))
-					{
-						tooltip = "SY_YCA.ReloadWeaponFromInventory_tooltip".Translate(),
-					};
-					if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
-					{
-						yield return new FloatMenuOption(
-							"SY_YCA.ReloadWeaponFromSurrounding_label".Translate(),
-							() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedComps))
-						{
-							tooltip = "SY_YCA.ReloadWeaponFromSurrounding_tooltip".Translate(),
-						};
-					}
-				}
-
 				if (Main.ReloadAllWeaponsInInventoryOption)
 				{
 					yield return new FloatMenuOption(
@@ -122,6 +103,24 @@ namespace YayosCombatAddon
 							() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedAndInventoryComps))
 						{
 							tooltip = "SY_YCA.ReloadAllWeaponFromSurrounding_tooltip".Translate(),
+						};
+					}
+				}
+				else
+				{
+					yield return new FloatMenuOption(
+					"SY_YCA.ReloadWeaponFromInventory_label".Translate(),
+					() => ReloadUtility.TryForcedReloadFromInventory(Pawn, EquippedComps))
+					{
+						tooltip = "SY_YCA.ReloadWeaponFromInventory_tooltip".Translate(),
+					};
+					if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+					{
+						yield return new FloatMenuOption(
+							"SY_YCA.ReloadWeaponFromSurrounding_label".Translate(),
+							() => ReloadUtility.TryForcedReloadFromSurrounding(Pawn, EquippedComps))
+						{
+							tooltip = "SY_YCA.ReloadWeaponFromSurrounding_tooltip".Translate(),
 						};
 					}
 				}

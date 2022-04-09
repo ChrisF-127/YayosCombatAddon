@@ -18,7 +18,7 @@ namespace YayosCombatAddon
         public static bool ReloadAllWeaponsInInventoryOption = false;
 
 #warning TODO implement Eject Ammo designator
-#warning TODO replace standard reload operations from Yayo's
+#warning TODO replace standard reload operations from Yayo's - as setting! "Replace reloading from Yayo's with improved job?"
 
         public override void DefsLoaded()
         {

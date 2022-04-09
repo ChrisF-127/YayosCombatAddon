@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Jobs\JobDriver_ReloadFromSurrounding.cs" />
+    <Compile Include="Jobs\YCA_JobUtility.cs" />
     <Compile Include="Jobs\YCA_JobDefOf.cs" />
     <Compile Include="Jobs\JobDriver_ReloadFromInventory.cs" />
     <Compile Include="Main.cs" />

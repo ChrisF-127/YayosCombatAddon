@@ -90,7 +90,7 @@ namespace YayosCombatAddon
 
 			if (required.Count > 0)
 			{
-				var hasJob = false;
+				var enqueue = false;
 				foreach (var entry in required)
 				{
 					var def = entry.Key;
@@ -108,9 +108,9 @@ namespace YayosCombatAddon
 							var job = JobMaker.MakeJob(JobDefOf.TakeCountToInventory, ammo);
 							job.count = Mathf.Min(ammo.stackCount, count);
 							count -= job.count;
-							pawn.jobs.TryTakeOrderedJob(job, requestQueueing: hasJob);
+							pawn.jobs.TryTakeOrderedJob(job, requestQueueing: enqueue);
 
-							hasJob = true;
+							enqueue = true;
 							if (count == 0)
 								break;
 						}
@@ -126,7 +126,7 @@ namespace YayosCombatAddon
 					}
 				}
 
-				if (hasJob)
+				if (enqueue)
 					pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 			}
 			else

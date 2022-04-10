@@ -4,6 +4,9 @@
   <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
   <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory
 Right click for more options</SY_YCA.ReloadGizmo_desc>
+
+  <SY_YCA.EjectAmmo_label>Eject ammo</SY_YCA.EjectAmmo_label>
+  <SY_YCA.EjectAmmo_desc>Eject ammo from weapons.</SY_YCA.EjectAmmo_desc>
   
   <SY_YCA.ReloadWeaponFromInventory_label>Reload from Inventory</SY_YCA.ReloadWeaponFromInventory_label>
   <SY_YCA.ReloadWeaponFromInventory_tooltip>Reload currently equipped weapon using ammo from inventory</SY_YCA.ReloadWeaponFromInventory_tooltip>

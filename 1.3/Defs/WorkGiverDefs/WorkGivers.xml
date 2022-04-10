@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<WorkGiverDef>
+		<defName>EjectAmmo</defName>
+		<label>eject ammo</label>
+		<giverClass>YayosCombatAddon.WorkGiver_EjectAmmo</giverClass>
+		<workType>Hauling</workType>
+		<priorityInType>50</priorityInType>
+		<verb>eject ammo</verb>
+		<gerund>ejecting ammo</gerund>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
+
+</Defs>

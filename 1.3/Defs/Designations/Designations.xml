@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+
+	<DesignationDef>
+		<defName>EjectAmmo</defName>
+		<texturePath>Designations/Open</texturePath>
+		<targetType>Thing</targetType>
+	</DesignationDef>
+	
+</Defs>

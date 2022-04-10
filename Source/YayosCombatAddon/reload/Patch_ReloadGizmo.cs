@@ -10,12 +10,6 @@ using Verse;
 
 namespace YayosCombatAddon
 {
-	[StaticConstructorOnStartup]
-	internal static class GizmoTexture
-	{
-		public static readonly Texture2D AmmoReload = ContentFinder<Texture2D>.Get("YCA_AmmoReload", true);
-	}
-
 	[HarmonyPatch(typeof(Pawn_DraftController), "GetGizmos")]
 	internal class Pawn_DraftController_GetGizmos
 	{
@@ -79,7 +73,7 @@ namespace YayosCombatAddon
 
 			defaultLabel = "SY_YCA.ReloadGizmo_title".Translate();
 			defaultDesc = "SY_YCA.ReloadGizmo_desc".Translate();
-			icon = GizmoTexture.AmmoReload;
+			icon = YCA_Textures.AmmoReload;
 
 			action = () => ReloadUtility.TryForcedReloadFromInventory(pawn, EquippedComps);
 		}

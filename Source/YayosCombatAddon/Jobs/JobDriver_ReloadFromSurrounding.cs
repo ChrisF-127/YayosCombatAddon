@@ -13,8 +13,8 @@ namespace YayosCombatAddon
 {
 	internal class JobDriver_ReloadFromSurrounding : JobDriver
 	{
-		private IntVec3 StartingPosition { get; set; }
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
+		private IntVec3 StartingPosition { get; set; }
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed) =>
 			true;
@@ -47,7 +47,7 @@ namespace YayosCombatAddon
 			// DONE:
 
 			StartingPosition = pawn.Position;
-			var primary = GetPrimary();
+			var primary = pawn.GetPrimary();
 			yield return next;
 			yield return YCA_JobUtility.DropCarriedThing();
 			yield return Toils_Jump.JumpIf(done, () => job.GetTargetQueue(TargetIndex.A).NullOrEmpty());
@@ -57,11 +57,11 @@ namespace YayosCombatAddon
 			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.B);
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
 			//yield return Toils_Haul.StartCarryThing(TargetIndex.B, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-			yield return Ammo(); // custom method instead of Toils_Haul.StartCarryThing because it allows picking up full stacks
-			yield return Equip();
+			yield return StartCarryAmmoFromGround(); // custom method instead of Toils_Haul.StartCarryThing because it allows picking up full stacks
+			yield return YCA_JobUtility.EquipStaticOrTargetA();
 			yield return Wait;
-			yield return Reload();
-			yield return Equip(primary);
+			yield return YCA_JobUtility.ReloadFromCarriedThing();
+			yield return YCA_JobUtility.EquipStaticOrTargetA(primary);
 			yield return Toils_Jump.Jump(repeat);
 			yield return done;
 		}
@@ -97,11 +97,7 @@ namespace YayosCombatAddon
 			return false;
 		}
 
-		private Thing GetPrimary() =>
-			pawn?.equipment?.Primary;
-
-
-		private Toil Ammo()
+		private Toil StartCarryAmmoFromGround()
 		{
 			var toil = new Toil
 			{
@@ -144,54 +140,6 @@ namespace YayosCombatAddon
 				},
 			};
 			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-		}
-
-		private Toil Equip(Thing staticThing = null)
-		{
-			var toil = new Toil
-			{
-				initAction = () =>
-				{
-					var thing = staticThing ?? TargetThingA;
-					var equipment = pawn.equipment;
-					var primary = equipment.Primary;
-					if (thing is ThingWithComps thingWithComps)
-					{
-						if (thingWithComps != primary)
-						{
-							if (primary != null && !equipment.TryTransferEquipmentToContainer(primary, pawn.inventory.innerContainer))
-								Log.Warning($"{nameof(YayosCombatAddon)}: could not move '{primary}' into inventory");
-							thingWithComps.holdingOwner?.Remove(thingWithComps);
-							equipment.AddEquipment(thingWithComps);
-						}
-					}
-					else
-						Log.Warning($"{nameof(YayosCombatAddon)}: '{thing}' is not {nameof(ThingWithComps)}");
-				},
-			};
-			return staticThing == null ? toil.FailOnDestroyedNullOrForbidden(TargetIndex.A) : toil;
-		}
-
-		private Toil Reload()
-		{
-			var toil = new Toil
-			{
-				initAction = () =>
-				{
-					var comp = TargetThingA?.TryGetComp<CompReloadable>();
-					if (comp?.NeedsReload(true) == true)
-					{
-						var carriedThing = pawn.carryTracker.CarriedThing;
-						if (carriedThing?.def == comp.AmmoDef)
-							comp.ReloadFrom(carriedThing);
-						else
-							Log.Warning($"{nameof(YayosCombatAddon)}: invalid carried thing: '{carriedThing}' (needed: '{comp.AmmoDef}')");
-					}
-					else
-						Log.Warning($"{nameof(YayosCombatAddon)}: failed getting comp / does not need reloading: '{TargetThingA}'");
-				},
-			};
-			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A);
 		}
 	}
 }

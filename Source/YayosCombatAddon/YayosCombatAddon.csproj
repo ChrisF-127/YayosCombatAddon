@@ -53,6 +53,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reload\Patch_ReloadGizmo.cs" />
     <Compile Include="Reload\ReloadUtility.cs" />
+    <Compile Include="Textures\YCA_Textures.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Rimworld.Ref">

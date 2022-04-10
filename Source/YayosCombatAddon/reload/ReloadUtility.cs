@@ -150,6 +150,23 @@ namespace YayosCombatAddon
 					return true;
 			return false;
 		}
+		public static void EjectAmmo(Pawn pawn, CompReloadable comp)
+		{
+			var charges = comp.remainingCharges;
+			if (charges > 0)
+			{
+				do
+				{
+					var ammo = ThingMaker.MakeThing(comp.AmmoDef);
+					ammo.stackCount = Mathf.Min(ammo.def.stackLimit, charges);
+					charges -= ammo.stackCount;
+					GenPlace.TryPlaceThing(ammo, pawn.Position, pawn.Map, ThingPlaceMode.Near);
+				}
+				while (charges > 0);
+				comp.Props.soundReload.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+			}
+		}
+
 
 		public static void IncreaseOrAdd<T>(this Dictionary<T, int> dictionary, T t, int count)
 		{

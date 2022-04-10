@@ -26,11 +26,11 @@ namespace YayosCombatAddon
 		#region OVERRIDES
 		public override int DraggableDimensions => 2;
 
-        protected override DesignationDef Designation => 
+        public override DesignationDef Designation => 
             YCA_DesignationDefOf.EjectAmmo;
 
 		public override AcceptanceReport CanDesignateThing(Thing thing)
-		{
+        {
             if (Map.designationManager.DesignationOn(thing, Designation) != null)
                 return false;
 
@@ -42,15 +42,22 @@ namespace YayosCombatAddon
             if (!cell.InBounds(Map) || cell.Fogged(Map))
                 return false;
 
-            var thing = GetEjectableWeapon(cell, Map);
-            if (thing == null)
-                return false;
+            var things = GetEjectableWeapons(cell, Map);
+            if (things?.Count() > 0)
+			{
+                foreach (var thing in things)
+                    if (CanDesignateThing(thing))
+                        return true;
+            }
 
-            return CanDesignateThing(thing);
+            return false;
         }
 
-        public override void DesignateSingleCell(IntVec3 cell) => 
-            DesignateThing(GetEjectableWeapon(cell, Map));
+        public override void DesignateSingleCell(IntVec3 cell)
+        {
+            foreach (var thing in GetEjectableWeapons(cell, Map))
+                DesignateThing(thing);
+        }
 
 		public override void DesignateThing(Thing thing) =>
             Map.designationManager.AddDesignation(new Designation(thing, Designation));
@@ -60,14 +67,13 @@ namespace YayosCombatAddon
         #endregion
 
         #region PRIVATE METHODS
-        private static Thing GetEjectableWeapon(IntVec3 cell, Map map)
+        private static IEnumerable<Thing> GetEjectableWeapons(IntVec3 cell, Map map)
         {
             foreach (Thing thing in cell.GetThingList(map))
             {
-                if (thing.TryGetComp<CompReloadable>()?.RemainingCharges > 0)
-                    return thing;
+                if (CanEjectAmmo(thing))
+                    yield return thing;
             }
-            return null;
         }
 
         private static bool CanEjectAmmo(Thing thing) =>

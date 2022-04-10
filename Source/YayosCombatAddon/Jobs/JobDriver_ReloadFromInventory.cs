@@ -17,7 +17,7 @@ namespace YayosCombatAddon
 		public override bool TryMakePreToilReservations(bool errorOnFailed) =>
 			true;
 
-		protected override IEnumerable<Toil> MakeNewToils()
+		public override IEnumerable<Toil> MakeNewToils()
 		{
 			this.FailOn(() => pawn == null);
 			this.FailOn(() => pawn.Downed);

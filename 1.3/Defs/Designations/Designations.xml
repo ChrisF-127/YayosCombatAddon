@@ -3,7 +3,7 @@
 
 	<DesignationDef>
 		<defName>EjectAmmo</defName>
-		<texturePath>Designations/Open</texturePath>
+		<texturePath>YCA_AmmoEjectDesignation</texturePath>
 		<targetType>Thing</targetType>
 	</DesignationDef>
 	

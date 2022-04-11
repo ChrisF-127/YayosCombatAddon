@@ -23,7 +23,7 @@ namespace YayosCombatAddon
 
 		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra_Postfix(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{
-			if (__instance is CompReloadable reloadable)
+			if (__instance is CompReloadable reloadable && reloadable.AmmoDef.IsAmmo())
 			{
 				var thing = reloadable.parent;
 				if (thing.Map.designationManager.DesignationOn(thing, YCA_DesignationDefOf.EjectAmmo) == null)
@@ -33,8 +33,11 @@ namespace YayosCombatAddon
 						defaultLabel = "SY_YCA.EjectAmmo_label".Translate(),
 						defaultDesc = "SY_YCA.EjectAmmo_desc".Translate(),
 						icon = YCA_Textures.AmmoEject,
+						disabled = reloadable.RemainingCharges == 0,
+						disabledReason = "SY_YCA.NoEjectableAmmo".Translate(),
 						action = () => thing.Map.designationManager.AddDesignation(new Designation(thing, YCA_DesignationDefOf.EjectAmmo)),
-					};
+						activateSound  = YCA_SoundDefOf.Designate_EjectAmmo,
+				};
 				}
 			}
 

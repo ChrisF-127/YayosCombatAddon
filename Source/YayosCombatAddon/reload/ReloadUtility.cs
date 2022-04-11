@@ -164,6 +164,7 @@ namespace YayosCombatAddon
 				}
 				while (charges > 0);
 				comp.Props.soundReload.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
+				comp.remainingCharges = 0;
 			}
 		}
 

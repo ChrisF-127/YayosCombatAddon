@@ -26,7 +26,8 @@ namespace YayosCombatAddon
                 "SY_YCA.ShowReloadWeaponGizmo_title".Translate(), 
                 "SY_YCA.ShowReloadWeaponGizmo_desc".Translate(), 
                 true);
-            _showReloadWeaponGizmoSetting.ValueChanged += value => ShowReloadWeaponGizmo = (SettingHandle<bool>)value;
+            _showReloadWeaponGizmoSetting.ValueChanged += 
+                value => ShowReloadWeaponGizmo = (SettingHandle<bool>)value;
             ShowReloadWeaponGizmo = _showReloadWeaponGizmoSetting.Value;
 
             _reloadAllWeaponsInInventoryOption = Settings.GetHandle(
@@ -34,7 +35,8 @@ namespace YayosCombatAddon
                 "SY_YCA.ReloadAllWeaponsInInventoryOption_title".Translate(),
                 "SY_YCA.ReloadAllWeaponsInInventoryOption_desc".Translate(),
                 false);
-            _reloadAllWeaponsInInventoryOption.ValueChanged += value => ReloadAllWeaponsInInventoryOption = (SettingHandle<bool>)value;
+            _reloadAllWeaponsInInventoryOption.ValueChanged += 
+                value => ReloadAllWeaponsInInventoryOption = (SettingHandle<bool>)value;
             ReloadAllWeaponsInInventoryOption = _reloadAllWeaponsInInventoryOption.Value;
         }
     }

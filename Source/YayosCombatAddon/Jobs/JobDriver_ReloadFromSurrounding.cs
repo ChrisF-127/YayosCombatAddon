@@ -93,7 +93,8 @@ namespace YayosCombatAddon
 					return true;
 				}
 
-				ReloadUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
+				if (job.playerForced)
+					ReloadUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
 			}
 			return false;
 		}

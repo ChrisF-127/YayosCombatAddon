@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using SimpleSidearms.rimworld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,9 @@ namespace YayosCombatAddon
 {
 	public static class ReloadUtility
 	{
-		public static void TryAutoReload(CompReloadable comp)
+		public static void TryAutoReloadSingle(CompReloadable comp)
 		{
-			if (comp.RemainingCharges <= 0)
+			if (comp?.RemainingCharges <= 0)
 			{
 				var pawn = comp.Wearer;
 				var thing = comp.parent;
@@ -33,65 +34,91 @@ namespace YayosCombatAddon
 
 					// reload from inventory
 					if (ammoCount > 0)
-						ReloadFromInventory(pawn, thing);
+						ReloadFromInventory(pawn, false, thing);
 					// reload from surrounding
-					else if(yayoCombat.yayoCombat.supplyAmmoDist >= 0)
-						ReloadFromSurrounding(pawn, thing);
+					else if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+						ReloadFromSurrounding(pawn, false, thing);
 				}
 			}
 		}
+		public static void TryAutoReloadAll(Pawn pawn)
+		{
+			var things = pawn?.GetAllReloadableThings()?.ToArray();
+			if (things?.Length > 0)
+			{
+				var reloadFromInventory = false;
+				foreach (var thing in things)
+				{
+					var comp = thing?.TryGetComp<CompReloadable>();
+					var count = pawn.CountAmmoInInventory(comp);
+
+					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
+					if (count == 0 && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					{
+						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
+						ammo.stackCount = comp.MaxAmmoNeeded(true);
+						if (pawn.inventory.innerContainer.TryAdd(ammo))
+							count = ammo.stackCount;
+					}
+
+					if (count > 0) 
+						reloadFromInventory = true;
+				}
+
+				// reload from inventory
+				if (reloadFromInventory)
+					ReloadFromInventory(pawn, false, things);
+				// reload from surrounding
+				else if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+					ReloadFromSurrounding(pawn, false, things);
+			}
+		}
 
 
-		public static void ReloadFromInventory(Pawn pawn, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromInventory(Pawn pawn, bool playerForced, IEnumerable<CompReloadable> comps)
 		{
 			var reloads = new List<Thing>();
-
 			foreach (var comp in comps)
-			{
 				if (comp.RemainingCharges < comp.MaxCharges)
 					reloads.Add(comp.parent);
-			}
 
 			if (reloads.Count > 0)
-				ReloadFromInventory(pawn, reloads.ToArray());
-			else // nothing to reload
+				ReloadFromInventory(pawn, playerForced, reloads.ToArray());
+			else if (playerForced) // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-		public static void ReloadFromInventory(Pawn pawn, params Thing[] things)
+		public static void ReloadFromInventory(Pawn pawn, bool playerForced, params Thing[] things)
 		{
 			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
+			job.playerForced = playerForced;
 			foreach (var thing in things)
 				job.AddQueuedTarget(TargetIndex.A, thing);
 			pawn.jobs.TryTakeOrderedJob(job);
 		}
-		public static void ReloadFromSurrounding(Pawn pawn, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromSurrounding(Pawn pawn, bool playerForced, IEnumerable<CompReloadable> comps)
 		{
 			if (yayoCombat.yayoCombat.supplyAmmoDist < 0)
 				return;
 
 			var reloads = new List<Thing>();
-
-			var noWeaponToReload = true;
 			foreach (var comp in comps)
-			{
 				if (comp.RemainingCharges < comp.MaxCharges)
-				{
-					noWeaponToReload = false;
 					reloads.Add(comp.parent);
-				}
-			}
 
 			if (reloads.Count > 0)
-				ReloadFromSurrounding(pawn, reloads.ToArray());
+			{
+				ReloadFromSurrounding(pawn, playerForced, reloads.ToArray());
 
-			if (noWeaponToReload) // nothing to reload
-				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
-			else // make pawn go back to where they were
+				// make pawn go back to where they were
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
+			}
+			else if (playerForced) // nothing to reload
+				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-		public static void ReloadFromSurrounding(Pawn pawn, params Thing[] things)
+		public static void ReloadFromSurrounding(Pawn pawn, bool playerForced, params Thing[] things)
 		{
 			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
+			job.playerForced = playerForced;
 			foreach (var thing in things)
 				job.AddQueuedTarget(TargetIndex.A, thing);
 			pawn.jobs.TryTakeOrderedJob(job);
@@ -169,22 +196,42 @@ namespace YayosCombatAddon
 		}
 
 
-		public static void ShowRejectMessage(string text) =>
-			Messages.Message(text, MessageTypeDefOf.RejectInput, historical: false);
-
-
-		public static bool IsAmmo(this ThingDef def) =>
-			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
-
-		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
+		public static IEnumerable<Thing> GetAllReloadableThings(this Pawn pawn)
 		{
-			var count = 0;
-			foreach (var thing in pawn.inventory.innerContainer)
-				if (thing.def == comp.AmmoDef)
-					count += thing.stackCount;
-			return count;
+			if (pawn == null)
+				yield break;
+
+			foreach (var thing in pawn.equipment.AllEquipmentListForReading)
+				if (thing?.RequiresReloading() == true)
+					yield return thing;
+
+			if (Main.SimpleSidearmsCompatibility)
+			{
+				var memory = CompSidearmMemory.GetMemoryCompForPawn(pawn);
+				foreach (var thing in pawn.inventory.innerContainer)
+				{
+					if (thing != null 
+						&& memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def)) 
+						&& thing.RequiresReloading() == true)
+						yield return thing;
+				}
+			}
 		}
-		public static bool RequiresReloading(this IEnumerable<CompReloadable> comps)
+		public static IEnumerable<CompReloadable> GetCompReloadables(this IEnumerable<Thing> things)
+		{
+			foreach (var thing in things)
+			{
+				var comp = thing?.TryGetComp<CompReloadable>();
+				if (comp != null)
+					yield return comp;
+			}	
+		}
+		public static bool RequiresReloading(this Thing thing)
+		{
+			var comp = thing?.TryGetComp<CompReloadable>();
+			return comp?.AmmoDef?.IsAmmo() == true && comp.RemainingCharges != comp.MaxCharges;
+		}
+		public static bool AnythingRequiresReloading(this IEnumerable<CompReloadable> comps)
 		{
 			foreach (var comp in comps)
 				if (comp.RemainingCharges < comp.MaxCharges)
@@ -208,6 +255,23 @@ namespace YayosCombatAddon
 				comp.remainingCharges = 0;
 			}
 		}
+
+
+		public static bool IsAmmo(this ThingDef def) =>
+			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
+
+		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
+		{
+			var count = 0;
+			foreach (var thing in pawn.inventory.innerContainer)
+				if (thing.def == comp.AmmoDef)
+					count += thing.stackCount;
+			return count;
+		}
+
+
+		public static void ShowRejectMessage(string text) =>
+			Messages.Message(text, MessageTypeDefOf.RejectInput, historical: false);
 
 
 		public static void IncreaseOrAdd<T>(this Dictionary<T, int> dictionary, T t, int count)

@@ -79,23 +79,10 @@ namespace YayosCombatAddon
 				return;
 			if (Find.TickManager.TicksGame % 60 != 0) 
 				return;
-			if (!(__instance.CurJobDef == JobDefOf.Wait_Combat || __instance.CurJobDef == JobDefOf.AttackStatic) || __instance.equipment == null) 
+			if (__instance.CurJobDef != JobDefOf.Wait_Combat && __instance.CurJobDef != JobDefOf.AttackStatic || __instance.equipment == null) 
 				return;
 
-
-#warning TODO replace with reload all weapons?
-			List<ThingWithComps> ar = __instance.equipment.AllEquipmentListForReading;
-
-			foreach (ThingWithComps t in ar)
-			{
-				CompReloadable cp = t.TryGetComp<CompReloadable>();
-
-				if (cp != null)
-				{
-					reloadUtility.tryAutoReload(cp);
-					return;
-				}
-			}
+			ReloadUtility.TryAutoReloadAll(__instance);
 		}
 		static bool Patch_CompReloadable_UsedOnce(CompReloadable __instance)
 		{
@@ -113,18 +100,21 @@ namespace YayosCombatAddon
 			if (__instance.Wearer == null) 
 				return false;
 
+			// (new) don't try to reload ammo that's not part of Yayo's Combat
+			if (__instance.AmmoDef?.IsAmmo() != true)
+				return false;
 
-			if (__instance.RemainingCharges == 0)
-			{
-				if (__instance.Wearer.CurJobDef == JobDefOf.Hunt)
-				{
-#warning TODO try reload from inventory
-					__instance.Wearer.jobs.StopAll();
-				}
-			}
+//			if (__instance.RemainingCharges == 0)
+//			{
+//				if (pawn.CurJobDef == JobDefOf.Hunt)
+//				{
+//#warning TODO try reload from inventory
+//					pawn.jobs.StopAll();
+//				}
+//			}
 
 			// (replacement) Replaced with new method
-			ReloadUtility.TryAutoReload(__instance);
+			ReloadUtility.TryAutoReloadSingle(__instance);
 
 			return false;
 		}

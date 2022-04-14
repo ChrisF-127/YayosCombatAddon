@@ -73,7 +73,8 @@ namespace YayosCombatAddon
 					if (thing?.def == comp.AmmoDef)
 						return true;
 
-				ReloadUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
+				if (job.playerForced)
+					ReloadUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
 			}
 			return false;
 		}

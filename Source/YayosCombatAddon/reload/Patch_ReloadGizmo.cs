@@ -44,35 +44,18 @@ namespace YayosCombatAddon
 	internal class Command_ReloadActions : Command_Action
 	{
 		private readonly Pawn Pawn = null;
-		private readonly List<CompReloadable> Reloadables;
+		private readonly IEnumerable<CompReloadable> Reloadables;
 
 		public Command_ReloadActions(Pawn pawn)
 		{
-			Pawn = pawn;
-
-			Reloadables = new List<CompReloadable>();
-			foreach (var thing in pawn.equipment.AllEquipmentListForReading)
-			{
-				var comp = thing.TryGetComp<CompReloadable>();
-				if (comp != null)
-					Reloadables.Add(comp);
-			}
-
-			if (Main.SimpleSidearmsCompatibility_ReloadAllWeapons)
-			{
-				foreach (var thing in pawn.inventory.innerContainer)
-				{
-					var comp = thing.TryGetComp<CompReloadable>();
-					if (comp != null)
-						Reloadables.Add(comp);
-				}
-			}
-
 			defaultLabel = "SY_YCA.ReloadGizmo_title".Translate();
 			defaultDesc = "SY_YCA.ReloadGizmo_desc".Translate();
 			icon = YCA_Textures.AmmoReload;
 
-			action = () => ReloadUtility.ReloadFromInventory(pawn, Reloadables);
+			Pawn = pawn;
+			Reloadables = pawn.GetAllReloadableThings().GetCompReloadables();
+
+			action = () => ReloadUtility.ReloadFromInventory(pawn, true, Reloadables);
 		}
 
 		public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
@@ -82,7 +65,7 @@ namespace YayosCombatAddon
 				string inventory_label, inventory_tooltip;
 				string surrounding_label, surrounding_tooltip;
 
-				if (Main.SimpleSidearmsCompatibility_ReloadAllWeapons)
+				if (Main.SimpleSidearmsCompatibility)
 				{
 					inventory_label = "SY_YCA.ReloadAllWeaponFromInventory_label";
 					inventory_tooltip = "SY_YCA.ReloadAllWeaponFromInventory_tooltip";
@@ -101,7 +84,7 @@ namespace YayosCombatAddon
 
 				yield return new FloatMenuOption(
 					inventory_label.Translate(),
-					() => ReloadUtility.ReloadFromInventory(Pawn, Reloadables))
+					() => ReloadUtility.ReloadFromInventory(Pawn, true, Reloadables))
 				{
 					tooltip = inventory_tooltip.Translate(),
 				};
@@ -109,7 +92,7 @@ namespace YayosCombatAddon
 				{
 					yield return new FloatMenuOption(
 						surrounding_label.Translate(),
-						() => ReloadUtility.ReloadFromSurrounding(Pawn, Reloadables))
+						() => ReloadUtility.ReloadFromSurrounding(Pawn, true, Reloadables))
 					{
 						tooltip = surrounding_tooltip.Translate(),
 					};

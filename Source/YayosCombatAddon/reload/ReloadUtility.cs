@@ -11,7 +11,38 @@ namespace YayosCombatAddon
 {
 	public static class ReloadUtility
 	{
-		public static void TryForcedReloadFromInventory(Pawn pawn, IEnumerable<CompReloadable> comps)
+		public static void TryAutoReload(CompReloadable comp)
+		{
+			if (comp.RemainingCharges <= 0)
+			{
+				var pawn = comp.Wearer;
+				var thing = comp.parent;
+
+				if (pawn != null && thing != null)
+				{
+					var ammoCount = pawn.CountAmmoInInventory(comp);
+
+					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
+					if (ammoCount == 0 && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					{
+						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
+						ammo.stackCount = comp.MaxAmmoNeeded(true);
+						if (pawn.inventory.innerContainer.TryAdd(ammo))
+							ammoCount = ammo.stackCount;
+					}
+
+					// reload from inventory
+					if (ammoCount > 0)
+						ReloadFromInventory(pawn, thing);
+					// reload from surrounding
+					else if(yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+						ReloadFromSurrounding(pawn, thing);
+				}
+			}
+		}
+
+
+		public static void ReloadFromInventory(Pawn pawn, IEnumerable<CompReloadable> comps)
 		{
 			var reloads = new List<Thing>();
 
@@ -22,17 +53,18 @@ namespace YayosCombatAddon
 			}
 
 			if (reloads.Count > 0)
-			{
-				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
-				foreach (var thing in reloads)
-					job.AddQueuedTarget(TargetIndex.A, thing);
-				pawn.jobs.TryTakeOrderedJob(job);
-			}
+				ReloadFromInventory(pawn, reloads.ToArray());
 			else // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-
-		public static void TryForcedReloadFromSurrounding(Pawn pawn, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromInventory(Pawn pawn, params Thing[] things)
+		{
+			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
+			foreach (var thing in things)
+				job.AddQueuedTarget(TargetIndex.A, thing);
+			pawn.jobs.TryTakeOrderedJob(job);
+		}
+		public static void ReloadFromSurrounding(Pawn pawn, IEnumerable<CompReloadable> comps)
 		{
 			if (yayoCombat.yayoCombat.supplyAmmoDist < 0)
 				return;
@@ -50,20 +82,21 @@ namespace YayosCombatAddon
 			}
 
 			if (reloads.Count > 0)
-			{
-				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
-				foreach (var thing in reloads)
-					job.AddQueuedTarget(TargetIndex.A, thing);
-				pawn.jobs.TryTakeOrderedJob(job);
-			}
+				ReloadFromSurrounding(pawn, reloads.ToArray());
 
 			if (noWeaponToReload) // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 			else // make pawn go back to where they were
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 		}
-
-		public static void TryRestockInventoryFromSurrounding(Pawn pawn)
+		public static void ReloadFromSurrounding(Pawn pawn, params Thing[] things)
+		{
+			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
+			foreach (var thing in things)
+				job.AddQueuedTarget(TargetIndex.A, thing);
+			pawn.jobs.TryTakeOrderedJob(job);
+		}
+		public static void RestockInventoryFromSurrounding(Pawn pawn)
 		{
 			var required = new Dictionary<Def, int>();
 			for (int i = 0; i < pawn.drugs.CurrentPolicy.Count; i++)
@@ -143,6 +176,14 @@ namespace YayosCombatAddon
 		public static bool IsAmmo(this ThingDef def) =>
 			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
 
+		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
+		{
+			var count = 0;
+			foreach (var thing in pawn.inventory.innerContainer)
+				if (thing.def == comp.AmmoDef)
+					count += thing.stackCount;
+			return count;
+		}
 		public static bool RequiresReloading(this IEnumerable<CompReloadable> comps)
 		{
 			foreach (var comp in comps)

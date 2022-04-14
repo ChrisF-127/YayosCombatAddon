@@ -79,7 +79,8 @@ namespace YayosCombatAddon
 					pawn.Position,
 					new IntRange(comp.MinAmmoNeeded(true), comp.MaxAmmoNeeded(true)),
 					t => t.def == comp.AmmoDef 
-						&& (IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist
+						&& (!pawn.Drafted // non-drafted pawns will look everywhere
+							|| IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist
 							|| IntVec3Utility.DistanceTo(StartingPosition, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
 
 				job.targetQueueB?.Clear();

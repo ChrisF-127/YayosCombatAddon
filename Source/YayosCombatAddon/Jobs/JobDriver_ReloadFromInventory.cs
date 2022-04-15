@@ -73,8 +73,11 @@ namespace YayosCombatAddon
 					if (thing?.def == comp.AmmoDef)
 						return true;
 
-				if (job.playerForced)
+				if (job.overeat) // used to decide whether to show messages or not
+				{
+					Log.Message($"ReloadFromInventory forced: {job.overeat}");
 					ReloadUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
+				}
 			}
 			return false;
 		}

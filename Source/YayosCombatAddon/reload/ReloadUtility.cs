@@ -44,24 +44,24 @@ namespace YayosCombatAddon
 		public static void TryAutoReloadAll(Pawn pawn)
 		{
 			var things = pawn?.GetAllReloadableThings()?.ToArray();
-			if (things?.Length > 0)
+			if (things?.AnyOutOfAmmo() == true)
 			{
 				var reloadFromInventory = false;
 				foreach (var thing in things)
 				{
 					var comp = thing?.TryGetComp<CompReloadable>();
-					var count = pawn.CountAmmoInInventory(comp);
+					var ammoInInventory = pawn.CountAmmoInInventory(comp);
 
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
-					if (count == 0 && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					if (ammoInInventory == 0 && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
 						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
 						ammo.stackCount = comp.MaxAmmoNeeded(true);
 						if (pawn.inventory.innerContainer.TryAdd(ammo))
-							count = ammo.stackCount;
+							ammoInInventory = ammo.stackCount;
 					}
 
-					if (count > 0) 
+					if (ammoInInventory > 0) 
 						reloadFromInventory = true;
 				}
 
@@ -75,7 +75,7 @@ namespace YayosCombatAddon
 		}
 
 
-		public static void ReloadFromInventory(Pawn pawn, bool playerForced, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromInventory(Pawn pawn, bool showMessages, IEnumerable<CompReloadable> comps)
 		{
 			var reloads = new List<Thing>();
 			foreach (var comp in comps)
@@ -83,19 +83,23 @@ namespace YayosCombatAddon
 					reloads.Add(comp.parent);
 
 			if (reloads.Count > 0)
-				ReloadFromInventory(pawn, playerForced, reloads.ToArray());
-			else if (playerForced) // nothing to reload
+				ReloadFromInventory(pawn, showMessages, reloads.ToArray());
+			else if (showMessages) // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-		public static void ReloadFromInventory(Pawn pawn, bool playerForced, params Thing[] things)
+		public static void ReloadFromInventory(Pawn pawn, bool showMessages, params Thing[] things)
 		{
 			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
-			job.playerForced = playerForced;
+
+			// just needed a variable for the job to tell it not to show messages
+			job.overeat = showMessages;
+			Log.Message($"ReloadFromInventory forced: {job.overeat}");
+
 			foreach (var thing in things)
 				job.AddQueuedTarget(TargetIndex.A, thing);
 			pawn.jobs.TryTakeOrderedJob(job);
 		}
-		public static void ReloadFromSurrounding(Pawn pawn, bool playerForced, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromSurrounding(Pawn pawn, bool showMessages, IEnumerable<CompReloadable> comps)
 		{
 			if (yayoCombat.yayoCombat.supplyAmmoDist < 0)
 				return;
@@ -107,18 +111,22 @@ namespace YayosCombatAddon
 
 			if (reloads.Count > 0)
 			{
-				ReloadFromSurrounding(pawn, playerForced, reloads.ToArray());
+				ReloadFromSurrounding(pawn, showMessages, reloads.ToArray());
 
 				// make pawn go back to where they were
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 			}
-			else if (playerForced) // nothing to reload
+			else if (showMessages) // nothing to reload
 				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-		public static void ReloadFromSurrounding(Pawn pawn, bool playerForced, params Thing[] things)
+		public static void ReloadFromSurrounding(Pawn pawn, bool showMessages, params Thing[] things)
 		{
 			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
-			job.playerForced = playerForced;
+
+			// just needed a variable for the job to tell it not to show messages
+			job.overeat = showMessages;
+			Log.Message($"ReloadFromSurrounding forced: {job.overeat}");
+
 			foreach (var thing in things)
 				job.AddQueuedTarget(TargetIndex.A, thing);
 			pawn.jobs.TryTakeOrderedJob(job);
@@ -196,13 +204,22 @@ namespace YayosCombatAddon
 		}
 
 
+		public static IEnumerable<CompReloadable> GetCompReloadables(this IEnumerable<Thing> things)
+		{
+			foreach (var thing in things)
+			{
+				var comp = thing?.TryGetComp<CompReloadable>();
+				if (comp != null)
+					yield return comp;
+			}
+		}
 		public static IEnumerable<Thing> GetAllReloadableThings(this Pawn pawn)
 		{
 			if (pawn == null)
 				yield break;
 
 			foreach (var thing in pawn.equipment.AllEquipmentListForReading)
-				if (thing?.RequiresReloading() == true)
+				if (thing?.AmmoNeeded() > 0)
 					yield return thing;
 
 			if (Main.SimpleSidearmsCompatibility)
@@ -212,29 +229,29 @@ namespace YayosCombatAddon
 				{
 					if (thing != null 
 						&& memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def)) 
-						&& thing.RequiresReloading() == true)
+						&& thing.AmmoNeeded() > 0)
 						yield return thing;
 				}
 			}
 		}
-		public static IEnumerable<CompReloadable> GetCompReloadables(this IEnumerable<Thing> things)
-		{
-			foreach (var thing in things)
-			{
-				var comp = thing?.TryGetComp<CompReloadable>();
-				if (comp != null)
-					yield return comp;
-			}	
-		}
-		public static bool RequiresReloading(this Thing thing)
+		public static int AmmoNeeded(this Thing thing)
 		{
 			var comp = thing?.TryGetComp<CompReloadable>();
-			return comp?.AmmoDef?.IsAmmo() == true && comp.RemainingCharges != comp.MaxCharges;
+			if (comp?.AmmoDef?.IsAmmo() == true)
+				return comp.MaxAmmoNeeded(true);
+			return 0;
 		}
-		public static bool AnythingRequiresReloading(this IEnumerable<CompReloadable> comps)
+		public static bool IsOutOfAmmo(this Thing thing)
 		{
-			foreach (var comp in comps)
-				if (comp.RemainingCharges < comp.MaxCharges)
+			var comp = thing?.TryGetComp<CompReloadable>();
+			if (comp?.AmmoDef?.IsAmmo() == true)
+				return comp.RemainingCharges == 0;
+			return false;
+		}
+		public static bool AnyOutOfAmmo(this IEnumerable<Thing> things)
+		{
+			foreach (var thing in things)
+				if (thing.IsOutOfAmmo())
 					return true;
 			return false;
 		}

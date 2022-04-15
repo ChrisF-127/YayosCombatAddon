@@ -32,14 +32,12 @@ namespace YayosCombatAddon
 							ammoCount = ammo.stackCount;
 					}
 
-					var things = new Thing[] { thing };
-
-					// reload from inventory
+					// only reload equipped weapon from inventory
 					if (ammoCount > 0)
-						ReloadFromInventory(pawn, things, false);
-					// reload from surrounding
+						ReloadFromInventory(pawn, new Thing[] { thing }, false);
+					// reload all weapons from surrounding
 					else if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
-						ReloadFromSurrounding(pawn, things, false, true);
+						ReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), false, false);
 				}
 			}
 		}
@@ -72,7 +70,7 @@ namespace YayosCombatAddon
 					ReloadFromInventory(pawn, things, false);
 				// reload from surrounding
 				else if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
-					ReloadFromSurrounding(pawn, things, false, true);
+					ReloadFromSurrounding(pawn, things, false, false);
 			}
 		}
 
@@ -83,9 +81,8 @@ namespace YayosCombatAddon
 			{
 				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
 
-				// just needed a variable for the job to tell it not to show messages
-				job.overeat = showMessages;
-				Log.Message($"ReloadFromInventory forced: {job.overeat}");
+				var variables = JobDriver_ReloadFromInventory.AttachedVariables.GetOrCreateValue(job);
+				variables.ShowMessages = showMessages;
 
 				foreach (var thing in things)
 					job.AddQueuedTarget(TargetIndex.A, thing);
@@ -104,9 +101,9 @@ namespace YayosCombatAddon
 			{
 				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
 
-				// just needed a variable for the job to tell it not to show messages
-				job.overeat = showMessages;
-				Log.Message($"ReloadFromSurrounding forced: {job.overeat}");
+				var variables = JobDriver_ReloadFromSurrounding.AttachedVariables.GetOrCreateValue(job);
+				variables.ShowMessages = showMessages;
+				variables.IgnoreDistance = ignoreDistance;
 
 				foreach (var thing in things)
 					job.AddQueuedTarget(TargetIndex.A, thing);

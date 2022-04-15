@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -10,8 +11,15 @@ using Verse.AI;
 
 namespace YayosCombatAddon
 {
+	internal class Job_ReloadFromInventory_Variables
+	{
+		public bool ShowMessages = false;
+	}
+
 	internal class JobDriver_ReloadFromInventory : JobDriver
 	{
+		public static ConditionalWeakTable<Job, Job_ReloadFromInventory_Variables> AttachedVariables { get; } = new ConditionalWeakTable<Job, Job_ReloadFromInventory_Variables>();
+
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed) =>
@@ -67,17 +75,15 @@ namespace YayosCombatAddon
 				// sneaky way for setting wait duration using comp
 				Wait.defaultDuration = comp.Props.baseReloadTicks;
 
+				var foundVariables = AttachedVariables.TryGetValue(job, out var variables);
 				if (pawn.carryTracker.CarriedThing?.def == comp.AmmoDef)
 					return true;
 				foreach (var thing in pawn.inventory.innerContainer)
 					if (thing?.def == comp.AmmoDef)
 						return true;
 
-				if (job.overeat) // used to decide whether to show messages or not
-				{
-					Log.Message($"ReloadFromInventory forced: {job.overeat}");
+				if (foundVariables && variables.ShowMessages)
 					GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
-				}
 			}
 			return false;
 		}

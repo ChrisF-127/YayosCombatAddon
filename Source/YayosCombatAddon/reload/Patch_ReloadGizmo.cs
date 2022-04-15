@@ -88,15 +88,12 @@ namespace YayosCombatAddon
 				{
 					tooltip = inventory_tooltip.Translate(),
 				};
-				if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
+				yield return new FloatMenuOption(
+					surrounding_label.Translate(),
+					() => ReloadUtility.ReloadFromSurrounding(Pawn, ReloadableThings, true, true))
 				{
-					yield return new FloatMenuOption(
-						surrounding_label.Translate(),
-						() => ReloadUtility.ReloadFromSurrounding(Pawn, ReloadableThings, true, false))
-					{
-						tooltip = surrounding_tooltip.Translate(),
-					};
-				}
+					tooltip = surrounding_tooltip.Translate(),
+				};
 
 				yield return new FloatMenuOption(
 					"SY_YCA.RestockAmmoFromSurrounding_label".Translate(),

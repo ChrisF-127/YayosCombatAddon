@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -11,8 +12,16 @@ using Verse.Sound;
 
 namespace YayosCombatAddon
 {
+	internal class Job_ReloadFromSurrounding_Variables
+	{
+		public bool ShowMessages = false;
+		public bool IgnoreDistance = false;
+	}
+
 	internal class JobDriver_ReloadFromSurrounding : JobDriver
 	{
+		public static ConditionalWeakTable<Job, Job_ReloadFromSurrounding_Variables> AttachedVariables { get; } = new ConditionalWeakTable<Job, Job_ReloadFromSurrounding_Variables>();
+
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
 		private IntVec3 StartingPosition { get; set; }
 
@@ -74,12 +83,13 @@ namespace YayosCombatAddon
 				// sneaky way for setting wait duration using comp
 				Wait.defaultDuration = comp.Props.baseReloadTicks;
 
+				var foundVariables = AttachedVariables.TryGetValue(job, out var variables);
 				var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
 					pawn,
 					pawn.Position,
 					new IntRange(comp.MinAmmoNeeded(true), comp.MaxAmmoNeeded(true)),
 					t => t.def == comp.AmmoDef 
-						&& (!pawn.Drafted // non-drafted pawns will look everywhere
+						&& (foundVariables && variables.IgnoreDistance //!pawn.Drafted
 							|| IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist
 							|| IntVec3Utility.DistanceTo(StartingPosition, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
 
@@ -93,11 +103,8 @@ namespace YayosCombatAddon
 					return true;
 				}
 
-				if (job.overeat) // used to decide whether to show messages or not
-				{
-					Log.Message($"ReloadFromSurrounding forced: {job.overeat}");
+				if (foundVariables && variables.ShowMessages)
 					GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
-				}
 			}
 			return false;
 		}

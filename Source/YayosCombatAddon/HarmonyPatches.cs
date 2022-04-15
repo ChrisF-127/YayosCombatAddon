@@ -19,17 +19,20 @@ namespace YayosCombatAddon
 		{
 			Harmony harmony = new Harmony("syrus.yayoscombataddon");
 
+			// gizmo patch for reloadable weapons
 			harmony.Patch(
 				typeof(ThingComp).GetMethod("CompGetGizmosExtra"),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ThingComp_CompGetGizmosExtra_Postfix)));
 
+			// replace original patches
 			harmony.Patch(
 				typeof(patch_Pawn_TickRare).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_Pawn_TickRare_Transpiler)));
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_Pawn_TickRare)));
 			harmony.Patch(
 				typeof(patch_CompReloadable_UsedOnce).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce_Transpiler)));
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
 		}
+
 
 		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra_Postfix(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{
@@ -46,8 +49,8 @@ namespace YayosCombatAddon
 						disabled = reloadable.RemainingCharges == 0,
 						disabledReason = "SY_YCA.NoEjectableAmmo".Translate(),
 						action = () => thing.Map.designationManager.AddDesignation(new Designation(thing, YCA_DesignationDefOf.EjectAmmo)),
-						activateSound  = YCA_SoundDefOf.Designate_EjectAmmo,
-				};
+						activateSound = YCA_SoundDefOf.Designate_EjectAmmo,
+					};
 				}
 			}
 
@@ -55,21 +58,19 @@ namespace YayosCombatAddon
 				yield return gizmo;
 		}
 
-		static IEnumerable<CodeInstruction> YC_Patch_Pawn_TickRare_Transpiler(IEnumerable<CodeInstruction> instructions)
+
+		static IEnumerable<CodeInstruction> YC_Patch_Pawn_TickRare(IEnumerable<CodeInstruction> instructions)
 		{
-			// Fully replace original functionality with my own patch; hopefully in the most efficient way...maybe?
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_Pawn_TickRare), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
-		static IEnumerable<CodeInstruction> YC_Patch_CompReloadable_UsedOnce_Transpiler(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_CompReloadable_UsedOnce(IEnumerable<CodeInstruction> instructions)
 		{
-			// Fully replace original functionality with my own patch; hopefully in the most efficient way...maybe?
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
-
 
 		static void Patch_Pawn_TickRare(Pawn __instance)
 		{
@@ -104,14 +105,15 @@ namespace YayosCombatAddon
 			if (__instance.AmmoDef?.IsAmmo() != true)
 				return false;
 
-//			if (__instance.RemainingCharges == 0)
-//			{
-//				if (pawn.CurJobDef == JobDefOf.Hunt)
-//				{
-//#warning TODO try reload from inventory
-//					pawn.jobs.StopAll();
-//				}
-//			}
+#warning TODO does reloading while hunting work?
+			//if (__instance.RemainingCharges == 0)
+			//{
+			//	if (pawn.CurJobDef == JobDefOf.Hunt)
+			//	{
+			//		// Reload from inventory?
+			//		pawn.jobs.StopAll();
+			//	}
+			//}
 
 			// (replacement) Replaced with new method
 			ReloadUtility.TryAutoReloadSingle(__instance);

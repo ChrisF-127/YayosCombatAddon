@@ -49,7 +49,7 @@ namespace YayosCombatAddon
 				var reloadFromInventory = false;
 				foreach (var thing in things)
 				{
-					var comp = thing?.TryGetComp<CompReloadable>();
+					var comp = thing.TryGetComp<CompReloadable>();
 					var ammoInInventory = pawn.CountAmmoInInventory(comp);
 
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
@@ -81,9 +81,11 @@ namespace YayosCombatAddon
 			{
 				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
 
+				// set attached variables
 				var variables = JobDriver_ReloadFromInventory.AttachedVariables.GetOrCreateValue(job);
 				variables.ShowMessages = showMessages;
 
+				// fill job queue
 				foreach (var thing in things)
 					job.AddQueuedTarget(TargetIndex.A, thing);
 				pawn.jobs.TryTakeOrderedJob(job);
@@ -101,10 +103,12 @@ namespace YayosCombatAddon
 			{
 				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
 
+				// set attached variables
 				var variables = JobDriver_ReloadFromSurrounding.AttachedVariables.GetOrCreateValue(job);
 				variables.ShowMessages = showMessages;
 				variables.IgnoreDistance = ignoreDistance;
 
+				// fill job queue
 				foreach (var thing in things)
 					job.AddQueuedTarget(TargetIndex.A, thing);
 				pawn.jobs.TryTakeOrderedJob(job);

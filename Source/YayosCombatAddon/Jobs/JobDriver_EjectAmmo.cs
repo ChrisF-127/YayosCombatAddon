@@ -39,7 +39,7 @@ namespace YayosCombatAddon
             {
                 initAction = () =>
                 {
-                    ReloadUtility.EjectAmmo(GetActor(), comp);
+                    AmmoUtility.EjectAmmo(GetActor(), comp);
                     Map.designationManager.DesignationOn(comp.parent, YCA_DesignationDefOf.EjectAmmo)?.Delete();
                 }
             };

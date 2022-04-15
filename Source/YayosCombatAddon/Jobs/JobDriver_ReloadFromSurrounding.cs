@@ -96,7 +96,7 @@ namespace YayosCombatAddon
 				if (job.overeat) // used to decide whether to show messages or not
 				{
 					Log.Message($"ReloadFromSurrounding forced: {job.overeat}");
-					ReloadUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
+					GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
 				}
 			}
 			return false;

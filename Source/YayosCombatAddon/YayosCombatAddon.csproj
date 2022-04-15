@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="Eject\WorkGiver_EjectAmmo.cs" />
     <Compile Include="Eject\YCA_DesignationDefOf.cs" />
+    <Compile Include="Stuff\AmmoUtility.cs" />
+    <Compile Include="Stuff\GeneralUtility.cs" />
     <Compile Include="HarmonyPatches.cs" />
     <Compile Include="Jobs\JobDriver_EjectAmmo.cs" />
     <Compile Include="Jobs\JobDriver_ReloadFromSurrounding.cs" />

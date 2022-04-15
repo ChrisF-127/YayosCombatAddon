@@ -44,7 +44,7 @@ namespace YayosCombatAddon
 	internal class Command_ReloadActions : Command_Action
 	{
 		private readonly Pawn Pawn = null;
-		private readonly IEnumerable<CompReloadable> Reloadables;
+		private readonly IEnumerable<Thing> ReloadableThings;
 
 		public Command_ReloadActions(Pawn pawn)
 		{
@@ -53,9 +53,9 @@ namespace YayosCombatAddon
 			icon = YCA_Textures.AmmoReload;
 
 			Pawn = pawn;
-			Reloadables = pawn.GetAllReloadableThings().GetCompReloadables();
+			ReloadableThings = pawn.GetAllReloadableThings();
 
-			action = () => ReloadUtility.ReloadFromInventory(pawn, true, Reloadables);
+			action = () => ReloadUtility.ReloadFromInventory(pawn, ReloadableThings, true);
 		}
 
 		public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
@@ -84,7 +84,7 @@ namespace YayosCombatAddon
 
 				yield return new FloatMenuOption(
 					inventory_label.Translate(),
-					() => ReloadUtility.ReloadFromInventory(Pawn, true, Reloadables))
+					() => ReloadUtility.ReloadFromInventory(Pawn, ReloadableThings, true))
 				{
 					tooltip = inventory_tooltip.Translate(),
 				};
@@ -92,7 +92,7 @@ namespace YayosCombatAddon
 				{
 					yield return new FloatMenuOption(
 						surrounding_label.Translate(),
-						() => ReloadUtility.ReloadFromSurrounding(Pawn, true, Reloadables))
+						() => ReloadUtility.ReloadFromSurrounding(Pawn, ReloadableThings, true, false))
 					{
 						tooltip = surrounding_tooltip.Translate(),
 					};

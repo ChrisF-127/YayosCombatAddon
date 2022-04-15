@@ -32,12 +32,14 @@ namespace YayosCombatAddon
 							ammoCount = ammo.stackCount;
 					}
 
+					var things = new Thing[] { thing };
+
 					// reload from inventory
 					if (ammoCount > 0)
-						ReloadFromInventory(pawn, false, thing);
+						ReloadFromInventory(pawn, things, false);
 					// reload from surrounding
 					else if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
-						ReloadFromSurrounding(pawn, false, thing);
+						ReloadFromSurrounding(pawn, things, false, true);
 				}
 			}
 		}
@@ -67,70 +69,56 @@ namespace YayosCombatAddon
 
 				// reload from inventory
 				if (reloadFromInventory)
-					ReloadFromInventory(pawn, false, things);
+					ReloadFromInventory(pawn, things, false);
 				// reload from surrounding
 				else if (yayoCombat.yayoCombat.supplyAmmoDist >= 0)
-					ReloadFromSurrounding(pawn, false, things);
+					ReloadFromSurrounding(pawn, things, false, true);
 			}
 		}
 
 
-		public static void ReloadFromInventory(Pawn pawn, bool showMessages, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromInventory(Pawn pawn, IEnumerable<Thing> things, bool showMessages)
 		{
-			var reloads = new List<Thing>();
-			foreach (var comp in comps)
-				if (comp.RemainingCharges < comp.MaxCharges)
-					reloads.Add(comp.parent);
+			if (things.Count() > 0)
+			{
+				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
 
-			if (reloads.Count > 0)
-				ReloadFromInventory(pawn, showMessages, reloads.ToArray());
+				// just needed a variable for the job to tell it not to show messages
+				job.overeat = showMessages;
+				Log.Message($"ReloadFromInventory forced: {job.overeat}");
+
+				foreach (var thing in things)
+					job.AddQueuedTarget(TargetIndex.A, thing);
+				pawn.jobs.TryTakeOrderedJob(job);
+			}
 			else if (showMessages) // nothing to reload
-				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
+				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-		public static void ReloadFromInventory(Pawn pawn, bool showMessages, params Thing[] things)
-		{
-			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
 
-			// just needed a variable for the job to tell it not to show messages
-			job.overeat = showMessages;
-			Log.Message($"ReloadFromInventory forced: {job.overeat}");
-
-			foreach (var thing in things)
-				job.AddQueuedTarget(TargetIndex.A, thing);
-			pawn.jobs.TryTakeOrderedJob(job);
-		}
-		public static void ReloadFromSurrounding(Pawn pawn, bool showMessages, IEnumerable<CompReloadable> comps)
+		public static void ReloadFromSurrounding(Pawn pawn, IEnumerable<Thing> things, bool showMessages, bool ignoreDistance)
 		{
-			if (yayoCombat.yayoCombat.supplyAmmoDist < 0)
+			if (!ignoreDistance && yayoCombat.yayoCombat.supplyAmmoDist < 0)
 				return;
 
-			var reloads = new List<Thing>();
-			foreach (var comp in comps)
-				if (comp.RemainingCharges < comp.MaxCharges)
-					reloads.Add(comp.parent);
-
-			if (reloads.Count > 0)
+			if (things.Count() > 0)
 			{
-				ReloadFromSurrounding(pawn, showMessages, reloads.ToArray());
+				var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
+
+				// just needed a variable for the job to tell it not to show messages
+				job.overeat = showMessages;
+				Log.Message($"ReloadFromSurrounding forced: {job.overeat}");
+
+				foreach (var thing in things)
+					job.AddQueuedTarget(TargetIndex.A, thing);
+				pawn.jobs.TryTakeOrderedJob(job);
 
 				// make pawn go back to where they were
 				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 			}
 			else if (showMessages) // nothing to reload
-				ShowRejectMessage("SY_YCA.NothingToReload".Translate());
+				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
-		public static void ReloadFromSurrounding(Pawn pawn, bool showMessages, params Thing[] things)
-		{
-			var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
 
-			// just needed a variable for the job to tell it not to show messages
-			job.overeat = showMessages;
-			Log.Message($"ReloadFromSurrounding forced: {job.overeat}");
-
-			foreach (var thing in things)
-				job.AddQueuedTarget(TargetIndex.A, thing);
-			pawn.jobs.TryTakeOrderedJob(job);
-		}
 		public static void RestockInventoryFromSurrounding(Pawn pawn)
 		{
 			var required = new Dictionary<Def, int>();
@@ -186,7 +174,7 @@ namespace YayosCombatAddon
 
 					if (count > 0)
 					{
-						ShowRejectMessage("SY_YCA.NoAmmoRestock".Translate(
+						GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoRestock".Translate(
 							new NamedArgument(pawn, "pawn"),
 							new NamedArgument(def.label, "ammo"),
 							new NamedArgument(count, "count"),
@@ -199,20 +187,11 @@ namespace YayosCombatAddon
 			}
 			else
 			{
-				ShowRejectMessage("SY_YCA.NothingToRestock".Translate());
+				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToRestock".Translate());
 			}
 		}
 
 
-		public static IEnumerable<CompReloadable> GetCompReloadables(this IEnumerable<Thing> things)
-		{
-			foreach (var thing in things)
-			{
-				var comp = thing?.TryGetComp<CompReloadable>();
-				if (comp != null)
-					yield return comp;
-			}
-		}
 		public static IEnumerable<Thing> GetAllReloadableThings(this Pawn pawn)
 		{
 			if (pawn == null)
@@ -227,86 +206,11 @@ namespace YayosCombatAddon
 				var memory = CompSidearmMemory.GetMemoryCompForPawn(pawn);
 				foreach (var thing in pawn.inventory.innerContainer)
 				{
-					if (thing != null 
-						&& memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def)) 
+					if (thing != null
+						&& memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def))
 						&& thing.AmmoNeeded() > 0)
 						yield return thing;
 				}
-			}
-		}
-		public static int AmmoNeeded(this Thing thing)
-		{
-			var comp = thing?.TryGetComp<CompReloadable>();
-			if (comp?.AmmoDef?.IsAmmo() == true)
-				return comp.MaxAmmoNeeded(true);
-			return 0;
-		}
-		public static bool IsOutOfAmmo(this Thing thing)
-		{
-			var comp = thing?.TryGetComp<CompReloadable>();
-			if (comp?.AmmoDef?.IsAmmo() == true)
-				return comp.RemainingCharges == 0;
-			return false;
-		}
-		public static bool AnyOutOfAmmo(this IEnumerable<Thing> things)
-		{
-			foreach (var thing in things)
-				if (thing.IsOutOfAmmo())
-					return true;
-			return false;
-		}
-		public static void EjectAmmo(Pawn pawn, CompReloadable comp)
-		{
-			var charges = comp.remainingCharges;
-			if (charges > 0)
-			{
-				do
-				{
-					var ammo = ThingMaker.MakeThing(comp.AmmoDef);
-					ammo.stackCount = Mathf.Min(ammo.def.stackLimit, charges);
-					charges -= ammo.stackCount;
-					GenPlace.TryPlaceThing(ammo, pawn.Position, pawn.Map, ThingPlaceMode.Near);
-				}
-				while (charges > 0);
-				comp.Props.soundReload.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
-				comp.remainingCharges = 0;
-			}
-		}
-
-
-		public static bool IsAmmo(this ThingDef def) =>
-			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
-
-		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
-		{
-			var count = 0;
-			foreach (var thing in pawn.inventory.innerContainer)
-				if (thing.def == comp.AmmoDef)
-					count += thing.stackCount;
-			return count;
-		}
-
-
-		public static void ShowRejectMessage(string text) =>
-			Messages.Message(text, MessageTypeDefOf.RejectInput, historical: false);
-
-
-		public static void IncreaseOrAdd<T>(this Dictionary<T, int> dictionary, T t, int count)
-		{
-			if (dictionary.ContainsKey(t))
-				dictionary[t] += count;
-			else
-				dictionary.Add(t, count);
-		}
-		public static void DecreaseOrRemove<T>(this Dictionary<T, int> dictionary, T t, int count)
-		{
-			if (dictionary.ContainsKey(t))
-			{
-				var value = dictionary[t] - count;
-				if (value > 0)
-					dictionary[t] = value;
-				else
-					dictionary.Remove(t);
 			}
 		}
 	}

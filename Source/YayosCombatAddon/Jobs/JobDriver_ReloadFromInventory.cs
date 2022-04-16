@@ -11,15 +11,8 @@ using Verse.AI;
 
 namespace YayosCombatAddon
 {
-	internal class Job_ReloadFromInventory_Variables
-	{
-		public bool ShowMessages = false;
-	}
-
 	internal class JobDriver_ReloadFromInventory : JobDriver
 	{
-		public static ConditionalWeakTable<Job, Job_ReloadFromInventory_Variables> AttachedVariables { get; } = new ConditionalWeakTable<Job, Job_ReloadFromInventory_Variables>();
-
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed) =>
@@ -45,38 +38,17 @@ namespace YayosCombatAddon
 			yield return YCA_JobUtility.EquipStaticOrTargetA();
 			yield return Wait;
 			yield return YCA_JobUtility.ReloadFromCarriedThing();
-			yield return PutCarriedAmmoIntoInventoryAndQueue();
+			yield return StowCarriedAmmoAndReaddToQueue();
 			yield return Toils_Jump.Jump(repeat);
 			yield return done;
 			yield return YCA_JobUtility.EquipStaticOrTargetA(primary);
-		}
-
-		private Toil PutCarriedAmmoIntoInventoryAndQueue()
-		{
-			var toil = new Toil();
-			toil.initAction = () =>
-			{
-				var actor = toil.GetActor();
-				var carriedThing = actor.carryTracker.CarriedThing;
-				if (carriedThing != null)
-				{
-					if (actor.carryTracker.innerContainer.TryTransferToContainer(carriedThing, actor.inventory.innerContainer))
-					{
-						if (carriedThing.IsAmmo())
-							job.targetQueueB.Add(carriedThing);
-					}
-					else
-						actor.carryTracker.TryDropCarriedThing(actor.Position, actor.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _);
-				}
-			};
-			return toil;
 		}
 
 		private bool TryMoveAmmoToCarriedThing()
 		{
 			var output = false;
 			var comp = TargetThingA?.TryGetComp<CompReloadable>();
-			if (comp?.NeedsReload(true) == true)
+			if (comp?.NeedsReload(true) == true && job.targetQueueB?.Count > 0)
 			{
 				// sneaky way for setting wait duration using comp
 				Wait.defaultDuration = comp.Props.baseReloadTicks;
@@ -139,6 +111,25 @@ namespace YayosCombatAddon
 			}
 			OUT:
 			return output;
+		}
+
+		private Toil StowCarriedAmmoAndReaddToQueue()
+		{
+			var toil = new Toil();
+			toil.initAction = () =>
+			{
+				var actor = toil.GetActor();
+				var carriedThing = actor.carryTracker.CarriedThing;
+				if (carriedThing != null)
+				{
+					if (carriedThing.IsAmmo() 
+						&& actor.carryTracker.innerContainer.TryTransferToContainer(carriedThing, actor.inventory.innerContainer))
+						job.targetQueueB.Add(carriedThing);
+					else
+						actor.carryTracker.TryDropCarriedThing(actor.Position, actor.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _);
+				}
+			};
+			return toil;
 		}
 	}
 }

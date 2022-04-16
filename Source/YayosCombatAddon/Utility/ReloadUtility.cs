@@ -85,10 +85,6 @@ namespace YayosCombatAddon
 				{
 					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
 
-					// set attached variables
-					var variables = JobDriver_ReloadFromInventory.AttachedVariables.GetOrCreateValue(job);
-					variables.ShowMessages = showMessages;
-
 					// fill job queue
 					foreach (var thing in reloadables)
 						job.AddQueuedTarget(TargetIndex.A, thing);
@@ -98,6 +94,7 @@ namespace YayosCombatAddon
 					pawn.jobs.StartJob(job, JobCondition.InterruptForced, resumeCurJobAfterwards: true, canReturnCurJobToPool: true);
 					//pawn.jobs.TryTakeOrderedJob(job);
 				}
+#warning TODO no ammo found message?
 			}
 			else if (showMessages) // nothing to reload
 				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
@@ -117,11 +114,6 @@ namespace YayosCombatAddon
 				if (ammoThings.Count > 0)
 				{
 					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
-
-					// set attached variables
-					var variables = JobDriver_ReloadFromSurrounding.AttachedVariables.GetOrCreateValue(job);
-					variables.ShowMessages = showMessages;
-					variables.IgnoreDistance = ignoreDistance;
 
 					// fill job queues
 					foreach (var thing in reloadables)
@@ -198,6 +190,7 @@ namespace YayosCombatAddon
 							count -= thing.stackCount;
 						}
 					}
+#warning TODO no ammo found message?
 				}
 			}
 			return ammoThings;
@@ -218,8 +211,8 @@ namespace YayosCombatAddon
 						t => t.def == ammoDef && (ignoreDistance || IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
 					foreach (var thing in things)
 						ammoThings.Add(thing);
-				}
 #warning TODO no ammo found message?
+				}
 			}
 			return ammoThings;
 		}

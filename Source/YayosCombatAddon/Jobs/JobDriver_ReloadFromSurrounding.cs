@@ -12,16 +12,8 @@ using Verse.Sound;
 
 namespace YayosCombatAddon
 {
-	internal class Job_ReloadFromSurrounding_Variables
-	{
-		public bool ShowMessages = false;
-		public bool IgnoreDistance = false;
-	}
-
 	internal class JobDriver_ReloadFromSurrounding : JobDriver
 	{
-		public static ConditionalWeakTable<Job, Job_ReloadFromSurrounding_Variables> AttachedVariables { get; } = new ConditionalWeakTable<Job, Job_ReloadFromSurrounding_Variables>();
-
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
 		private IntVec3 StartingPosition { get; set; }
 
@@ -41,75 +33,56 @@ namespace YayosCombatAddon
 			var repeat = Toils_General.Label();
 			var done = Toils_General.Label();
 
-			// save currently equipped weapon
-			// NEXT:
-			// drop carried thing
-			// if no more items in queue -> goto DONE: (job ends)
-			// get next weapon out of TargetA queue
-			// REPEAT:
-			// if no ammo found or not reloadable -> goto NEXT: (get next weapon)
-			// get next ammo out of TargetB queue
-			// go to ammo
-			// equip weapon
-			// start carrying ammo
-			// wait (progress bar)
-			// reload weapon from carried ammo
-			// switch to original weapon (in case job is interrupted)
-			// goto REPEAT: (make sure weapon is fully loaded)
-			// DONE:
-
 			StartingPosition = pawn.Position;
 			var primary = pawn.GetPrimary();
-			yield return next;
 			yield return YCA_JobUtility.DropCarriedThing();
+			yield return next;
 			yield return Toils_Jump.JumpIf(done, () => job.GetTargetQueue(TargetIndex.A).NullOrEmpty());
 			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A);
 			yield return repeat;
-			yield return Toils_Jump.JumpIf(next, () => !CheckReloadableAmmo() || job.GetTargetQueue(TargetIndex.B).NullOrEmpty());
-			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.B);
+			yield return Toils_Jump.JumpIf(next, () => !TryMoveAmmoToCarriedThing());
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-			//yield return Toils_Haul.StartCarryThing(TargetIndex.B, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
 			yield return StartCarryAmmoFromGround(); // custom method instead of Toils_Haul.StartCarryThing because it allows picking up full stacks
 			yield return YCA_JobUtility.EquipStaticOrTargetA();
 			yield return Wait;
 			yield return YCA_JobUtility.ReloadFromCarriedThing();
+			yield return DropCarriedAmmoAndReaddToQueue();
 			yield return YCA_JobUtility.EquipStaticOrTargetA(primary);
 			yield return Toils_Jump.Jump(repeat);
 			yield return done;
 		}
 
-		private bool CheckReloadableAmmo()
+		private bool TryMoveAmmoToCarriedThing()
 		{
+			var output = false;
 			var comp = TargetThingA?.TryGetComp<CompReloadable>();
-			if (comp?.NeedsReload(true) == true)
+			if (comp?.NeedsReload(true) == true && job.targetQueueB?.Count > 0)
 			{
 				// sneaky way for setting wait duration using comp
 				Wait.defaultDuration = comp.Props.baseReloadTicks;
 
-				var foundVariables = AttachedVariables.TryGetValue(job, out var variables);
-				var ammoList = RefuelWorkGiverUtility.FindEnoughReservableThings(
-					pawn,
-					pawn.Position,
-					new IntRange(comp.MinAmmoNeeded(true), comp.MaxAmmoNeeded(true)),
-					t => t.def == comp.AmmoDef 
-						&& (foundVariables && variables.IgnoreDistance //!pawn.Drafted
-							|| IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist
-							|| IntVec3Utility.DistanceTo(StartingPosition, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
+				// sort by distance
+				job.targetQueueB = job.targetQueueB.OrderBy(t => IntVec3Utility.DistanceTo(pawn.Position, t.Thing.Position)).ToList();
 
-				job.targetQueueB?.Clear();
-				if (ammoList?.Count > 0)
+				// get ammo from queue
+				foreach (var targetInfo in job.targetQueueB)
 				{
-					job.count = comp.MaxCharges - comp.RemainingCharges;
-					foreach (var thing in ammoList)
-						job.AddQueuedTarget(TargetIndex.B, thing);
-					pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.B), job);
-					return true;
-				}
+					var ammoThing = targetInfo.Thing;
+					if (ammoThing.def == comp.AmmoDef)
+					{
+						job.targetB = targetInfo;
+						job.count = comp.MaxCharges - comp.RemainingCharges;
 
-				if (foundVariables && variables.ShowMessages)
-					GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
+						if (ammoThing.stackCount < job.count)
+							job.targetQueueB.Remove(targetInfo);
+
+						output = true;
+						goto OUT;
+					}
+				}
 			}
-			return false;
+			OUT:
+			return output;
 		}
 
 		private Toil StartCarryAmmoFromGround()
@@ -155,6 +128,21 @@ namespace YayosCombatAddon
 				},
 			};
 			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnDestroyedNullOrForbidden(TargetIndex.B);
+		}
+
+		private Toil DropCarriedAmmoAndReaddToQueue()
+		{
+			var toil = new Toil();
+			toil.initAction = () =>
+			{
+				var actor = toil.GetActor();
+				var carriedThing = actor.carryTracker.CarriedThing;
+				if (carriedThing != null 
+					&& actor.carryTracker.TryDropCarriedThing(actor.Position, actor.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _)
+					&& carriedThing.IsAmmo())
+					job.targetQueueB.Add(carriedThing);
+			};
+			return toil;
 		}
 	}
 }

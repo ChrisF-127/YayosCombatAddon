@@ -88,13 +88,15 @@ namespace YayosCombatAddon
 				// fill job queue
 				foreach (var thing in things)
 					job.AddQueuedTarget(TargetIndex.A, thing);
-				pawn.jobs.TryTakeOrderedJob(job);
+
+				pawn.jobs.StartJob(job, JobCondition.InterruptForced, resumeCurJobAfterwards: true, canReturnCurJobToPool: true);
+				//pawn.jobs.TryTakeOrderedJob(job);
 			}
 			else if (showMessages) // nothing to reload
 				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
 		}
 
-		public static void ReloadFromSurrounding(Pawn pawn, IEnumerable<Thing> things, bool showMessages, bool ignoreDistance)
+		public static void ReloadFromSurrounding(Pawn pawn, IEnumerable<Thing> things, bool showMessages, bool ignoreDistance, bool returnToStartingPosition = true)
 		{
 			if (!ignoreDistance && yayoCombat.yayoCombat.supplyAmmoDist < 0)
 				return;
@@ -111,10 +113,13 @@ namespace YayosCombatAddon
 				// fill job queue
 				foreach (var thing in things)
 					job.AddQueuedTarget(TargetIndex.A, thing);
-				pawn.jobs.TryTakeOrderedJob(job);
+
+				pawn.jobs.StartJob(job, JobCondition.InterruptForced, resumeCurJobAfterwards: true, canReturnCurJobToPool: true);
+				//pawn.jobs.TryTakeOrderedJob(job);
 
 				// make pawn go back to where they were
-				pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
+				if (returnToStartingPosition)
+					pawn.jobs.jobQueue.EnqueueFirst(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 			}
 			else if (showMessages) // nothing to reload
 				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());

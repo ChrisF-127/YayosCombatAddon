@@ -35,102 +35,110 @@ namespace YayosCombatAddon
 			var repeat = Toils_General.Label();
 			var done = Toils_General.Label();
 
-			// save currently equipped weapon
-			// NEXT:
-			// put carried thing into inventory
-			// if no more items in queue -> goto DONE: (job ends)
-			// get next weapon out of TargetA queue
-			// REPEAT:
-			// if no ammo found or not reloadable -> goto NEXT: (get next weapon)
-			// equip weapon
-			// take ammo out of inventory as carried thing
-			// wait (progress bar)
-			// reload weapon from carried ammo
-			// goto REPEAT: (make sure weapon is fully loaded)
-			// DONE:
-			// switch to original weapon
-
 			var primary = pawn.GetPrimary();
 			yield return YCA_JobUtility.DropCarriedThing();
 			yield return next;
-			yield return Toils_General.PutCarriedThingInInventory();
 			yield return Toils_Jump.JumpIf(done, () => job.GetTargetQueue(TargetIndex.A).NullOrEmpty());
 			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A);
 			yield return repeat;
-			yield return Toils_Jump.JumpIf(next, () => !CheckReloadableAmmo());
-			yield return StartCarryAmmoFromInventory();
+			yield return Toils_Jump.JumpIf(next, () => !TryMoveAmmoToCarriedThing());
 			yield return YCA_JobUtility.EquipStaticOrTargetA();
 			yield return Wait;
 			yield return YCA_JobUtility.ReloadFromCarriedThing();
+			yield return PutCarriedAmmoIntoInventoryAndQueue();
 			yield return Toils_Jump.Jump(repeat);
 			yield return done;
 			yield return YCA_JobUtility.EquipStaticOrTargetA(primary);
 		}
 
-		private bool CheckReloadableAmmo()
+		private Toil PutCarriedAmmoIntoInventoryAndQueue()
 		{
+			var toil = new Toil();
+			toil.initAction = () =>
+			{
+				var actor = toil.GetActor();
+				var carriedThing = actor.carryTracker.CarriedThing;
+				if (carriedThing != null)
+				{
+					if (actor.carryTracker.innerContainer.TryTransferToContainer(carriedThing, actor.inventory.innerContainer))
+					{
+						if (carriedThing.IsAmmo())
+							job.targetQueueB.Add(carriedThing);
+					}
+					else
+						actor.carryTracker.TryDropCarriedThing(actor.Position, actor.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _);
+				}
+			};
+			return toil;
+		}
+
+		private bool TryMoveAmmoToCarriedThing()
+		{
+			var output = false;
 			var comp = TargetThingA?.TryGetComp<CompReloadable>();
 			if (comp?.NeedsReload(true) == true)
 			{
 				// sneaky way for setting wait duration using comp
 				Wait.defaultDuration = comp.Props.baseReloadTicks;
 
-				var foundVariables = AttachedVariables.TryGetValue(job, out var variables);
-				if (pawn.carryTracker.CarriedThing?.def == comp.AmmoDef)
-					return true;
-				foreach (var thing in pawn.inventory.innerContainer)
-					if (thing?.def == comp.AmmoDef)
-						return true;
-
-				if (foundVariables && variables.ShowMessages)
-					GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(new NamedArgument(pawn.Name, "pawn"), new NamedArgument(comp.parent.LabelCap, "weapon")));
-			}
-			return false;
-		}
-
-		private Toil StartCarryAmmoFromInventory()
-		{
-			var toil = new Toil
-			{
-				initAction = () =>
+				// get ammo from queue
+				for (int i = job.targetQueueB.Count - 1; i >= 0; i--)
 				{
-					var comp = TargetThingA?.TryGetComp<CompReloadable>();
-					if (comp?.NeedsReload(true) == true)
+					var targetInfo = job.targetQueueB[i];
+					var ammoThing = targetInfo.Thing;
+					if (ammoThing.def == comp.AmmoDef)
 					{
-						var innerContainer = pawn.inventory.innerContainer;
-						for (int i = innerContainer.Count - 1; i >= 0; i--)
+						var prevCount = 0;
+						var carriedThing = pawn.carryTracker.CarriedThing;
+						if (carriedThing != null)
 						{
-							var thing = innerContainer[i];
-							if (thing.def == comp.AmmoDef)
-							{
-								var carriedThing = pawn.carryTracker.CarriedThing;
-								if (carriedThing != null && carriedThing.def != comp.AmmoDef) // carrying invalid thing instead of ammo
-								{
-									Log.Warning($"{nameof(YayosCombatAddon)}: carrying invalid thing while trying to get ammo: '{pawn.carryTracker.CarriedThing}'");
-									break;
-								}
+							// carrying invalid thing instead of ammo
+							if (carriedThing.def != comp.AmmoDef)
+								throw new Exception($"{nameof(YayosCombatAddon)}: " +
+									$"carrying invalid thing while trying to get ammo: '{carriedThing}' ({carriedThing.def} / expected {comp.AmmoDef})");
 
-								var prevCount = carriedThing?.stackCount ?? 0;
-								var count = Mathf.Min(comp.AmmoDef.stackLimit - prevCount, thing.stackCount);
-								if (count < 0)
-									throw new Exception($"{nameof(YayosCombatAddon)}: count should never be less than 0: {count}");
-								if (count == 0) // already carrying max amount of ammo
-									break;
-								
-								pawn.inventory.innerContainer.TryTransferToContainer(thing, pawn.carryTracker.innerContainer, count, true);
-								carriedThing = pawn.carryTracker.CarriedThing;
-								if (carriedThing?.stackCount != prevCount + count)
-								{
-									Log.Warning($"{nameof(YayosCombatAddon)}: failed to move/merge '{thing}' ({thing.stackCount}) into CarriedThing " +
-										$"(carrying: '{carriedThing}' ({carriedThing?.stackCount} / {comp.AmmoDef.stackLimit}; expected: {prevCount + count} ({prevCount} + {count}))");
-									break;
-								}
-							}
+							prevCount = carriedThing.stackCount;
 						}
+
+						var maxReq = comp.AmmoDef.stackLimit - prevCount;
+
+						// count should never be less than 0, neither should the stackCount be 0
+						if (maxReq < 0 || ammoThing.stackCount == 0)
+							throw new Exception($"{nameof(YayosCombatAddon)}: " +
+								$"count less than 0 or empty stack: count: {maxReq} stackLimit: {comp.AmmoDef.stackLimit} prevCount: {prevCount} stackCount: {ammoThing.stackCount}");
+
+						// already carrying max amount of ammo
+						if (maxReq == 0)
+						{
+							output = true;
+							goto OUT;
+						}
+
+						var count = Mathf.Min(maxReq, ammoThing.stackCount);
+
+						// remove from queue if used up
+						if (count >= ammoThing.stackCount)
+							job.targetQueueB.Remove(targetInfo);
+
+						// start carrying thing from inventory
+						pawn.inventory.innerContainer.TryTransferToContainer(ammoThing, pawn.carryTracker.innerContainer, count, true);
+
+						// check carried thing
+						carriedThing = pawn.carryTracker.CarriedThing;
+						if (carriedThing?.stackCount != prevCount + count)
+						{
+							Log.Warning($"{nameof(YayosCombatAddon)}: failed to move/merge '{ammoThing}' ({ammoThing.stackCount}) into CarriedThing " +
+								$"(carrying: '{carriedThing}' ({carriedThing?.stackCount} / {comp.AmmoDef.stackLimit}; expected: {prevCount + count} ({prevCount} + {count}))");
+							break;
+						}
+
+						// success
+						output = true;
 					}
-				},
-			};
-			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A);
+				}
+			}
+			OUT:
+			return output;
 		}
 	}
 }

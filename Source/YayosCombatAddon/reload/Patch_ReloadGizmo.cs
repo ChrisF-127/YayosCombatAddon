@@ -97,7 +97,7 @@ namespace YayosCombatAddon
 
 				yield return new FloatMenuOption(
 					"SY_YCA.RestockAmmoFromSurrounding_label".Translate(),
-					() => ReloadUtility.RestockInventoryFromSurrounding(Pawn)) 
+					() => InventoryUtility.RestockInventoryFromSurrounding(Pawn)) 
 				{ 
 					tooltip = "SY_YCA.RestockAmmoFromSurrounding_tooltip".Translate(), 
 				};

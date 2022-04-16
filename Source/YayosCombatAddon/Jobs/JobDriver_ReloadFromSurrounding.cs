@@ -25,8 +25,11 @@ namespace YayosCombatAddon
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
 		private IntVec3 StartingPosition { get; set; }
 
-		public override bool TryMakePreToilReservations(bool errorOnFailed) =>
-			true;
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.B), job);
+			return true;
+		}
 
 		public override IEnumerable<Toil> MakeNewToils()
 		{

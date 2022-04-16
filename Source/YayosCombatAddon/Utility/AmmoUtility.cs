@@ -31,6 +31,8 @@ namespace YayosCombatAddon
 			}
 		}
 
+		public static bool IsAmmo(this Thing thing) =>
+			thing?.def?.IsAmmo() == true;
 		public static bool IsAmmo(this ThingDef def) =>
 			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
 
@@ -43,11 +45,15 @@ namespace YayosCombatAddon
 			return count;
 		}
 
-		public static int AmmoNeeded(this Thing thing)
+		public static int AmmoNeeded(this Thing thing, out Def ammoDef)
 		{
 			var comp = thing?.TryGetComp<CompReloadable>();
 			if (comp?.AmmoDef?.IsAmmo() == true)
+			{
+				ammoDef = comp.AmmoDef;
 				return comp.MaxAmmoNeeded(true);
+			}
+			ammoDef = null;
 			return 0;
 		}
 		public static bool IsOutOfAmmo(this Thing thing)

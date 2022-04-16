@@ -31,6 +31,8 @@ namespace YayosCombatAddon
 			harmony.Patch(
 				typeof(patch_CompReloadable_UsedOnce).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
+
+#warning TODO patch reload via right click
 		}
 
 

@@ -14,9 +14,9 @@ Right click for more options</SY_YCA.ReloadGizmo_desc>
   <SY_YCA.ReloadWeaponFromSurrounding_label>Reload from Surrounding</SY_YCA.ReloadWeaponFromSurrounding_label>
   <SY_YCA.ReloadWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload currently equipped weapon</SY_YCA.ReloadWeaponFromSurrounding_tooltip>
     
-  <SY_YCA.ReloadAllWeaponFromInventory_label>Reload All from Inventory</SY_YCA.ReloadAllWeaponFromInventory_label>
+  <SY_YCA.ReloadAllWeaponFromInventory_label>Reload all weapons from Inventory</SY_YCA.ReloadAllWeaponFromInventory_label>
   <SY_YCA.ReloadAllWeaponFromInventory_tooltip>Reload all weapons equipped and in inventory using ammo from inventory</SY_YCA.ReloadAllWeaponFromInventory_tooltip>
-  <SY_YCA.ReloadAllWeaponFromSurrounding_label>Reload All from Surrounding</SY_YCA.ReloadAllWeaponFromSurrounding_label>
+  <SY_YCA.ReloadAllWeaponFromSurrounding_label>Reload all weapons from Surrounding</SY_YCA.ReloadAllWeaponFromSurrounding_label>
   <SY_YCA.ReloadAllWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload all weapons equipped or in inventory</SY_YCA.ReloadAllWeaponFromSurrounding_tooltip>
   
   <SY_YCA.RestockAmmoFromSurrounding_label>Restock inventory ammo</SY_YCA.RestockAmmoFromSurrounding_label>
@@ -25,17 +25,9 @@ Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurr
   
   <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
   <SY_YCA.NothingToRestock>Nothing requires restocking</SY_YCA.NothingToRestock>
-  <SY_YCA.NoAmmoNearby>{pawn} found insufficient '{ammo}' nearby, missing {count}</SY_YCA.NoAmmoNearby>
-  <SY_YCA.NoAmmoInventory>{pawn} found insufficient '{ammo}' in their inventory, missing {count}</SY_YCA.NoAmmoInventory>
-  <SY_YCA.NoAmmoRestock>{pawn} could not find enough '{ammo}', missing {count} out of {max}</SY_YCA.NoAmmoRestock>
+  <SY_YCA.NoAmmoNearby>{pawn} could not find enough '{ammo}' nearby, missing {count}</SY_YCA.NoAmmoNearby>
+  <SY_YCA.NoAmmoInventory>{pawn} could not find enough '{ammo}' in their inventory, missing {count}</SY_YCA.NoAmmoInventory>
+  <SY_YCA.NoAmmoRestock>{pawn} could not find enough '{ammo}', missing {count} out of a desired {max}</SY_YCA.NoAmmoRestock>
   <SY_YCA.OutOfAmmo>{pawn} ran out of ammo and could not find any to reload</SY_YCA.OutOfAmmo>
-  
-  
-  <SY_YCA.ShowReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</SY_YCA.ShowReloadWeaponGizmo_title>
-  <SY_YCA.ShowReloadWeaponGizmo_desc>Activate the "Reload Weapon" gizmo for selected drafted pawns using weapons which require ammo.</SY_YCA.ShowReloadWeaponGizmo_desc>
-
-  <SY_YCA.ReloadAllWeaponsInInventoryOption_title># Show 'Reload All' Options</SY_YCA.ReloadAllWeaponsInInventoryOption_title>
-  <SY_YCA.ReloadAllWeaponsInInventoryOption_desc>Makes reloading options reload all weapons in inventory
-Recommended when using "Simple sidearms" or other mods that allow pawns to carry more than one weapon where additional weapons are stored in the inventory. (These options will reload ALL weapons in inventory, no matter if remembered or not!)</SY_YCA.ReloadAllWeaponsInInventoryOption_desc>
   
 </LanguageData>

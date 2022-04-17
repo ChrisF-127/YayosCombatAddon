@@ -12,8 +12,14 @@ namespace YayosCombatAddon
 {
 	public static class ReloadUtility
 	{
-		public static void TryAutoReloadSingle(CompReloadable comp, bool showOutOfAmmoWarning = false, bool showJobWarnings = false)
+		public static bool TryAutoReloadSingle(
+			CompReloadable comp,
+			bool showOutOfAmmoWarning = false,
+			bool showJobWarnings = false,
+			bool ignoreDistance = false, 
+			bool returnToStartingPosition = true)
 		{
+			bool success = true;
 			if (comp?.RemainingCharges <= 0)
 			{
 				var pawn = comp.Wearer;
@@ -32,21 +38,27 @@ namespace YayosCombatAddon
 							ammoInInventory = ammo.stackCount;
 					}
 
-					bool reloadFailed;
 					// only reload equipped weapon from inventory
 					if (ammoInInventory > 0)
-						reloadFailed = !TryReloadFromInventory(pawn, new Thing[] { thing }, showJobWarnings);
+						success = TryReloadFromInventory(pawn, new Thing[] { thing }, showJobWarnings);
 					// reload all weapons from surrounding
 					else
-						reloadFailed = !TryReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), showJobWarnings, false);
+						success = TryReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), showJobWarnings, ignoreDistance, returnToStartingPosition);
 					// show out of ammo warning if reloading failed
-					if (showOutOfAmmoWarning && reloadFailed)
+					if (showOutOfAmmoWarning && !success)
 						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate( new NamedArgument(pawn, "pawn")));
 				}
 			}
+			return success;
 		}
-		public static void TryAutoReloadAll(Pawn pawn, bool showOutOfAmmoWarning = false, bool showJobWarnings = false)
+		public static bool TryAutoReloadAll(
+			Pawn pawn,
+			bool showOutOfAmmoWarning = false,
+			bool showJobWarnings = false,
+			bool ignoreDistance = false, 
+			bool returnToStartingPosition = true)
 		{
+			bool success = true;
 			var things = pawn?.GetAllReloadableThings()?.ToArray();
 			if (things?.AnyOutOfAmmo() == true)
 			{
@@ -70,17 +82,17 @@ namespace YayosCombatAddon
 						reloadFromInventory = true;
 				}
 
-				bool reloadFailed;
 				// reload from inventory
 				if (reloadFromInventory)
-					reloadFailed = !TryReloadFromInventory(pawn, things, showJobWarnings);
+					success = TryReloadFromInventory(pawn, things, showJobWarnings);
 				// reload from surrounding
 				else
-					reloadFailed = !TryReloadFromSurrounding(pawn, things, showJobWarnings, false);
+					success = TryReloadFromSurrounding(pawn, things, showJobWarnings, ignoreDistance, returnToStartingPosition);
 				// show out of ammo warning if reloading failed
-				if (showOutOfAmmoWarning && reloadFailed)
+				if (showOutOfAmmoWarning && !success)
 					GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
 			}
+			return success;
 		}
 
 

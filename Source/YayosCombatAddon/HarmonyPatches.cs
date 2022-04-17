@@ -100,25 +100,17 @@ namespace YayosCombatAddon
 				__instance.parent.Destroy(DestroyMode.Vanish);
 
 			// (yayo) guess it's better to make sure the wearer isn't null
-			if (__instance.Wearer == null) 
+			var pawn = __instance.Wearer;
+			if (pawn == null) 
 				return false;
 
 			// (new) don't try to reload ammo that's not part of Yayo's Combat
 			if (__instance.AmmoDef?.IsAmmo() != true)
 				return false;
 
-#warning TODO does reloading while hunting work?
-			//if (__instance.RemainingCharges == 0)
-			//{
-			//	if (pawn.CurJobDef == JobDefOf.Hunt)
-			//	{
-			//		// Reload from inventory?
-			//		pawn.jobs.StopAll();
-			//	}
-			//}
-
 			// (replacement) Replaced with new method
-			ReloadUtility.TryAutoReloadSingle(__instance, true);
+			if (!ReloadUtility.TryAutoReloadSingle(__instance, true) && pawn.CurJobDef == JobDefOf.Hunt)
+				pawn.jobs.StopAll();
 			return false;
 		}
 	}

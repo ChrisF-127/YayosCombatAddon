@@ -8,6 +8,7 @@
 	<packageId>Syrus.YayosCombatAddon</packageId>
 	<loadAfter>
 		<li>com.yayo.combat3</li>
+		<li>PeteTimesSix.SimpleSidearms</li>
 	</loadAfter>
 	<modDependencies>
 		<li>

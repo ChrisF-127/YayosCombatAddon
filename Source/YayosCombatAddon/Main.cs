@@ -11,6 +11,13 @@ namespace YayosCombatAddon
 {
     public class Main : ModBase
     {
-		public static bool SimpleSidearmsCompatibility { get; private set; } = ModsConfig.IsActive("PeteTimesSix.SimpleSidearms");
+		public static bool SimpleSidearmsCompatibility { get; private set; } = 
+            ModsConfig.IsActive("petetimessix.simplesidearms") || ModsConfig.IsActive("petetimessix.simplesidearms_steam");
+
+        public Main()
+		{
+            if (SimpleSidearmsCompatibility)
+                Log.Message($"[{nameof(YayosCombatAddon)}] SimpleSidearms found; applied compatibility");
+		}
     }
 }

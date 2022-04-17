@@ -10,8 +10,8 @@ namespace YayosCombatAddon
 {
 	public static class GeneralUtility
 	{
-		public static void ShowRejectMessage(string text) =>
-			Messages.Message(text, MessageTypeDefOf.RejectInput, historical: false);
+		public static void ShowRejectMessage(Pawn target, string text) =>
+			Messages.Message(text, new LookTargets(target), MessageTypeDefOf.RejectInput, historical: false);
 
 
 		public static void IncreaseOrAdd<T>(this Dictionary<T, int> dictionary, T t, int count)

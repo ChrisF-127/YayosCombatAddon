@@ -55,7 +55,7 @@ namespace YayosCombatAddon
 			Pawn = pawn;
 			ReloadableThings = pawn.GetAllReloadableThings();
 
-			action = () => ReloadUtility.ReloadFromInventory(pawn, ReloadableThings, true);
+			action = () => ReloadUtility.TryReloadFromInventory(pawn, ReloadableThings, true);
 		}
 
 		public override IEnumerable<FloatMenuOption> RightClickFloatMenuOptions
@@ -84,13 +84,13 @@ namespace YayosCombatAddon
 
 				yield return new FloatMenuOption(
 					inventory_label.Translate(),
-					() => ReloadUtility.ReloadFromInventory(Pawn, ReloadableThings, true))
+					() => ReloadUtility.TryReloadFromInventory(Pawn, ReloadableThings, true))
 				{
 					tooltip = inventory_tooltip.Translate(),
 				};
 				yield return new FloatMenuOption(
 					surrounding_label.Translate(),
-					() => ReloadUtility.ReloadFromSurrounding(Pawn, ReloadableThings, true, true))
+					() => ReloadUtility.TryReloadFromSurrounding(Pawn, ReloadableThings, true, true))
 				{
 					tooltip = surrounding_tooltip.Translate(),
 				};

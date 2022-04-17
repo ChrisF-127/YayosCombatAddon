@@ -66,11 +66,13 @@ namespace YayosCombatAddon
 
 					if (count > 0)
 					{
-						GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoRestock".Translate(
-							new NamedArgument(pawn, "pawn"),
-							new NamedArgument(def.label, "ammo"),
-							new NamedArgument(count, "count"),
-							new NamedArgument(entry.Value, "max")));
+						GeneralUtility.ShowRejectMessage(
+							pawn, 
+							"SY_YCA.NoAmmoRestock".Translate(
+								new NamedArgument(pawn, "pawn"),
+								new NamedArgument(def.label, "ammo"),
+								new NamedArgument(count, "count"),
+								new NamedArgument(entry.Value, "max")));
 					}
 				}
 
@@ -79,7 +81,7 @@ namespace YayosCombatAddon
 			}
 			else
 			{
-				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToRestock".Translate());
+				GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.NothingToRestock".Translate());
 			}
 		}
 	}

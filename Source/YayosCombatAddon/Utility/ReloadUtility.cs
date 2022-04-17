@@ -12,7 +12,7 @@ namespace YayosCombatAddon
 {
 	public static class ReloadUtility
 	{
-		public static void TryAutoReloadSingle(CompReloadable comp)
+		public static void TryAutoReloadSingle(CompReloadable comp, bool showOutOfAmmoWarning = false, bool showJobWarnings = false)
 		{
 			if (comp?.RemainingCharges <= 0)
 			{
@@ -32,16 +32,20 @@ namespace YayosCombatAddon
 							ammoInInventory = ammo.stackCount;
 					}
 
+					bool reloadFailed;
 					// only reload equipped weapon from inventory
 					if (ammoInInventory > 0)
-						ReloadFromInventory(pawn, new Thing[] { thing }, false);
+						reloadFailed = !TryReloadFromInventory(pawn, new Thing[] { thing }, showJobWarnings);
 					// reload all weapons from surrounding
 					else
-						ReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), false, false);
+						reloadFailed = !TryReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), showJobWarnings, false);
+					// show out of ammo warning if reloading failed
+					if (showOutOfAmmoWarning && reloadFailed)
+						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate( new NamedArgument(pawn, "pawn")));
 				}
 			}
 		}
-		public static void TryAutoReloadAll(Pawn pawn)
+		public static void TryAutoReloadAll(Pawn pawn, bool showOutOfAmmoWarning = false, bool showJobWarnings = false)
 		{
 			var things = pawn?.GetAllReloadableThings()?.ToArray();
 			if (things?.AnyOutOfAmmo() == true)
@@ -61,28 +65,38 @@ namespace YayosCombatAddon
 							ammoInInventory = ammo.stackCount;
 					}
 
+					// reload from inventory is there is anything that can be reloaded from inventory
 					if (ammoInInventory > 0) 
 						reloadFromInventory = true;
 				}
 
+				bool reloadFailed;
 				// reload from inventory
 				if (reloadFromInventory)
-					ReloadFromInventory(pawn, things, false);
+					reloadFailed = !TryReloadFromInventory(pawn, things, showJobWarnings);
 				// reload from surrounding
 				else
-					ReloadFromSurrounding(pawn, things, false, false);
+					reloadFailed = !TryReloadFromSurrounding(pawn, things, showJobWarnings, false);
+				// show out of ammo warning if reloading failed
+				if (showOutOfAmmoWarning && reloadFailed)
+					GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
 			}
 		}
 
 
-		public static void ReloadFromInventory(Pawn pawn, IEnumerable<Thing> reloadables, bool showMessages)
+		public static bool TryReloadFromInventory(Pawn pawn, IEnumerable<Thing> reloadables, bool showWarnings)
 		{
+			bool success = false;
+
+			// check for things requiring reloading
 			var ammoDefDict = reloadables.GetRequiredAmmo();
 			if (ammoDefDict.Count() > 0)
 			{
-				var ammoThings = pawn.FindAmmoThingsInventory(ammoDefDict, showMessages);
+				// find ammo for reloading in inventory
+				var ammoThings = pawn.FindAmmoThingsInventory(ammoDefDict, showWarnings);
 				if (ammoThings.Count > 0)
 				{
+					// make job
 					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
 
 					// fill job queue
@@ -91,27 +105,33 @@ namespace YayosCombatAddon
 					foreach (var thing in ammoThings)
 						job.AddQueuedTarget(TargetIndex.B, thing);
 
+					// start reload job and try to resume previous job after reloading
 					pawn.jobs.StartJob(job, JobCondition.InterruptForced, resumeCurJobAfterwards: true, canReturnCurJobToPool: true);
-					//pawn.jobs.TryTakeOrderedJob(job);
+
+					success = true;
 				}
 			}
-			else if (showMessages) // nothing to reload
-				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
+			else if (showWarnings) // nothing to reload
+				GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.NothingToReload".Translate());
+
+			return success;
 		}
 
-		public static void ReloadFromSurrounding(Pawn pawn, IEnumerable<Thing> reloadables, bool showMessages, bool ignoreDistance, bool returnToStartingPosition = true)
+		public static bool TryReloadFromSurrounding(Pawn pawn, IEnumerable<Thing> reloadables, bool showWarnings, bool ignoreDistance, bool returnToStartingPosition = true)
 		{
+			bool success = false;
 			if (!ignoreDistance && yayoCombat.yayoCombat.supplyAmmoDist < 0)
-				return;
+				return success;
 
 			// check for things requiring reloading
 			var ammoDefDict = reloadables.GetRequiredAmmo();
 			if (ammoDefDict.Count() > 0)
 			{
 				// find ammo for reloading
-				var ammoThings = pawn.FindAmmoThingsSurrounding(ammoDefDict, showMessages, ignoreDistance);
+				var ammoThings = pawn.FindAmmoThingsSurrounding(ammoDefDict, showWarnings, ignoreDistance);
 				if (ammoThings.Count > 0)
 				{
+					// make job
 					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
 
 					// fill job queues
@@ -120,16 +140,20 @@ namespace YayosCombatAddon
 					foreach (var thing in ammoThings)
 						job.AddQueuedTarget(TargetIndex.B, thing);
 
+					// start reload job and try to resume previous job after reloading
 					pawn.jobs.StartJob(job, JobCondition.InterruptForced, resumeCurJobAfterwards: true, canReturnCurJobToPool: true);
-					//pawn.jobs.TryTakeOrderedJob(job);
 
 					// make pawn go back to where they were
 					if (returnToStartingPosition)
 						pawn.jobs.jobQueue.EnqueueFirst(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
+
+					success = true;
 				}
 			}
-			else if (showMessages) // nothing to reload
-				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
+			else if (showWarnings) // nothing to reload
+				GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.NothingToReload".Translate());
+
+			return success;
 		}
 
 
@@ -169,7 +193,7 @@ namespace YayosCombatAddon
 			return output;
 		}
 
-		public static List<Thing> FindAmmoThingsInventory(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showMessage)
+		public static List<Thing> FindAmmoThingsInventory(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showWarnings)
 		{
 			var ammoThings = new List<Thing>();
 			if (pawn != null && ammoDefDict != null)
@@ -188,18 +212,20 @@ namespace YayosCombatAddon
 							count -= thing.stackCount;
 						}
 					}
-					if (showMessage && count > 0)
+					if (showWarnings && count > 0)
 					{
-						GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(
-							new NamedArgument(pawn, "pawn"),
-							new NamedArgument(ammoDef.label, "ammo"),
-							new NamedArgument(count, "count")));
+						GeneralUtility.ShowRejectMessage(
+							pawn, 
+							"SY_YCA.NoAmmoInventory".Translate(
+								new NamedArgument(pawn, "pawn"),
+								new NamedArgument(ammoDef.label, "ammo"),
+								new NamedArgument(count, "count")));
 					}
 				}
 			}
 			return ammoThings;
 		}
-		public static List<Thing> FindAmmoThingsSurrounding(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showMessage, bool ignoreDistance)
+		public static List<Thing> FindAmmoThingsSurrounding(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showWarnings, bool ignoreDistance)
 		{
 			var ammoThings = new List<Thing>();
 			if (pawn != null && ammoDefDict != null)
@@ -218,12 +244,14 @@ namespace YayosCombatAddon
 						foreach (var thing in things)
 							ammoThings.Add(thing);
 					}
-					else if (showMessage)
+					else if (showWarnings)
 					{
-						GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(
-							new NamedArgument(pawn, "pawn"),
-							new NamedArgument(ammoDef.label, "ammo"),
-							new NamedArgument(count, "count")));
+						GeneralUtility.ShowRejectMessage(
+							pawn,
+							"SY_YCA.NoAmmoNearby".Translate(
+								new NamedArgument(pawn, "pawn"),
+								new NamedArgument(ammoDef.label, "ammo"),
+								new NamedArgument(count, "count")));
 					}
 				}
 			}

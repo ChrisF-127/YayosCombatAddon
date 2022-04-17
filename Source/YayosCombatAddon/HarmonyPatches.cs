@@ -22,7 +22,7 @@ namespace YayosCombatAddon
 			// gizmo patch for reloadable weapons
 			harmony.Patch(
 				typeof(ThingComp).GetMethod("CompGetGizmosExtra"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ThingComp_CompGetGizmosExtra_Postfix)));
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ThingComp_CompGetGizmosExtra)));
 
 			// replace original patches
 			harmony.Patch(
@@ -33,10 +33,33 @@ namespace YayosCombatAddon
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
 
 #warning TODO patch reload via right click
+
+			if (Main.SimpleSidearmsCompatibility)
+			{
+				harmony.Patch(
+					typeof(ReloadableUtility).GetMethod("FindSomeReloadableComponent", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
+					postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ReloadableUtility_FindSomeReloadableComponent)));
+			}
 		}
 
 
-		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra_Postfix(IEnumerable<Gizmo> __result, ThingComp __instance)
+		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
+		{
+			Log.Message($"ReloadableUtility_FindSomeReloadableComponent {__result} {pawn} {allowForcedReload}");
+			if (__result == null)
+			{
+				foreach (var thing in pawn.GetSimpleSidearms())
+				{
+					var compReloadable = thing.TryGetComp<CompReloadable>();
+					if (compReloadable?.NeedsReload(allowForcedReload) == true && pawn.EquipThingFromInventory(thing))
+						return compReloadable;
+				}
+			}
+			return __result;
+		}
+
+
+		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{
 			if (__instance is CompReloadable reloadable && reloadable.AmmoDef.IsAmmo())
 			{

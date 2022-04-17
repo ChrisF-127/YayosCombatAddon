@@ -11,11 +11,6 @@ namespace YayosCombatAddon
 {
     public class Main : ModBase
     {
-		public static bool SimpleSidearmsCompatibility { get; private set; } = false;
-
-		public override void DefsLoaded()
-        {
-            SimpleSidearmsCompatibility = ModsConfig.IsActive("PeteTimesSix.SimpleSidearms");
-        }
+		public static bool SimpleSidearmsCompatibility { get; private set; } = ModsConfig.IsActive("PeteTimesSix.SimpleSidearms");
     }
 }

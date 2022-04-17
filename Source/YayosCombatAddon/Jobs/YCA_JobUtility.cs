@@ -32,23 +32,7 @@ namespace YayosCombatAddon
 			toil.initAction = () =>
 			{
 				var actor = toil.GetActor();
-				var targetThingA = actor.CurJob.targetA.Thing;
-
-				var thing = staticThing ?? targetThingA;
-				var equipment = actor.equipment;
-				var primary = equipment.Primary;
-				if (thing is ThingWithComps thingWithComps)
-				{
-					if (thingWithComps != primary)
-					{
-						if (primary != null && !equipment.TryTransferEquipmentToContainer(primary, actor.inventory.innerContainer))
-							Log.Warning($"{nameof(YayosCombatAddon)}: could not move '{primary}' into inventory");
-						thingWithComps.holdingOwner?.Remove(thingWithComps);
-						equipment.AddEquipment(thingWithComps);
-					}
-				}
-				else
-					Log.Warning($"{nameof(YayosCombatAddon)}: '{thing}' is not {nameof(ThingWithComps)}");
+				actor.EquipThingFromInventory(staticThing ?? actor.CurJob.targetA.Thing);
 			};
 			return staticThing == null ? toil.FailOnDestroyedNullOrForbidden(TargetIndex.A) : toil;
 		}

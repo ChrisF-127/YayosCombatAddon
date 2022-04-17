@@ -169,26 +169,20 @@ namespace YayosCombatAddon
 		}
 
 
-		public static IEnumerable<Thing> GetAllReloadableThings(this Pawn pawn)
+		public static List<Thing> GetAllReloadableThings(this Pawn pawn)
 		{
-			if (pawn == null)
-				yield break;
-
-			foreach (var thing in pawn.equipment.AllEquipmentListForReading)
-				if (thing.AmmoNeeded(out _) > 0)
-					yield return thing;
-
-			if (Main.SimpleSidearmsCompatibility)
+			var things = new List<Thing>();
+			if (pawn != null)
 			{
-				var memory = CompSidearmMemory.GetMemoryCompForPawn(pawn);
-				foreach (var thing in pawn.inventory.innerContainer)
-				{
-					if (thing != null
-						&& memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def))
-						&& thing.AmmoNeeded(out _) > 0)
-						yield return thing;
-				}
+				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
+					if (thing.AmmoNeeded(out _) > 0)
+						things.Add(thing);
+
+				foreach (var thing in pawn.GetSimpleSidearms())
+					if (thing.AmmoNeeded(out _) > 0)
+						things.Add(thing);
 			}
+			return things;
 		}
 		public static Dictionary<Def, int> GetRequiredAmmo(this IEnumerable<Thing> things)
 		{

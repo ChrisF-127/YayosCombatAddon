@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using SimpleSidearms.rimworld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,44 @@ using Verse;
 
 namespace YayosCombatAddon
 {
-	internal class InventoryUtility
+	internal static class InventoryUtility
 	{
+		public static bool EquipThingFromInventory(this Pawn pawn, Thing thing)
+		{
+			var success = false;
+			var equipment = pawn.equipment;
+			var primary = equipment.Primary;
+			if (thing is ThingWithComps thingWithComps)
+			{
+				if (thingWithComps != primary)
+				{
+					if (primary != null && !equipment.TryTransferEquipmentToContainer(primary, pawn.inventory.innerContainer))
+						Log.Warning($"{nameof(YayosCombatAddon)}: could not move '{primary}' into inventory");
+					thingWithComps.holdingOwner?.Remove(thingWithComps);
+					equipment.Primary = thingWithComps;
+					success = true;
+				}
+			}
+			else
+				Log.Warning($"{nameof(YayosCombatAddon)}: '{thing}' is not {nameof(ThingWithComps)}");
+			return success;
+		}
+
+		public static List<Thing> GetSimpleSidearms(this Pawn pawn)
+		{
+			var things = new List<Thing>();
+			if (Main.SimpleSidearmsCompatibility && pawn != null)
+			{
+				var memory = CompSidearmMemory.GetMemoryCompForPawn(pawn);
+				foreach (var thing in pawn.inventory.innerContainer)
+				{
+					if (thing != null && memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def)))
+						things.Add(thing);
+				}
+			}
+			return things;
+		}
+
 		public static void RestockInventoryFromSurrounding(Pawn pawn)
 		{
 			var required = new Dictionary<Def, int>();

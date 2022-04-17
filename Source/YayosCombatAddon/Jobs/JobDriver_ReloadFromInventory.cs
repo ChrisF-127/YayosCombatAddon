@@ -48,6 +48,8 @@ namespace YayosCombatAddon
 		{
 			var output = false;
 			var comp = TargetThingA?.TryGetComp<CompReloadable>();
+
+			// check if target thing needs reloading and if we got targets to reload from
 			if (comp?.NeedsReload(true) == true && job.targetQueueB?.Count > 0)
 			{
 				// sneaky way for setting wait duration using comp
@@ -60,7 +62,7 @@ namespace YayosCombatAddon
 					var ammoThing = targetInfo.Thing;
 					if (ammoThing.def == comp.AmmoDef)
 					{
-						var prevCount = 0;
+						var carriedCount = 0;
 						var carriedThing = pawn.carryTracker.CarriedThing;
 						if (carriedThing != null)
 						{
@@ -69,24 +71,38 @@ namespace YayosCombatAddon
 								throw new Exception($"{nameof(YayosCombatAddon)}: " +
 									$"carrying invalid thing while trying to get ammo: '{carriedThing}' ({carriedThing.def} / expected {comp.AmmoDef})");
 
-							prevCount = carriedThing.stackCount;
+							// get count of carried thing 
+							carriedCount = carriedThing.stackCount;
 						}
 
-						var maxReq = comp.AmmoDef.stackLimit - prevCount;
+						// get available carry space
+						var count = comp.AmmoDef.stackLimit - carriedCount;
 
-						// count should never be less than 0, neither should the stackCount be 0
-						if (maxReq < 0 || ammoThing.stackCount == 0)
+						// available carry space should never be less than 0, neither should the stackCount be 0 or less
+						if (count < 0 || ammoThing.stackCount <= 0)
 							throw new Exception($"{nameof(YayosCombatAddon)}: " +
-								$"count less than 0 or empty stack: count: {maxReq} stackLimit: {comp.AmmoDef.stackLimit} prevCount: {prevCount} stackCount: {ammoThing.stackCount}");
+								$"available carry space less than 0 or empty stack: " +
+								$"available space: {count} " +
+								$"stackLimit: {comp.AmmoDef.stackLimit} " +
+								$"already carrying: {carriedCount} " +
+								$"stackCount: {ammoThing.stackCount}");
 
 						// already carrying max amount of ammo
-						if (maxReq == 0)
+						if (count == 0)
 						{
 							output = true;
 							goto OUT;
 						}
 
-						var count = Mathf.Min(maxReq, ammoThing.stackCount);
+						// either limit to ammoThing's stackCount or available carry space
+						count = Mathf.Min(ammoThing.stackCount, count);
+
+						// check if comp needs reloading - this should always be the case at this point
+						var minAmmoNeeded = comp.MinAmmoNeededChecked();
+
+						// check if there is enough ammo to reload
+						if (count < minAmmoNeeded)
+							continue;
 
 						// remove from queue if used up
 						if (count >= ammoThing.stackCount)
@@ -97,10 +113,10 @@ namespace YayosCombatAddon
 
 						// check carried thing
 						carriedThing = pawn.carryTracker.CarriedThing;
-						if (carriedThing?.stackCount != prevCount + count)
+						if (carriedThing?.stackCount != carriedCount + count)
 						{
 							Log.Warning($"{nameof(YayosCombatAddon)}: failed to move/merge '{ammoThing}' ({ammoThing.stackCount}) into CarriedThing " +
-								$"(carrying: '{carriedThing}' ({carriedThing?.stackCount} / {comp.AmmoDef.stackLimit}; expected: {prevCount + count} ({prevCount} + {count}))");
+								$"(carrying: '{carriedThing}' ({carriedThing?.stackCount} / {comp.AmmoDef.stackLimit}; expected: {carriedCount + count} ({carriedCount} + {count}))");
 							break;
 						}
 

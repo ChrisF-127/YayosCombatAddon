@@ -29,8 +29,11 @@ namespace YayosCombatAddon
 				{
 					var ammoInInventory = pawn.CountAmmoInInventory(comp);
 
+					// check if comp needs reloading - this should always be the case at this point
+					var minAmmoNeeded = comp.MinAmmoNeededChecked();
+
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
-					if (ammoInInventory == 0 && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
 						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
 						ammo.stackCount = comp.MaxAmmoNeeded(true);
@@ -39,7 +42,7 @@ namespace YayosCombatAddon
 					}
 
 					// only reload equipped weapon from inventory
-					if (ammoInInventory > 0)
+					if (ammoInInventory >= minAmmoNeeded)
 						success = TryReloadFromInventory(pawn, new Thing[] { thing }, showJobWarnings);
 					// reload all weapons from surrounding
 					else
@@ -68,8 +71,11 @@ namespace YayosCombatAddon
 					var comp = thing.TryGetComp<CompReloadable>();
 					var ammoInInventory = pawn.CountAmmoInInventory(comp);
 
+					// check if comp needs reloading - this should always be the case at this point
+					var minAmmoNeeded = comp.MinAmmoNeededChecked();
+
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
-					if (ammoInInventory == 0 && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
 						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
 						ammo.stackCount = comp.MaxAmmoNeeded(true);
@@ -78,7 +84,7 @@ namespace YayosCombatAddon
 					}
 
 					// reload from inventory is there is anything that can be reloaded from inventory
-					if (ammoInInventory > 0) 
+					if (ammoInInventory >= minAmmoNeeded) 
 						reloadFromInventory = true;
 				}
 
@@ -175,81 +181,115 @@ namespace YayosCombatAddon
 			if (pawn != null)
 			{
 				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
-					if (thing.AmmoNeeded(out _) > 0)
+					if (thing.MaxAmmoNeeded(out _) > 0)
 						things.Add(thing);
 
 				foreach (var thing in pawn.GetSimpleSidearms())
-					if (thing.AmmoNeeded(out _) > 0)
+					if (thing.MaxAmmoNeeded(out _) > 0)
 						things.Add(thing);
 			}
 			return things;
 		}
-		public static Dictionary<Def, int> GetRequiredAmmo(this IEnumerable<Thing> things)
+		public static Dictionary<Def, AmmoInfo> GetRequiredAmmo(this IEnumerable<Thing> things)
 		{
-			var output = new Dictionary<Def, int>();
+			var output = new Dictionary<Def, AmmoInfo>();
 			if (things != null)
 			{
 				foreach (var thing in things)
 				{
-					var count = thing.AmmoNeeded(out Def def);
+					var count = thing.MaxAmmoNeeded(out Def def);
 					if (count > 0)
-						output.IncreaseOrAdd(def, count);
+					{
+						var minAmmoNeeded = thing.MinAmmoNeededForThing();
+						if (output.ContainsKey(def))
+						{
+							output[def].Count += count;
+							if (output[def].MinAmmoNeeded > minAmmoNeeded)
+								output[def].MinAmmoNeeded = minAmmoNeeded;
+						}
+						else
+						{
+							output.Add(def, new AmmoInfo
+							{
+								Count = count,
+								MinAmmoNeeded = minAmmoNeeded,
+							});
+						}
+					}
 				}
 			}
 			return output;
 		}
 
-		public static List<Thing> FindAmmoThingsInventory(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showWarnings)
+		public static List<Thing> FindAmmoThingsInventory(this Pawn pawn, Dictionary<Def, AmmoInfo> ammoDefDict, bool showWarnings)
 		{
-			var ammoThings = new List<Thing>();
+			var output = new List<Thing>();
 			if (pawn != null && ammoDefDict != null)
 			{
 				foreach (var entry in ammoDefDict)
 				{
 					var ammoDef = entry.Key;
-					var count = entry.Value;
+					var count = entry.Value.Count;
+					var minAmmoNeeded = entry.Value.MinAmmoNeeded;
+
+					// find things for this ammoDef in inventory
 					foreach (var thing in pawn.inventory.innerContainer)
 					{
 						if (thing.def == ammoDef)
 						{
 							if (count <= 0)
 								break;
-							ammoThings.Add(thing);
+							output.Add(thing);
 							count -= thing.stackCount;
 						}
 					}
-					if (showWarnings && count > 0)
+					// if less than minAmmoNeeded was found, remove all things of this ammoDef from output
+					if ((entry.Value.Count - count) < minAmmoNeeded)
+					{
+						for (int i = output.Count - 1; i >= 0; i--)
+							if (output[i].def == ammoDef)
+								output.RemoveAt(i);
+					}
+					// show warning if ammo not found
+					if (showWarnings)
 					{
 						GeneralUtility.ShowRejectMessage(
 							pawn, 
 							"SY_YCA.NoAmmoInventory".Translate(
 								new NamedArgument(pawn, "pawn"),
 								new NamedArgument(ammoDef.label, "ammo"),
-								new NamedArgument(count, "count")));
+								new NamedArgument(count, "count"),
+								new NamedArgument(minAmmoNeeded, "minAmmoNeeded")));
 					}
 				}
 			}
-			return ammoThings;
+			return output;
 		}
-		public static List<Thing> FindAmmoThingsSurrounding(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showWarnings, bool ignoreDistance)
+		public static List<Thing> FindAmmoThingsSurrounding(this Pawn pawn, Dictionary<Def, AmmoInfo> ammoDefDict, bool showWarnings, bool ignoreDistance)
 		{
-			var ammoThings = new List<Thing>();
+			var output = new List<Thing>();
 			if (pawn != null && ammoDefDict != null)
 			{
 				foreach (var entry in ammoDefDict)
 				{
 					var ammoDef = entry.Key;
-					var count = entry.Value;
+					var count = entry.Value.Count;
+					var minAmmoNeeded = entry.Value.MinAmmoNeeded;
+
+					// find things for this ammoDef nearby
 					var things = RefuelWorkGiverUtility.FindEnoughReservableThings(
 						pawn,
 						pawn.Position,
-						new IntRange(1, count),
+						new IntRange(minAmmoNeeded, count),
 						t => t.def == ammoDef && (ignoreDistance || IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
+
+					// add found things to output
 					if (things?.Count > 0)
 					{
 						foreach (var thing in things)
-							ammoThings.Add(thing);
+							output.Add(thing);
 					}
+					// show warning if ammo not found
 					else if (showWarnings)
 					{
 						GeneralUtility.ShowRejectMessage(
@@ -257,11 +297,19 @@ namespace YayosCombatAddon
 							"SY_YCA.NoAmmoNearby".Translate(
 								new NamedArgument(pawn, "pawn"),
 								new NamedArgument(ammoDef.label, "ammo"),
-								new NamedArgument(count, "count")));
+								new NamedArgument(count, "count"),
+								new NamedArgument(minAmmoNeeded, "minAmmoNeeded")));
 					}
 				}
 			}
-			return ammoThings;
+			return output;
+		}
+
+		// Helper class for picking up ammo
+		public class AmmoInfo
+		{
+			public int Count;
+			public int MinAmmoNeeded;
 		}
 	}
 }

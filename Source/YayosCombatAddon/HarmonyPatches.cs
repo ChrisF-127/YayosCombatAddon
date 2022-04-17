@@ -32,7 +32,10 @@ namespace YayosCombatAddon
 				typeof(patch_CompReloadable_UsedOnce).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
 
-#warning TODO patch reload via right click
+			// patch to allow for picking up stacklimit 
+			harmony.Patch(
+				typeof(Pawn_CarryTracker).GetMethod("MaxStackSpaceEver", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_CarryTracker_MaxStackSpaceEver)));
 
 			if (Main.SimpleSidearmsCompatibility)
 			{
@@ -42,20 +45,10 @@ namespace YayosCombatAddon
 			}
 		}
 
-
-		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
+		
+		static int Pawn_CarryTracker_MaxStackSpaceEver(int __result, ThingDef td)
 		{
-			Log.Message($"ReloadableUtility_FindSomeReloadableComponent {__result} {pawn} {allowForcedReload}");
-			if (__result == null)
-			{
-				foreach (var thing in pawn.GetSimpleSidearms())
-				{
-					var compReloadable = thing.TryGetComp<CompReloadable>();
-					if (compReloadable?.NeedsReload(allowForcedReload) == true && pawn.EquipThingFromInventory(thing))
-						return compReloadable;
-				}
-			}
-			return __result;
+			return td.IsAmmo() ? td.stackLimit : __result;
 		}
 
 
@@ -71,7 +64,7 @@ namespace YayosCombatAddon
 						defaultLabel = "SY_YCA.EjectAmmo_label".Translate(),
 						defaultDesc = "SY_YCA.EjectAmmo_desc".Translate(),
 						icon = YCA_Textures.AmmoEject,
-						disabled = reloadable.RemainingCharges == 0,
+						disabled = reloadable.RemainingCharges <= 0,
 						disabledReason = "SY_YCA.NoEjectableAmmo".Translate(),
 						action = () => thing.Map.designationManager.AddDesignation(new Designation(thing, YCA_DesignationDefOf.EjectAmmo)),
 						activateSound = YCA_SoundDefOf.Designate_EjectAmmo,
@@ -135,6 +128,21 @@ namespace YayosCombatAddon
 			if (!ReloadUtility.TryAutoReloadSingle(__instance, true) && pawn.CurJobDef == JobDefOf.Hunt)
 				pawn.jobs.StopAll();
 			return false;
+		}
+
+
+		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
+		{
+			if (__result == null)
+			{
+				foreach (var thing in pawn.GetSimpleSidearms())
+				{
+					var compReloadable = thing.TryGetComp<CompReloadable>();
+					if (compReloadable?.NeedsReload(allowForcedReload) == true && pawn.EquipThingFromInventory(thing))
+						return compReloadable;
+				}
+			}
+			return __result;
 		}
 	}
 }

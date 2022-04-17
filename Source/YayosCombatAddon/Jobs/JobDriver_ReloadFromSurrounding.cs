@@ -42,7 +42,7 @@ namespace YayosCombatAddon
 			yield return repeat;
 			yield return Toils_Jump.JumpIf(next, () => !TryMoveAmmoToCarriedThing());
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-			yield return StartCarryAmmoFromGround(); // custom method instead of Toils_Haul.StartCarryThing because it allows picking up full stacks
+			yield return Toils_Haul.StartCarryThing(TargetIndex.B, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
 			yield return YCA_JobUtility.EquipStaticOrTargetA();
 			yield return Wait;
 			yield return YCA_JobUtility.ReloadFromCarriedThing();
@@ -56,13 +56,12 @@ namespace YayosCombatAddon
 		{
 			var output = false;
 			var comp = TargetThingA?.TryGetComp<CompReloadable>();
+
+			// check if target thing needs reloading and if we got targets to reload from
 			if (comp?.NeedsReload(true) == true && job.targetQueueB?.Count > 0)
 			{
 				// sneaky way for setting wait duration using comp
 				Wait.defaultDuration = comp.Props.baseReloadTicks;
-
-				// sort by distance
-				job.targetQueueB = job.targetQueueB.OrderBy(t => IntVec3Utility.DistanceTo(pawn.Position, t.Thing.Position)).ToList();
 
 				// get ammo from queue
 				foreach (var targetInfo in job.targetQueueB)
@@ -70,12 +69,23 @@ namespace YayosCombatAddon
 					var ammoThing = targetInfo.Thing;
 					if (ammoThing.def == comp.AmmoDef)
 					{
-						job.targetB = targetInfo;
-						job.count = comp.MaxCharges - comp.RemainingCharges;
+						// check if comp needs reloading - this should always be the case at this point
+						var minAmmoNeeded = comp.MinAmmoNeededChecked();
 
-						if (ammoThing.stackCount < job.count)
+						// check if the stack is big enough to reload thing
+						if (ammoThing.stackCount < minAmmoNeeded)
+							continue;
+
+						// set ammoThing as new target
+						job.targetB = targetInfo;
+						// set total count of stuff we wish to pick up, this can be more than ammoThing's stack actually holds
+						job.count = (comp.MaxCharges - comp.RemainingCharges) * minAmmoNeeded;
+
+						// if the stack is picked up completely, remove it from target queue
+						if (ammoThing.stackCount <= job.count)
 							job.targetQueueB.Remove(targetInfo);
 
+						// we got something to pick up, so let's go there
 						output = true;
 						goto OUT;
 					}
@@ -85,64 +95,23 @@ namespace YayosCombatAddon
 			return output;
 		}
 
-		private Toil StartCarryAmmoFromGround()
+		private Toil DropCarriedAmmoAndReaddToQueue()
 		{
-			var toil = new Toil
+			return new Toil
 			{
 				initAction = () =>
 				{
-					var comp = TargetThingA?.TryGetComp<CompReloadable>();
-					if (comp?.NeedsReload(true) == true)
+					// if pawn is carrying ammo, drop it, reserve it and add it back to target queue, we might need it later for a different weapon
+					var carriedThing = pawn.carryTracker.CarriedThing;
+					if (carriedThing != null
+						&& pawn.carryTracker.TryDropCarriedThing(pawn.Position, pawn.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _)
+						&& carriedThing.IsAmmo())
 					{
-						var thing = TargetThingB;
-						if (thing != null && !Toils_Haul.ErrorCheckForCarry(pawn, thing))
-						{
-							var carriedThing = pawn.carryTracker.CarriedThing;
-							if (carriedThing != null && carriedThing.def != comp.AmmoDef) // carrying invalid thing instead of ammo
-							{
-								Log.Warning($"{nameof(YayosCombatAddon)}: carrying invalid thing while trying to pick up ammo: '{carriedThing}'");
-								return;
-							}
-
-							var prevCount = carriedThing?.stackCount ?? 0;
-							var count = Mathf.Min(comp.AmmoDef.stackLimit - prevCount, thing.stackCount, job.count);
-							if (count < 0)
-								throw new Exception($"{nameof(YayosCombatAddon)}: count should never be less than 0: {count}");
-							if (count == 0) // already carrying max amount of ammo
-								return;
-
-							int num = pawn.carryTracker.innerContainer.TryAdd(thing.SplitOff(count), count);
-							thing.def.soundPickup.PlayOneShot(new TargetInfo(thing.Position, pawn.Map));
-
-							carriedThing = pawn.carryTracker.CarriedThing;
-							pawn.Reserve(carriedThing, job);
-
-							if (carriedThing?.stackCount != prevCount + count || num != count)
-							{
-								Log.Warning($"{nameof(YayosCombatAddon)}: failed to move/merge '{thing}' ({thing.stackCount}) into CarriedThing " +
-									$"(carrying: '{carriedThing}' ({carriedThing?.stackCount} / {comp.AmmoDef.stackLimit}; expected: {prevCount + count} ({prevCount} + {count} // {num}))");
-								return;
-							}
-						}
+						pawn.Reserve(carriedThing, job);
+						job.targetQueueB.Add(carriedThing);
 					}
-				},
+				}
 			};
-			return toil.FailOnDestroyedNullOrForbidden(TargetIndex.A).FailOnDestroyedNullOrForbidden(TargetIndex.B);
-		}
-
-		private Toil DropCarriedAmmoAndReaddToQueue()
-		{
-			var toil = new Toil();
-			toil.initAction = () =>
-			{
-				var actor = toil.GetActor();
-				var carriedThing = actor.carryTracker.CarriedThing;
-				if (carriedThing != null 
-					&& actor.carryTracker.TryDropCarriedThing(actor.Position, actor.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _)
-					&& carriedThing.IsAmmo())
-					job.targetQueueB.Add(carriedThing);
-			};
-			return toil;
 		}
 	}
 }

@@ -15,7 +15,7 @@ namespace YayosCombatAddon
 	{
 		public static void EjectAmmo(Pawn pawn, CompReloadable comp)
 		{
-			var charges = comp.remainingCharges;
+			var charges = comp.remainingCharges * comp.Props.ammoCountPerCharge;
 			if (charges > 0)
 			{
 				do
@@ -45,7 +45,26 @@ namespace YayosCombatAddon
 			return count;
 		}
 
-		public static int AmmoNeeded(this Thing thing, out Def ammoDef)
+		public static int MinAmmoNeededChecked(this CompReloadable comp)
+		{
+			var minAmmoNeeded = comp.MinAmmoNeeded(true);
+			if (minAmmoNeeded <= 0)
+				throw new Exception($"{nameof(YayosCombatAddon)}: " +
+					$"thing does not require reloading: '{comp}' (" +
+					$"minAmmoNeeded: {minAmmoNeeded} / " +
+					$"remainingCharges: {comp.RemainingCharges} / " +
+					$"maxCharges: {comp.MaxCharges})");
+			return minAmmoNeeded;
+		}
+		public static int MinAmmoNeededForThing(this Thing thing)
+		{
+			var comp = thing?.TryGetComp<CompReloadable>();
+			if (comp?.AmmoDef?.IsAmmo() == true)
+				return comp.MinAmmoNeededChecked();
+
+			throw new Exception($"{nameof(YayosCombatAddon)}: invalid thing for {nameof(MinAmmoNeededForThing)}: '{thing}'");
+		}
+		public static int MaxAmmoNeeded(this Thing thing, out Def ammoDef)
 		{
 			var comp = thing?.TryGetComp<CompReloadable>();
 			if (comp?.AmmoDef?.IsAmmo() == true)
@@ -60,7 +79,7 @@ namespace YayosCombatAddon
 		{
 			var comp = thing?.TryGetComp<CompReloadable>();
 			if (comp?.AmmoDef?.IsAmmo() == true)
-				return comp.RemainingCharges == 0;
+				return comp.RemainingCharges <= 0;
 			return false;
 		}
 		public static bool AnyOutOfAmmo(this IEnumerable<Thing> things)

@@ -25,9 +25,9 @@ Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurr
   
   <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
   <SY_YCA.NothingToRestock>Nothing requires restocking</SY_YCA.NothingToRestock>
-  <SY_YCA.NoAmmoNearby>{pawn} found insufficient ammo for {weapon} nearby</SY_YCA.NoAmmoNearby>
-  <SY_YCA.NoAmmoInventory>{pawn} found insufficient ammo for {weapon} in their inventory</SY_YCA.NoAmmoInventory>
-  <SY_YCA.NoAmmoRestock>{pawn} could not find enough {ammo}, missing {count} out of {max}</SY_YCA.NoAmmoRestock>
+  <SY_YCA.NoAmmoNearby>{pawn} found insufficient '{ammo}' nearby, missing {count}</SY_YCA.NoAmmoNearby>
+  <SY_YCA.NoAmmoInventory>{pawn} found insufficient '{ammo}' in their inventory, missing {count}</SY_YCA.NoAmmoInventory>
+  <SY_YCA.NoAmmoRestock>{pawn} could not find enough '{ammo}', missing {count} out of {max}</SY_YCA.NoAmmoRestock>
   
   
   <SY_YCA.ShowReloadWeaponGizmo_title># Show 'Reload Weapon' Gizmo</SY_YCA.ShowReloadWeaponGizmo_title>

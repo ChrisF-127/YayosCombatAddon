@@ -80,7 +80,7 @@ namespace YayosCombatAddon
 			var ammoDefDict = reloadables.GetRequiredAmmo();
 			if (ammoDefDict.Count() > 0)
 			{
-				var ammoThings = pawn.FindAmmoThingsInventory(ammoDefDict);
+				var ammoThings = pawn.FindAmmoThingsInventory(ammoDefDict, showMessages);
 				if (ammoThings.Count > 0)
 				{
 					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
@@ -94,7 +94,6 @@ namespace YayosCombatAddon
 					pawn.jobs.StartJob(job, JobCondition.InterruptForced, resumeCurJobAfterwards: true, canReturnCurJobToPool: true);
 					//pawn.jobs.TryTakeOrderedJob(job);
 				}
-#warning TODO no ammo found message?
 			}
 			else if (showMessages) // nothing to reload
 				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
@@ -110,7 +109,7 @@ namespace YayosCombatAddon
 			if (ammoDefDict.Count() > 0)
 			{
 				// find ammo for reloading
-				var ammoThings = pawn.FindAmmoThingsSurrounding(ammoDefDict, ignoreDistance);
+				var ammoThings = pawn.FindAmmoThingsSurrounding(ammoDefDict, showMessages, ignoreDistance);
 				if (ammoThings.Count > 0)
 				{
 					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
@@ -128,7 +127,6 @@ namespace YayosCombatAddon
 					if (returnToStartingPosition)
 						pawn.jobs.jobQueue.EnqueueFirst(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 				}
-#warning TODO no ammo found message?
 			}
 			else if (showMessages) // nothing to reload
 				GeneralUtility.ShowRejectMessage("SY_YCA.NothingToReload".Translate());
@@ -171,7 +169,7 @@ namespace YayosCombatAddon
 			return output;
 		}
 
-		public static List<Thing> FindAmmoThingsInventory(this Pawn pawn, Dictionary<Def, int> ammoDefDict)
+		public static List<Thing> FindAmmoThingsInventory(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showMessage)
 		{
 			var ammoThings = new List<Thing>();
 			if (pawn != null && ammoDefDict != null)
@@ -190,12 +188,18 @@ namespace YayosCombatAddon
 							count -= thing.stackCount;
 						}
 					}
-#warning TODO no ammo found message?
+					if (showMessage && count > 0)
+					{
+						GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoInventory".Translate(
+							new NamedArgument(pawn, "pawn"),
+							new NamedArgument(ammoDef.label, "ammo"),
+							new NamedArgument(count, "count")));
+					}
 				}
 			}
 			return ammoThings;
 		}
-		public static List<Thing> FindAmmoThingsSurrounding(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool ignoreDistance)
+		public static List<Thing> FindAmmoThingsSurrounding(this Pawn pawn, Dictionary<Def, int> ammoDefDict, bool showMessage, bool ignoreDistance)
 		{
 			var ammoThings = new List<Thing>();
 			if (pawn != null && ammoDefDict != null)
@@ -209,9 +213,18 @@ namespace YayosCombatAddon
 						pawn.Position,
 						new IntRange(1, count),
 						t => t.def == ammoDef && (ignoreDistance || IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
-					foreach (var thing in things)
-						ammoThings.Add(thing);
-#warning TODO no ammo found message?
+					if (things?.Count > 0)
+					{
+						foreach (var thing in things)
+							ammoThings.Add(thing);
+					}
+					else if (showMessage)
+					{
+						GeneralUtility.ShowRejectMessage("SY_YCA.NoAmmoNearby".Translate(
+							new NamedArgument(pawn, "pawn"),
+							new NamedArgument(ammoDef.label, "ammo"),
+							new NamedArgument(count, "count")));
+					}
 				}
 			}
 			return ammoThings;

@@ -119,7 +119,6 @@ namespace YayosCombatAddon
 
 			// (replacement) Replaced with new method
 			ReloadUtility.TryAutoReloadSingle(__instance);
-
 			return false;
 		}
 	}

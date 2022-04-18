@@ -28,5 +28,7 @@
 			<steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl>
 		</li>
 	</modDependencies>
-	<description>[TODO]</description>
+	<description>Ammo utility additions for Yayo's Combat 3.
+	
+(Requires Yayo's Combat 3 ammo to be enabled.)</description>
 </ModMetaData>

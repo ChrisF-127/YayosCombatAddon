@@ -124,7 +124,7 @@ namespace YayosCombatAddon
 				return;
 			if (Find.TickManager.TicksGame % 60 != 0) 
 				return;
-			if (__instance.CurJobDef != JobDefOf.Wait_Combat && __instance.CurJobDef != JobDefOf.AttackStatic || __instance.equipment == null) 
+			if ((__instance.CurJobDef != JobDefOf.Wait_Combat && __instance.CurJobDef != JobDefOf.AttackStatic) || __instance.equipment == null) 
 				return;
 
 			ReloadUtility.TryAutoReloadAll(__instance);

@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using SimpleSidearms.rimworld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,26 +14,43 @@ namespace YayosCombatAddon
 	{
 		public static void EjectAmmo(Pawn pawn, CompReloadable comp)
 		{
-			var charges = comp.remainingCharges * comp.Props.ammoCountPerCharge;
-			if (charges > 0)
+			int count = comp.EjectableAmmo();
+			if (count > 0)
 			{
 				do
 				{
 					var ammo = ThingMaker.MakeThing(comp.AmmoDef);
-					ammo.stackCount = Mathf.Min(ammo.def.stackLimit, charges);
-					charges -= ammo.stackCount;
+					ammo.stackCount = Mathf.Min(ammo.def.stackLimit, count);
+					count -= ammo.stackCount;
 					GenPlace.TryPlaceThing(ammo, pawn.Position, pawn.Map, ThingPlaceMode.Near);
 				}
-				while (charges > 0);
+				while (count > 0);
 				comp.Props.soundReload.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
 				comp.remainingCharges = 0;
 			}
+			else
+			{
+				GeneralUtility.ShowRejectMessage(
+					comp.parent,
+					"SY_YCA.NoAmmoToEject".Translate(
+						new NamedArgument(pawn, "pawn"),
+						new NamedArgument(comp.parent, "thing")));
+			}
+		}
+
+		public static int EjectableAmmo(this CompReloadable comp)
+		{
+			if (comp.Props.ammoCountToRefill > 0)
+				return comp.RemainingCharges == comp.MaxCharges ? comp.Props.ammoCountToRefill : 0;
+			if (comp.Props.ammoCountPerCharge > 0)
+				return comp.RemainingCharges * comp.Props.ammoCountPerCharge;
+			return -1;
 		}
 
 		public static bool IsAmmo(this Thing thing) =>
 			thing?.def?.IsAmmo() == true;
-		public static bool IsAmmo(this ThingDef def) =>
-			def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
+		public static bool IsAmmo(this ThingDef def) => true; // ammo check disabled
+			//def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
 
 		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
 		{
@@ -47,7 +63,7 @@ namespace YayosCombatAddon
 
 		public static int MinAmmoNeededChecked(this CompReloadable comp)
 		{
-			var minAmmoNeeded = comp.MinAmmoNeeded(true);
+			var minAmmoNeeded = comp.MinAmmoNeeded(false);
 			if (minAmmoNeeded <= 0)
 				throw new Exception($"{nameof(YayosCombatAddon)}: " +
 					$"thing does not require reloading: '{comp}' (" +
@@ -70,7 +86,7 @@ namespace YayosCombatAddon
 			if (comp?.AmmoDef?.IsAmmo() == true)
 			{
 				ammoDef = comp.AmmoDef;
-				return comp.MaxAmmoNeeded(true);
+				return comp.MaxAmmoNeeded(false);
 			}
 			ammoDef = null;
 			return 0;
@@ -78,9 +94,7 @@ namespace YayosCombatAddon
 		public static bool IsOutOfAmmo(this Thing thing)
 		{
 			var comp = thing?.TryGetComp<CompReloadable>();
-			if (comp?.AmmoDef?.IsAmmo() == true)
-				return comp.RemainingCharges <= 0;
-			return false;
+			return comp?.AmmoDef?.IsAmmo() == true && comp.RemainingCharges <= 0;
 		}
 		public static bool AnyOutOfAmmo(this IEnumerable<Thing> things)
 		{

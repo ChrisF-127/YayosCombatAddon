@@ -79,7 +79,7 @@ namespace YayosCombatAddon
 						// set ammoThing as new target
 						job.targetB = targetInfo;
 						// set total count of stuff we wish to pick up, this can be more than ammoThing's stack actually holds
-						job.count = (comp.MaxCharges - comp.RemainingCharges) * minAmmoNeeded;
+						job.count = comp.MaxAmmoNeeded(false);
 
 						// if the stack is picked up completely, remove it from target queue
 						if (ammoThing.stackCount <= job.count)

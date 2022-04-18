@@ -36,7 +36,7 @@ namespace YayosCombatAddon
 					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
 						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
-						ammo.stackCount = comp.MaxAmmoNeeded(true);
+						ammo.stackCount = comp.MaxAmmoNeeded(false);
 						if (pawn.inventory.innerContainer.TryAdd(ammo))
 							ammoInInventory = ammo.stackCount;
 					}
@@ -78,7 +78,7 @@ namespace YayosCombatAddon
 					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
 						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
-						ammo.stackCount = comp.MaxAmmoNeeded(true);
+						ammo.stackCount = comp.MaxAmmoNeeded(false);
 						if (pawn.inventory.innerContainer.TryAdd(ammo))
 							ammoInInventory = ammo.stackCount;
 					}

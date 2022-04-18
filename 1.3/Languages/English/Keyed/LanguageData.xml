@@ -8,6 +8,7 @@ Right click for more options</SY_YCA.ReloadGizmo_desc>
   <SY_YCA.EjectAmmo_label>Eject ammo</SY_YCA.EjectAmmo_label>
   <SY_YCA.EjectAmmo_desc>Eject ammo from weapons.</SY_YCA.EjectAmmo_desc>
   <SY_YCA.NoEjectableAmmo>No ammo to eject</SY_YCA.NoEjectableAmmo>
+  <SY_YCA.NoAmmoToEject>{pawn}: there was no ammo left to eject from {thing}</SY_YCA.NoAmmoToEject>
   
   <SY_YCA.ReloadWeaponFromInventory_label>Reload from Inventory</SY_YCA.ReloadWeaponFromInventory_label>
   <SY_YCA.ReloadWeaponFromInventory_tooltip>Reload currently equipped weapon using ammo from inventory</SY_YCA.ReloadWeaponFromInventory_tooltip>

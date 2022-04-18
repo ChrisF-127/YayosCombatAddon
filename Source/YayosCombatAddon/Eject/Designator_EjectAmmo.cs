@@ -79,9 +79,9 @@ namespace YayosCombatAddon
         private static bool CanEjectAmmo(Thing thing)
 		{
             var reloadable = thing?.TryGetComp<CompReloadable>();
-			return reloadable != null 
-                && reloadable.AmmoDef.IsAmmo() 
-                && reloadable.RemainingCharges > 0;
+			return reloadable != null
+				&& reloadable.AmmoDef.IsAmmo()
+				&& reloadable.EjectableAmmo() > 0;
 		}
 		#endregion
 	}

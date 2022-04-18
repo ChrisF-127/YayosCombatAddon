@@ -19,12 +19,11 @@ namespace YayosCombatAddon
 			bool ignoreDistance = false, 
 			bool returnToStartingPosition = true)
 		{
-			bool success = true;
+			var success = true;
 			if (comp?.RemainingCharges <= 0)
 			{
 				var pawn = comp.Wearer;
 				var thing = comp.parent;
-
 				if (pawn != null && thing != null)
 				{
 					var ammoInInventory = pawn.CountAmmoInInventory(comp);
@@ -35,7 +34,7 @@ namespace YayosCombatAddon
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
 					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
-						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
+						var ammo = ThingMaker.MakeThing(comp.AmmoDef);
 						ammo.stackCount = comp.MaxAmmoNeeded(false);
 						if (pawn.inventory.innerContainer.TryAdd(ammo))
 							ammoInInventory = ammo.stackCount;
@@ -61,9 +60,9 @@ namespace YayosCombatAddon
 			bool ignoreDistance = false, 
 			bool returnToStartingPosition = true)
 		{
-			bool success = true;
+			var success = true;
 			var things = pawn?.GetAllReloadableThings()?.ToArray();
-			if (things?.AnyOutOfAmmo() == true)
+			if (things?.AnyAtLowAmmo(pawn, false) == true)
 			{
 				var reloadFromInventory = false;
 				foreach (var thing in things)
@@ -77,7 +76,7 @@ namespace YayosCombatAddon
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
 					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
 					{
-						Thing ammo = ThingMaker.MakeThing(comp.AmmoDef);
+						var ammo = ThingMaker.MakeThing(comp.AmmoDef);
 						ammo.stackCount = comp.MaxAmmoNeeded(false);
 						if (pawn.inventory.innerContainer.TryAdd(ammo))
 							ammoInInventory = ammo.stackCount;
@@ -92,7 +91,7 @@ namespace YayosCombatAddon
 				if (reloadFromInventory)
 					success = TryReloadFromInventory(pawn, things, showJobWarnings);
 				// reload from surrounding
-				else
+				else if (things.AnyAtLowAmmo(pawn, true))
 					success = TryReloadFromSurrounding(pawn, things, showJobWarnings, ignoreDistance, returnToStartingPosition);
 				// show out of ammo warning if reloading failed
 				if (showOutOfAmmoWarning && !success)

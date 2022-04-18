@@ -91,15 +91,18 @@ namespace YayosCombatAddon
 			ammoDef = null;
 			return 0;
 		}
-		public static bool IsOutOfAmmo(this Thing thing)
+		public static bool AtLowAmmo(this Thing thing, Pawn pawn, bool checkAvailable)
 		{
 			var comp = thing?.TryGetComp<CompReloadable>();
-			return comp?.AmmoDef?.IsAmmo() == true && comp.RemainingCharges <= 0;
+			return comp?.AmmoDef?.IsAmmo() == true 
+				&& ((comp.Props.ammoCountToRefill > 0 && comp.RemainingCharges <= 0) 
+					|| (comp.Props.ammoCountPerCharge > 0 && comp.RemainingCharges <= comp.MaxCharges * Main.LowAmmoFactorForReloadWhileWaiting))
+				&& (!checkAvailable || comp.AnyReservableReachableThing(pawn));
 		}
-		public static bool AnyOutOfAmmo(this IEnumerable<Thing> things)
+		public static bool AnyAtLowAmmo(this IEnumerable<Thing> things, Pawn pawn, bool checkAvailable)
 		{
 			foreach (var thing in things)
-				if (thing.IsOutOfAmmo())
+				if (thing.AtLowAmmo(pawn, checkAvailable))
 					return true;
 			return false;
 		}

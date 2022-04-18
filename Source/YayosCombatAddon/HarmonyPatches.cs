@@ -118,16 +118,19 @@ namespace YayosCombatAddon
 
 		static void Patch_Pawn_TickRare(Pawn __instance)
 		{
-			if (!yayoCombat.yayoCombat.ammo) 
-				return;
-			if (!__instance.Drafted) 
-				return;
-			if (Find.TickManager.TicksGame % 60 != 0) 
-				return;
-			if ((__instance.CurJobDef != JobDefOf.Wait_Combat && __instance.CurJobDef != JobDefOf.AttackStatic) || __instance.equipment == null) 
+			if (!yayoCombat.yayoCombat.ammo
+				|| __instance?.Drafted != true
+				|| Find.TickManager.TicksGame % 60 != 0 
+				|| __instance.equipment == null) 
 				return;
 
-			ReloadUtility.TryAutoReloadAll(__instance);
+			var job = __instance.CurJobDef;
+			// if attacking at range, try reloading only primary once it runs out of ammo
+			if (job == JobDefOf.AttackStatic)
+				ReloadUtility.TryAutoReloadSingle(__instance.GetPrimary().TryGetComp<CompReloadable>());
+			// if waiting (drafted), try reloading all weapons that are out of ammo and for which ammo can be found
+			else if (job == JobDefOf.Wait_Combat)
+				ReloadUtility.TryAutoReloadAll(__instance);
 		}
 
 		static bool Patch_CompReloadable_UsedOnce(CompReloadable __instance)
@@ -166,7 +169,8 @@ namespace YayosCombatAddon
 				{
 					// requires secondary patch to JobDriver_Reload.MakeNewToils (must only fail if comp.Wearer is neither pawn nor comp.Parent is in pawn's inventory)
 					var comp = thing.TryGetComp<CompReloadable>();
-					if (comp?.NeedsReload(allowForcedReload) == true && comp.AmmoDef.AnyReservableReachableThing(pawn, comp.MinAmmoNeeded(allowForcedReload)))
+					if (comp?.NeedsReload(allowForcedReload) == true 
+						&& comp.AmmoDef.AnyReservableReachableThing(pawn, comp.MinAmmoNeeded(allowForcedReload)))
 					{
 						__result = comp;
 						break;
@@ -175,7 +179,6 @@ namespace YayosCombatAddon
 			}
 			return __result;
 		}
-
 		static void JobDriver_Reload_MakeNewToils(JobDriver_Reload __instance)
 		{
 			var pawn = __instance.pawn;

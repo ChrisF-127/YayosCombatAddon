@@ -63,7 +63,7 @@
     <Compile Include="Loadout\PawnColumnWorker_CarryAmmo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Eject\Designator_EjectAmmo.cs" />
-    <Compile Include="Reload\Patch_ReloadGizmo.cs" />
+    <Compile Include="Reload\Command_ReloadActions.cs" />
     <Compile Include="Utility\InventoryUtility.cs" />
     <Compile Include="Utility\ReloadUtility.cs" />
     <Compile Include="Stuff\YCA_SoundDefOf.cs" />

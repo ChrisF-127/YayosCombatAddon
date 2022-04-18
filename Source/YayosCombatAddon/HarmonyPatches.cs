@@ -19,9 +19,13 @@ namespace YayosCombatAddon
 		{
 			Harmony harmony = new Harmony("syrus.yayoscombataddon");
 
+			// patch for reload gizmo
+			harmony.Patch(
+				typeof(Pawn_DraftController).GetMethod("GetGizmos", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_DraftController_GetGizmos)));
 			// patch for eject ammo gizmo
 			harmony.Patch(
-				typeof(ThingComp).GetMethod("CompGetGizmosExtra"),
+				typeof(ThingComp).GetMethod("CompGetGizmosExtra", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ThingComp_CompGetGizmosExtra)));
 
 			// replace original patches
@@ -57,6 +61,29 @@ namespace YayosCombatAddon
 			}
 		}
 
+		static IEnumerable<Gizmo> Pawn_DraftController_GetGizmos(IEnumerable<Gizmo> __result, Pawn_DraftController __instance)
+		{
+			if (yayoCombat.yayoCombat.ammo
+				&& __instance?.pawn is Pawn pawn
+				&& pawn.Faction?.IsPlayer == true
+				&& pawn.Drafted
+				&& !pawn.WorkTagIsDisabled(WorkTags.Violent))
+			{
+				var comps = new List<CompReloadable>();
+				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
+				{
+					var comp = thing.TryGetComp<CompReloadable>();
+					if (comp != null)
+						comps.Add(comp);
+				}
+
+				if (comps.Count > 0)
+					yield return new Command_ReloadActions(pawn);
+			}
+
+			foreach (var gizmo in __result)
+				yield return gizmo;
+		}
 
 		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{

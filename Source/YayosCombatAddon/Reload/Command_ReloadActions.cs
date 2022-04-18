@@ -10,37 +10,6 @@ using Verse;
 
 namespace YayosCombatAddon
 {
-	[HarmonyPatch(typeof(Pawn_DraftController), "GetGizmos")]
-	internal class Pawn_DraftController_GetGizmos
-	{
-		[HarmonyPostfix]
-#pragma warning disable IDE0051 // Remove unused private members
-		static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Pawn_DraftController __instance)
-#pragma warning restore IDE0051 // Remove unused private members
-		{
-			if (yayoCombat.yayoCombat.ammo
-				&& __instance?.pawn is Pawn pawn
-				&& pawn.Faction?.IsPlayer == true
-				&& pawn.Drafted
-				&& !pawn.WorkTagIsDisabled(WorkTags.Violent))
-			{
-				var comps = new List<CompReloadable>();
-				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
-				{
-					var comp = thing.TryGetComp<CompReloadable>();
-					if (comp != null)
-						comps.Add(comp);
-				}
-
-				if (comps.Count > 0)
-					yield return new Command_ReloadActions(pawn);
-			}
-
-			foreach (var gizmo in __result)
-				yield return gizmo;
-		}
-	}
-
 	internal class Command_ReloadActions : Command_Action
 	{
 		private readonly Pawn Pawn = null;

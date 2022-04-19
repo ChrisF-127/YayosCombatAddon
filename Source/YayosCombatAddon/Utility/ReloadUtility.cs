@@ -183,9 +183,12 @@ namespace YayosCombatAddon
 					if (thing.MaxAmmoNeeded(out _) > 0)
 						things.Add(thing);
 
-				foreach (var thing in pawn.GetSimpleSidearms())
-					if (thing.MaxAmmoNeeded(out _) > 0)
-						things.Add(thing);
+				if (Main.SimpleSidearmsCompatibility)
+				{
+					foreach (var thing in pawn.GetSimpleSidearms())
+						if (thing.MaxAmmoNeeded(out _) > 0)
+							things.Add(thing);
+				}
 			}
 			return things;
 		}

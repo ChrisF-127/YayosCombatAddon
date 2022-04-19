@@ -190,7 +190,7 @@ namespace YayosCombatAddon
 
 		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
 		{
-			if (__result == null)
+			if (Main.SimpleSidearmsCompatibility && __result == null)
 			{
 				foreach (var thing in pawn.GetSimpleSidearms())
 				{

@@ -33,11 +33,17 @@ namespace YayosCombatAddon
 			return success;
 		}
 
+		/// <summary>
+		/// Remember to check for <see cref="Main.SimpleSidearmsCompatibility"/> before executing; probably due to optimization, it can't be checked inside the method
+		/// </summary>
+		/// <param name="pawn"></param>
+		/// <returns></returns>
 		public static List<Thing> GetSimpleSidearms(this Pawn pawn)
 		{
 			var things = new List<Thing>();
-			if (Main.SimpleSidearmsCompatibility && pawn != null)
+			if (pawn != null)
 			{
+				Log.Message("Test");
 				var memory = CompSidearmMemory.GetMemoryCompForPawn(pawn);
 				foreach (var thing in pawn.inventory.innerContainer)
 				{

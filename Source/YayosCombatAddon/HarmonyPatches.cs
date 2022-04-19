@@ -48,7 +48,7 @@ namespace YayosCombatAddon
 			// SimpleSidearms compatibility patches
 			if (Main.SimpleSidearmsCompatibility)
 			{
-				// Info: original Yayo's Combat patch to ReloadableUtility.FindSomeReloadableComponent should be replaced as a postfix patch
+				// Info: original Yayo's Combat patch to ReloadableUtility.FindSomeReloadableComponent should be reworked as a postfix patch
 				// patch which makes this method also find sidearms in inventory
 				harmony.Patch(
 					typeof(ReloadableUtility).GetMethod("FindSomeReloadableComponent", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
@@ -190,7 +190,7 @@ namespace YayosCombatAddon
 
 		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
 		{
-			if (Main.SimpleSidearmsCompatibility && __result == null)
+			if (__result == null)
 			{
 				foreach (var thing in pawn.GetSimpleSidearms())
 				{

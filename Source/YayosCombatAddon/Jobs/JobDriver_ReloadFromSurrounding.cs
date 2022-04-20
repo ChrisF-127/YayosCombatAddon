@@ -15,7 +15,6 @@ namespace YayosCombatAddon
 	internal class JobDriver_ReloadFromSurrounding : JobDriver
 	{
 		private Toil Wait { get; } = Toils_General.Wait(1).WithProgressBarToilDelay(TargetIndex.A);
-		private IntVec3 StartingPosition { get; set; }
 
 		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
@@ -33,7 +32,6 @@ namespace YayosCombatAddon
 			var repeat = Toils_General.Label();
 			var done = Toils_General.Label();
 
-			StartingPosition = pawn.Position;
 			var primary = pawn.GetPrimary();
 			yield return YCA_JobUtility.DropCarriedThing();
 			yield return next;

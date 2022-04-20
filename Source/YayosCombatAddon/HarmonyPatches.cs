@@ -5,9 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
+using Verse.AI;
 using yayoCombat;
 
 namespace YayosCombatAddon
@@ -15,6 +17,13 @@ namespace YayosCombatAddon
 	[StaticConstructorOnStartup]
 	public static class HarmonyPatches
 	{
+		class JobInfo
+		{
+			public JobDef JobDef;
+			public JobCondition JobCondition;
+		}
+		static readonly ConditionalWeakTable<Pawn, JobInfo> PawnPreviousJobTable = new ConditionalWeakTable<Pawn, JobInfo>();
+
 		static HarmonyPatches()
 		{
 			Harmony harmony = new Harmony("syrus.yayoscombataddon");
@@ -40,6 +49,14 @@ namespace YayosCombatAddon
 				typeof(patch_ThingWithComps_GetFloatMenuOptions).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_ThingWithComps_GetFloatMenuOptions)));
 
+			// patches to prevent reloading when 
+			harmony.Patch(
+				typeof(JobGiver_Reload).GetMethod("GetPriority", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobGiver_Reload_GetPriority)));
+			harmony.Patch(
+				typeof(Pawn_JobTracker).GetMethod("EndCurrentJob", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_JobTracker_EndCurrentJob)));
+
 			// patch to allow for picking up stacklimit 
 			harmony.Patch(
 				typeof(Pawn_CarryTracker).GetMethod("MaxStackSpaceEver", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
@@ -60,6 +77,7 @@ namespace YayosCombatAddon
 					prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobDriver_Reload_MakeNewToils)));
 			}
 		}
+
 
 		static IEnumerable<Gizmo> Pawn_DraftController_GetGizmos(IEnumerable<Gizmo> __result, Pawn_DraftController __instance)
 		{
@@ -133,6 +151,27 @@ namespace YayosCombatAddon
 					yield return new CodeInstruction(OpCodes.Call, typeof(AmmoUtility).GetMethod(nameof(AmmoUtility.EjectableAmmo), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 				else
 					yield return instruction;
+			}
+		}
+
+
+		static float JobGiver_Reload_GetPriority(float __result, Pawn pawn)
+		{
+			// do not reload if hunting failed "Incompletable", it probably timed out and we don't want pawns running back and forth between reloading & hunting
+			if (PawnPreviousJobTable.TryGetValue(pawn, out var jobInfo)
+				&& jobInfo.JobDef == JobDefOf.Hunt
+				&& jobInfo.JobCondition == JobCondition.Incompletable)
+				__result = -1f;
+			return __result;
+		}
+		static void Pawn_JobTracker_EndCurrentJob(Pawn ___pawn, Job ___curJob, JobCondition condition)
+		{
+			if (___pawn?.IsColonist == true 
+				&& ___curJob != null)
+			{
+				var jobInfo = PawnPreviousJobTable.GetOrCreateValue(___pawn);
+				jobInfo.JobDef = ___curJob.def;
+				jobInfo.JobCondition = condition;
 			}
 		}
 

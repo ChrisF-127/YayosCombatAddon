@@ -182,7 +182,13 @@ namespace YayosCombatAddon
 				return false;
 
 			// (replacement) Replaced with new method
-			if (!ReloadUtility.TryAutoReloadSingle(__instance, true) && pawn.CurJobDef == JobDefOf.Hunt)
+			var drafted = pawn.Drafted;
+			if (!ReloadUtility.TryAutoReloadSingle(
+					__instance, 
+					showOutOfAmmoWarning: true, 
+					ignoreDistance: !drafted, 
+					returnToStartingPosition: drafted) 
+				&& pawn.CurJobDef == JobDefOf.Hunt)
 				pawn.jobs.StopAll();
 			return false;
 		}

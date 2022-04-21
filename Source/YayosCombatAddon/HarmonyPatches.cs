@@ -19,8 +19,9 @@ namespace YayosCombatAddon
 	{
 		class JobInfo
 		{
-			public JobDef JobDef;
-			public JobCondition JobCondition;
+			public JobDef Def;
+			public JobCondition EndCondition;
+			public ThingWithComps PreviousWeapon;
 		}
 		static readonly ConditionalWeakTable<Pawn, JobInfo> PawnPreviousJobTable = new ConditionalWeakTable<Pawn, JobInfo>();
 
@@ -49,7 +50,7 @@ namespace YayosCombatAddon
 				typeof(patch_ThingWithComps_GetFloatMenuOptions).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_ThingWithComps_GetFloatMenuOptions)));
 
-			// patches to prevent reloading when 
+			// patches to prevent reloading after hunting job fails (usually after timing out after 2h), stops pawns from going back and forth between hunting and reloading
 			harmony.Patch(
 				typeof(JobGiver_Reload).GetMethod("GetPriority", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobGiver_Reload_GetPriority)));
@@ -159,8 +160,8 @@ namespace YayosCombatAddon
 		{
 			// do not reload if hunting failed "Incompletable", it probably timed out and we don't want pawns running back and forth between reloading & hunting
 			if (PawnPreviousJobTable.TryGetValue(pawn, out var jobInfo)
-				&& jobInfo.JobDef == JobDefOf.Hunt
-				&& jobInfo.JobCondition == JobCondition.Incompletable)
+				&& jobInfo.Def == JobDefOf.Hunt
+				&& jobInfo.EndCondition == JobCondition.Incompletable)
 				__result = -1f;
 			return __result;
 		}
@@ -170,8 +171,16 @@ namespace YayosCombatAddon
 				&& ___curJob != null)
 			{
 				var jobInfo = PawnPreviousJobTable.GetOrCreateValue(___pawn);
-				jobInfo.JobDef = ___curJob.def;
-				jobInfo.JobCondition = condition;
+				jobInfo.Def = ___curJob.def;
+				jobInfo.EndCondition = condition;
+
+				if (Main.SimpleSidearmsCompatibility
+					&& ___curJob.def == JobDefOf.Reload
+					&& jobInfo.PreviousWeapon != null)
+				{
+					// reequip previous weapon
+					___pawn.EquipThingFromInventory(jobInfo.PreviousWeapon);
+				}
 			}
 		}
 
@@ -229,6 +238,7 @@ namespace YayosCombatAddon
 					returnToStartingPosition: drafted) 
 				&& pawn.CurJobDef == JobDefOf.Hunt)
 				pawn.jobs.StopAll();
+
 			return false;
 		}
 
@@ -262,6 +272,10 @@ namespace YayosCombatAddon
 				|| thing == null
 				|| !pawn.inventory.Contains(thing))
 				return;
+
+			// remember previous weapon to reequip it after the job ended
+			var jobInfo = PawnPreviousJobTable.GetOrCreateValue(pawn);
+			jobInfo.PreviousWeapon = pawn.equipment.Primary;
 
 			// thing to reload must be equipped
 			pawn.EquipThingFromInventory(thing);

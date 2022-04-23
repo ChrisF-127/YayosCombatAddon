@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <LanguageData>
 
+  <SY_YCA.NumberOfAmmoColumns_title>Number of ammo columns in assign tab</SY_YCA.NumberOfAmmoColumns_title>
+  <SY_YCA.NumberOfAmmoColumns_desc>Set the number of ammo columns to be shown in the "Assign" tab
+Reducing the amount of columns will throw errors when you load a save which had more - these can be ignored, they will be gone on future saves.
+Requires restarting the game!</SY_YCA.NumberOfAmmoColumns_desc>
+
   <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
   <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory
 Right click for more options</SY_YCA.ReloadGizmo_desc>

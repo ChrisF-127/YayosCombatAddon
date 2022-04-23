@@ -22,7 +22,7 @@ namespace YayosCombatAddon
 				if (yayoCombat.yayoCombat.ammo)
 				{
 					float num = rect.width - 4f;
-					int num2 = Mathf.FloorToInt(num * 0.333333343f);
+					int num2 = Mathf.FloorToInt(num / 3f);
 					float x = rect.x;
 
 					// Type

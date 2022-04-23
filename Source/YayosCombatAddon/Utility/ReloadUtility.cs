@@ -253,7 +253,7 @@ namespace YayosCombatAddon
 								output.RemoveAt(i);
 					}
 					// show warning if ammo not found
-					if (showWarnings)
+					if (showWarnings && count > 0)
 					{
 						GeneralUtility.ShowRejectMessage(
 							pawn, 

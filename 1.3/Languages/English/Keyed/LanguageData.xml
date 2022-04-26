@@ -6,6 +6,9 @@
 Reducing the amount of columns will throw errors when you load a save which had more - these can be ignored, they will be gone on future saves.
 Requires restarting the game!</SY_YCA.NumberOfAmmoColumns_desc>
 
+  <SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>Low ammo before reload in %</SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>
+  <SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>Drafted pawns will reload their weapon if its ammo falls below this limit while they are waiting (idle)</SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>
+
   <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
   <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory
 Right click for more options</SY_YCA.ReloadGizmo_desc>

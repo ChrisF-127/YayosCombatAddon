@@ -12,13 +12,14 @@ namespace YayosCombatAddon
 {
 	public class Main : ModBase
 	{
-		public static float LowAmmoFactorForReloadWhileWaiting { get; private set; } = 0.1f;
-
 		public static bool SimpleSidearmsCompatibility { get; private set; } = 
 			ModsConfig.IsActive("petetimessix.simplesidearms") || ModsConfig.IsActive("petetimessix.simplesidearms_steam");
 
 		private SettingHandle<int> _numberOfAmmoColumnsSetting;
 		public static int NumberOfAmmoColumns = 2;
+
+		private SettingHandle<float> _lowAmmoFactorForReloadWhileWaiting;
+		public static float LowAmmoFactorForReloadWhileWaiting = 0.1f;
 
 		public Main()
 		{
@@ -30,14 +31,27 @@ namespace YayosCombatAddon
 		{
 			base.DefsLoaded();
 
+			// Setting: number of ammo-columns in "Assign"-tab
 			_numberOfAmmoColumnsSetting = Settings.GetHandle(
 				nameof(NumberOfAmmoColumns),
 				"SY_YCA.NumberOfAmmoColumns_title".Translate(),
-				"SY_YCA.NumberOfAmmoColumns_desc".Translate(), 
-				2, 
-				s => true);
+				"SY_YCA.NumberOfAmmoColumns_desc".Translate(),
+				NumberOfAmmoColumns, 
+				s => int.TryParse(s, out int result) && result >= 0 && result <= 10);
 			NumberOfAmmoColumns = _numberOfAmmoColumnsSetting.Value;
 
+			// Setting: 
+			_lowAmmoFactorForReloadWhileWaiting = Settings.GetHandle(
+				nameof(LowAmmoFactorForReloadWhileWaiting),
+				"SY_YCA.LowAmmoFactorForReloadWhileWaiting_title".Translate(),
+				"SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc".Translate(),
+				LowAmmoFactorForReloadWhileWaiting * 1e2f, 
+				s => float.TryParse(s, out float result) && result >= 0f && result <= 90f);
+			_lowAmmoFactorForReloadWhileWaiting.ValueChanged += handle => LowAmmoFactorForReloadWhileWaiting = ((SettingHandle<float>)handle) * 1e-2f;
+			LowAmmoFactorForReloadWhileWaiting = _lowAmmoFactorForReloadWhileWaiting.Value * 1e-2f;
+
+
+			// Dynamic "Assign"-tab ammo-column initialization
 			var ammoCategory = "yy_ammo_category";
 
 			var assignTableDef = DefDatabase<PawnTableDef>.AllDefs.First(def => def.defName == "Assign");

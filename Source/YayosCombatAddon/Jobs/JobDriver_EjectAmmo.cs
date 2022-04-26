@@ -39,7 +39,7 @@ namespace YayosCombatAddon
                 initAction = () =>
                 {
                     AmmoUtility.EjectAmmo(pawn, comp);
-                    Map.designationManager.DesignationOn(comp.parent, YCA_DesignationDefOf.EjectAmmo)?.Delete();
+                    Map.designationManager.DesignationOn(comp.parent, YCA_DesignationDefOf.YCA_EjectAmmo)?.Delete();
                 }
             };
             yield return done;

@@ -12,7 +12,7 @@ namespace YayosCombatAddon
 	internal class YCA_SoundDefOf
 	{
 #pragma warning disable 0649 // disable "never assigned to" warning
-		public static SoundDef Designate_EjectAmmo;
+		public static SoundDef YCA_Designate_EjectAmmo;
 #pragma warning restore 0649
 	}
 }

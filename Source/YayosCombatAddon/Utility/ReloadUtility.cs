@@ -114,7 +114,7 @@ namespace YayosCombatAddon
 				if (ammoThings.Count > 0)
 				{
 					// make job
-					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromInventory);
+					var job = JobMaker.MakeJob(YCA_JobDefOf.YCA_ReloadFromInventory);
 
 					// fill job queue
 					foreach (var thing in reloadables)
@@ -149,7 +149,7 @@ namespace YayosCombatAddon
 				if (ammoThings.Count > 0)
 				{
 					// make job
-					var job = JobMaker.MakeJob(YCA_JobDefOf.ReloadFromSurrounding);
+					var job = JobMaker.MakeJob(YCA_JobDefOf.YCA_ReloadFromSurrounding);
 
 					// fill job queues
 					foreach (var thing in reloadables)

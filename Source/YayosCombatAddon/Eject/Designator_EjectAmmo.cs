@@ -19,7 +19,7 @@ namespace YayosCombatAddon
             soundDragSustain = SoundDefOf.Designate_DragStandard;
             soundDragChanged = SoundDefOf.Designate_DragStandard_Changed;
             useMouseIcon = true;
-            soundSucceeded = YCA_SoundDefOf.Designate_EjectAmmo;
+            soundSucceeded = YCA_SoundDefOf.YCA_Designate_EjectAmmo;
             hotKey = KeyBindingDefOf.Misc2;
         }
 
@@ -27,7 +27,7 @@ namespace YayosCombatAddon
 		public override int DraggableDimensions => 2;
 
         public override DesignationDef Designation => 
-            YCA_DesignationDefOf.EjectAmmo;
+            YCA_DesignationDefOf.YCA_EjectAmmo;
 
 		public override AcceptanceReport CanDesignateThing(Thing thing)
         {

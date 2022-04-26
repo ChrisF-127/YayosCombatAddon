@@ -2,7 +2,7 @@
 <Defs>
 
 	<SoundDef>
-		<defName>Designate_EjectAmmo</defName>
+		<defName>YCA_Designate_EjectAmmo</defName>
 		<maxSimultaneous>1</maxSimultaneous>
 		<subSounds>
 			<li>

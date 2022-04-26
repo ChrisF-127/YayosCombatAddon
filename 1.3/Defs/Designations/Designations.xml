@@ -2,7 +2,7 @@
 <Defs>
 
 	<DesignationDef>
-		<defName>EjectAmmo</defName>
+		<defName>YCA_EjectAmmo</defName>
 		<texturePath>YCA_AmmoEjectDesignation</texturePath>
 		<targetType>Thing</targetType>
 	</DesignationDef>

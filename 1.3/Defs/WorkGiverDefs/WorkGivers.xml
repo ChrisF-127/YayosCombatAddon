@@ -2,7 +2,7 @@
 <Defs>
 
 	<WorkGiverDef>
-		<defName>EjectAmmo</defName>
+		<defName>YCA_EjectAmmo</defName>
 		<label>eject ammo</label>
 		<giverClass>YayosCombatAddon.WorkGiver_EjectAmmo</giverClass>
 		<workType>Hauling</workType>

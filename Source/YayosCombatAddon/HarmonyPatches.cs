@@ -112,7 +112,7 @@ namespace YayosCombatAddon
 					|| reloadable.Props.ammoCountPerCharge > 0))
 			{
 				var thing = reloadable.parent;
-				if (thing.Map.designationManager.DesignationOn(thing, YCA_DesignationDefOf.EjectAmmo) == null)
+				if (thing.Map.designationManager.DesignationOn(thing, YCA_DesignationDefOf.YCA_EjectAmmo) == null)
 				{
 					yield return new Command_Action
 					{
@@ -121,8 +121,8 @@ namespace YayosCombatAddon
 						icon = YCA_Textures.AmmoEject,
 						disabled = reloadable.EjectableAmmo() <= 0,
 						disabledReason = "SY_YCA.NoEjectableAmmo".Translate(),
-						action = () => thing.Map.designationManager.AddDesignation(new Designation(thing, YCA_DesignationDefOf.EjectAmmo)),
-						activateSound = YCA_SoundDefOf.Designate_EjectAmmo,
+						action = () => thing.Map.designationManager.AddDesignation(new Designation(thing, YCA_DesignationDefOf.YCA_EjectAmmo)),
+						activateSound = YCA_SoundDefOf.YCA_Designate_EjectAmmo,
 					};
 				}
 			}

@@ -13,7 +13,7 @@ namespace YayosCombatAddon
 	internal class YCA_DesignationDefOf
 	{
 #pragma warning disable 0649 // disable "never assigned to" warning
-		public static DesignationDef EjectAmmo;
+		public static DesignationDef YCA_EjectAmmo;
 #pragma warning restore 0649
 	}
 }

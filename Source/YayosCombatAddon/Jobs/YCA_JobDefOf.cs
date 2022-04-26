@@ -12,8 +12,8 @@ namespace YayosCombatAddon
 	internal class YCA_JobDefOf
 	{
 #pragma warning disable 0649 // disable "never assigned to" warning
-		public static JobDef ReloadFromInventory;
-		public static JobDef ReloadFromSurrounding;
+		public static JobDef YCA_ReloadFromInventory;
+		public static JobDef YCA_ReloadFromSurrounding;
 #pragma warning restore 0649
 	}
 }

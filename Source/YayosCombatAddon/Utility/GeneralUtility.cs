@@ -20,7 +20,7 @@ namespace YayosCombatAddon
 		public static bool AnyReservableReachableThing(this ThingDef def, Pawn pawn, int minAmmoNeeded)
 		{
 			// check if any thing of the desire def is available
-			var listsByDef = pawn?.Position.GetRegion(pawn.Map)?.ListerThings?.listsByDef;
+			var listsByDef = pawn?.Map?.listerThings?.listsByDef;
 			if (listsByDef?.ContainsKey(def) == true)
 			{
 				// check if any thing found can be reserved and reached

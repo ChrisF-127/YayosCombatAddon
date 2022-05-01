@@ -12,6 +12,8 @@ namespace YayosCombatAddon
 {
 	public class Main : ModBase
 	{
+		internal static string AmmoCategoryName = "yy_ammo_category";
+
 		public static bool SimpleSidearmsCompatibility { get; private set; } = 
 			ModsConfig.IsActive("petetimessix.simplesidearms") || ModsConfig.IsActive("petetimessix.simplesidearms_steam");
 
@@ -52,10 +54,8 @@ namespace YayosCombatAddon
 
 
 			// Dynamic "Assign"-tab ammo-column initialization
-			var ammoCategory = "yy_ammo_category";
-
 			var assignTableDef = DefDatabase<PawnTableDef>.AllDefs.First(def => def.defName == "Assign");
-			var ammoDefs = DefDatabase<ThingDef>.AllDefs.Where(def => def.thingCategories?.Contains(ThingCategoryDef.Named(ammoCategory)) == true)?.ToList();
+			var ammoDefs = DefDatabase<ThingDef>.AllDefs.Where(def => def.IsAmmo(true))?.ToList();
 			if (ammoDefs?.Count > 0)
 			{
 				for (int i = 0; i < NumberOfAmmoColumns; i++)
@@ -88,7 +88,7 @@ namespace YayosCombatAddon
 				}
 			}
 			else
-				Log.Error($"{nameof(YayosCombatAddon)}: could not find any things using the '{ammoCategory}'-ThingCategory (no ammo found); assign tab columns could not be created!");
+				Log.Error($"{nameof(YayosCombatAddon)}: could not find any things using the '{AmmoCategoryName}'-ThingCategory (no ammo found); assign tab columns could not be created!");
 		}
 	}
 }

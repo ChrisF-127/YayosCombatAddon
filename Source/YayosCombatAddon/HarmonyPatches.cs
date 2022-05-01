@@ -187,7 +187,7 @@ namespace YayosCombatAddon
 
 		static int Pawn_CarryTracker_MaxStackSpaceEver(int __result, ThingDef td)
 		{
-			return td.IsAmmo() ? td.stackLimit : __result;
+			return td.IsAmmo(true) ? td.stackLimit : __result;
 		}
 
 

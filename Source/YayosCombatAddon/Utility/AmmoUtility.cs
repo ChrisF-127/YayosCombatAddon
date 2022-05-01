@@ -47,10 +47,16 @@ namespace YayosCombatAddon
 			return -1;
 		}
 
-		public static bool IsAmmo(this Thing thing) =>
-			thing?.def?.IsAmmo() == true;
-		public static bool IsAmmo(this ThingDef def) => true; // ammo check disabled
-			//def?.thingCategories?.Contains(ThingCategoryDef.Named("yy_ammo_category")) == true;
+		public static bool IsAmmo(this Thing thing, bool forceCheck = false) =>
+			thing?.def?.IsAmmo(forceCheck) == true;
+		public static bool IsAmmo(this ThingDef def, bool forceCheck = false)
+		{
+#if !ALWAYS_CHECK_ISAMMO
+			if (!forceCheck)
+				return true;
+#endif
+			return def?.thingCategories?.Contains(ThingCategoryDef.Named(Main.AmmoCategoryName)) == true;
+		}
 
 		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
 		{

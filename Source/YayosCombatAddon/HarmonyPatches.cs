@@ -58,11 +58,6 @@ namespace YayosCombatAddon
 				typeof(Pawn_JobTracker).GetMethod("EndCurrentJob", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
 				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_JobTracker_EndCurrentJob)));
 
-			// patch to allow for picking up stacklimit 
-			harmony.Patch(
-				typeof(Pawn_CarryTracker).GetMethod("MaxStackSpaceEver", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_CarryTracker_MaxStackSpaceEver)));
-
 			// SimpleSidearms compatibility patches
 			if (Main.SimpleSidearmsCompatibility)
 			{
@@ -182,12 +177,6 @@ namespace YayosCombatAddon
 					___pawn.EquipThingFromInventory(jobInfo.PreviousWeapon);
 				}
 			}
-		}
-
-
-		static int Pawn_CarryTracker_MaxStackSpaceEver(int __result, ThingDef td)
-		{
-			return td.IsAmmo(true) ? td.stackLimit : __result;
 		}
 
 

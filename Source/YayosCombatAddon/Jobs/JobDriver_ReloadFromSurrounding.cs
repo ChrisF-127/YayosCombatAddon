@@ -40,7 +40,7 @@ namespace YayosCombatAddon
 			yield return repeat;
 			yield return Toils_Jump.JumpIf(next, () => !TryMoveAmmoToCarriedThing());
 			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-			yield return Toils_Haul.StartCarryThing(TargetIndex.B, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
+			yield return Toils_Haul.StartCarryThing(TargetIndex.B, putRemainderInQueue: true, subtractNumTakenFromJobCount: true).FailOnDestroyedNullOrForbidden(TargetIndex.B);
 			yield return YCA_JobUtility.EquipStaticOrTargetA();
 			yield return Wait;
 			yield return YCA_JobUtility.ReloadFromCarriedThing();
@@ -102,11 +102,13 @@ namespace YayosCombatAddon
 					// if pawn is carrying ammo, drop it, reserve it and add it back to target queue, we might need it later for a different weapon
 					var carriedThing = pawn.carryTracker.CarriedThing;
 					if (carriedThing != null
+						&& !carriedThing.Destroyed
+						&& carriedThing.stackCount > 0
 						&& pawn.carryTracker.TryDropCarriedThing(pawn.Position, pawn.carryTracker.CarriedThing.stackCount, ThingPlaceMode.Near, out var _)
 						&& carriedThing.IsAmmo())
 					{
 						pawn.Reserve(carriedThing, job);
-						job.targetQueueB.Add(carriedThing);
+						job.targetQueueB.Insert(0, carriedThing);
 					}
 				}
 			};

@@ -52,5 +52,11 @@ namespace YayosCombatAddon
 					dictionary.Remove(t);
 			}
 		}
+
+		public static bool IsHumanlike(this Pawn pawn) => 
+			pawn?.def?.race?.Humanlike == true;
+
+		public static bool IsHumanlikeColonist(this Pawn pawn) =>
+			pawn.IsHumanlike() && pawn.IsColonist;
 	}
 }

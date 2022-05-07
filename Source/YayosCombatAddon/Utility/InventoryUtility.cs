@@ -41,13 +41,16 @@ namespace YayosCombatAddon
 		public static List<Thing> GetSimpleSidearms(this Pawn pawn)
 		{
 			var things = new List<Thing>();
-			if (pawn != null)
+			if (pawn != null && pawn.IsHumanlikeColonist())
 			{
 				var memory = CompSidearmMemory.GetMemoryCompForPawn(pawn);
-				foreach (var thing in pawn.inventory.innerContainer)
+				if (memory != null)
 				{
-					if (thing != null && memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def)))
-						things.Add(thing);
+					foreach (var thing in pawn.inventory.innerContainer)
+					{
+						if (thing != null && memory.RememberedWeapons.Contains(new ThingDefStuffDefPair(thing.def)))
+							things.Add(thing);
+					}
 				}
 			}
 			return things;

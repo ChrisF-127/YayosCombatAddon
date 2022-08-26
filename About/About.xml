@@ -22,11 +22,11 @@
 			<displayName>HugsLib</displayName>
 			<steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl>
 		</li>
-		<li>
-			<packageId>com.yayo.combat3</packageId>
-			<displayName>Yayo's Combat 3</displayName>
-			<steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl>
-		</li>
+		<!-- <li> -->
+			<!-- <packageId>com.yayo.combat3</packageId> -->
+			<!-- <displayName>Yayo's Combat 3</displayName> -->
+			<!-- <steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl> -->
+		<!-- </li> -->
 	</modDependencies>
 	<description>Ammo utility additions for Yayo's Combat 3.
 	

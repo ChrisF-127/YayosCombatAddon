@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <SY_YCA.NumberOfAmmoColumns_title>Number of ammo columns in assign tab</SY_YCA.NumberOfAmmoColumns_title>
+  <SY_YCA.NumberOfAmmoColumns_desc>Set the number of ammo columns to be shown in the "Assign" tab
+Reducing the amount of columns will throw errors when you load a save which had more - these can be ignored, they will be gone on future saves.
+Requires restarting the game!</SY_YCA.NumberOfAmmoColumns_desc>
+
+  <SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>Low ammo before reload in %</SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>
+  <SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>Drafted pawns will reload their weapon if its ammo falls below this limit while they are waiting (idle)</SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>
+
+  <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
+  <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory
+Right click for more options</SY_YCA.ReloadGizmo_desc>
+
+  <SY_YCA.EjectAmmo_label>Eject ammo</SY_YCA.EjectAmmo_label>
+  <SY_YCA.EjectAmmo_desc>Eject ammo from weapons.</SY_YCA.EjectAmmo_desc>
+  <SY_YCA.NoEjectableAmmo>No ammo to eject</SY_YCA.NoEjectableAmmo>
+  <SY_YCA.NoAmmoToEject>{pawn}: there was no ammo left to eject from {thing}</SY_YCA.NoAmmoToEject>
+  
+  <SY_YCA.ReloadWeaponFromInventory_label>Reload from Inventory</SY_YCA.ReloadWeaponFromInventory_label>
+  <SY_YCA.ReloadWeaponFromInventory_tooltip>Reload currently equipped weapon using ammo from inventory</SY_YCA.ReloadWeaponFromInventory_tooltip>
+  <SY_YCA.ReloadWeaponFromSurrounding_label>Reload from Surrounding</SY_YCA.ReloadWeaponFromSurrounding_label>
+  <SY_YCA.ReloadWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload currently equipped weapon</SY_YCA.ReloadWeaponFromSurrounding_tooltip>
+    
+  <SY_YCA.ReloadAllWeaponFromInventory_label>Reload all weapons from Inventory</SY_YCA.ReloadAllWeaponFromInventory_label>
+  <SY_YCA.ReloadAllWeaponFromInventory_tooltip>Reload all weapons equipped and in inventory using ammo from inventory</SY_YCA.ReloadAllWeaponFromInventory_tooltip>
+  <SY_YCA.ReloadAllWeaponFromSurrounding_label>Reload all weapons from Surrounding</SY_YCA.ReloadAllWeaponFromSurrounding_label>
+  <SY_YCA.ReloadAllWeaponFromSurrounding_tooltip>Search for ammo nearby and use it to reload all weapons equipped or in inventory</SY_YCA.ReloadAllWeaponFromSurrounding_tooltip>
+  
+  <SY_YCA.RestockAmmoFromSurrounding_label>Restock inventory ammo</SY_YCA.RestockAmmoFromSurrounding_label>
+  <SY_YCA.RestockAmmoFromSurrounding_tooltip>Restock inventory with ammo assigned to the pawn via the "assign" ammo settings or assigned drug policy
+Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurrounding_tooltip>
+  
+  <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
+  <SY_YCA.NothingToRestock>Nothing requires restocking</SY_YCA.NothingToRestock>
+  <SY_YCA.NoAmmoNearby>{pawn} could not find enough '{ammo}' nearby, missing {count}</SY_YCA.NoAmmoNearby>
+  <SY_YCA.NoAmmoInventory>{pawn} could not find enough '{ammo}' in their inventory, missing {count}</SY_YCA.NoAmmoInventory>
+  <SY_YCA.NoAmmoRestock>{pawn} could not find enough '{ammo}', missing {count} out of a desired {max}</SY_YCA.NoAmmoRestock>
+  <SY_YCA.OutOfAmmo>{pawn} ran out of ammo and could not find any to reload</SY_YCA.OutOfAmmo>
+  
+</LanguageData>

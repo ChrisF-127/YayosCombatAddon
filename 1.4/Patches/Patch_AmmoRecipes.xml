@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	
+	<Operation Class="PatchOperationAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_primitive" or defName="Make_yy_ammo_primitive10" or defName="Make_yy_ammo_primitive_fire" or defName="Make_yy_ammo_primitive_fire10" or defName="Make_yy_ammo_primitive_emp" or defName="Make_yy_ammo_primitive_emp10"]/recipeUsers</xpath>
+		<value>
+			<li>ElectricSmithy</li>
+			<li>FueledSmithy</li>
+		</value>
+	</Operation>
+	
+</Patch>

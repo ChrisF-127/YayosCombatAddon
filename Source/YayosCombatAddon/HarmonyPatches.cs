@@ -81,26 +81,40 @@ namespace YayosCombatAddon
 
 		static IEnumerable<Gizmo> Pawn_DraftController_GetGizmos(IEnumerable<Gizmo> __result, Pawn_DraftController __instance)
 		{
+			var addReloadGizmo = false;
+
+			var pawn = __instance?.pawn;
 			if (yayoCombat.yayoCombat.ammo
-				&& __instance?.pawn is Pawn pawn
+				&& pawn != null
 				&& pawn.Faction?.IsPlayer == true
 				&& pawn.Drafted
 				&& !pawn.WorkTagIsDisabled(WorkTags.Violent))
 			{
-				var comps = new List<CompReloadable>();
 				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
 				{
-					var comp = thing.TryGetComp<CompReloadable>();
-					if (comp != null)
-						comps.Add(comp);
+					if (thing.TryGetComp<CompReloadable>() != null)
+					{
+						addReloadGizmo = true;
+						break;
+					}
 				}
-
-				if (comps.Count > 0)
-					yield return new Command_ReloadActions(pawn);
 			}
 
 			foreach (var gizmo in __result)
+			{
 				yield return gizmo;
+
+				if (addReloadGizmo
+					&& gizmo is Command command
+					&& command.tutorTag == "FireAtWillToggle")
+				{
+					yield return new Command_ReloadActions(pawn);
+					addReloadGizmo = false;
+				}
+			}
+
+			if (addReloadGizmo)
+				Log.ErrorOnce($"{nameof(YayosCombatAddon)}: Failed to add 'Reload' gizmo!", 0x18051848);
 		}
 
 		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra(IEnumerable<Gizmo> __result, ThingComp __instance)

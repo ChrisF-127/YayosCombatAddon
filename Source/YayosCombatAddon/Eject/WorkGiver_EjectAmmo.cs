@@ -16,7 +16,7 @@ namespace YayosCombatAddon
 
 		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
-			var designations = pawn.Map.designationManager.allDesignations;
+			var designations = pawn.Map.designationManager.AllDesignations;
 			for (int i = 0; i < designations.Count; i++)
 			{
 				if (designations[i].def == YCA_DesignationDefOf.YCA_EjectAmmo)

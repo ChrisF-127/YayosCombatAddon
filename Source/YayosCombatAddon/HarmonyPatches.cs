@@ -42,12 +42,9 @@ namespace YayosCombatAddon
 			harmony.Patch(
 				typeof(patch_Pawn_TickRare).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_Pawn_TickRare)));
-			if (typeof(patch_CompReloadable_UsedOnce).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public) is MethodInfo m0)
-				harmony.Patch(m0, transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
-			else if (typeof(patch_CompReloadable_UsedOnce).GetMethod("Prefix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public) is MethodInfo m1)
-				harmony.Patch(m1, transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce_Legacy)));
-			else
-				Log.Error($"{nameof(YayosCombatAddon)}: 'patch_CompReloadable_UsedOnce.Prefix/Postfix' could not be found, please report this error!");
+			harmony.Patch(
+				typeof(patch_CompReloadable_UsedOnce).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), 
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
@@ -157,12 +154,6 @@ namespace YayosCombatAddon
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
-		static IEnumerable<CodeInstruction> YC_Patch_CompReloadable_UsedOnce_Legacy(IEnumerable<CodeInstruction> instructions)
-		{
-			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce_Legacy), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
-			yield return new CodeInstruction(OpCodes.Ret);
-		}
 		static IEnumerable<CodeInstruction> YC_ThingWithComps_GetFloatMenuOptions(IEnumerable<CodeInstruction> codeInstructions)
 		{
 			foreach (var instruction in codeInstructions)
@@ -240,40 +231,6 @@ namespace YayosCombatAddon
 					returnToStartingPosition: drafted)
 				&& pawn.CurJobDef == JobDefOf.Hunt)
 				pawn.jobs.StopAll();
-		}
-
-		static bool Patch_CompReloadable_UsedOnce_Legacy(CompReloadable __instance)
-		{
-			if (!yayoCombat.yayoCombat.ammo)
-				return true;
-
-			// (base) decrease number of charges
-			__instance.remainingCharges--;
-
-			// (base) destroy item if it is empty and supposed to be destroyed when empty
-			if (__instance.Props.destroyOnEmpty && __instance.remainingCharges == 0 && !__instance.parent.Destroyed)
-				__instance.parent.Destroy(DestroyMode.Vanish);
-
-			// (yayo) guess it's better to make sure the wearer isn't null
-			var pawn = __instance.Wearer;
-			if (pawn == null)
-				return false;
-
-			// (new) don't try to reload ammo that's not part of Yayo's Combat
-			if (__instance.AmmoDef?.IsAmmo() != true)
-				return false;
-
-			// (replacement) Replaced with new method
-			var drafted = pawn.Drafted;
-			if (!ReloadUtility.TryAutoReloadSingle(
-					__instance,
-					showOutOfAmmoWarning: true,
-					ignoreDistance: !drafted,
-					returnToStartingPosition: drafted)
-				&& pawn.CurJobDef == JobDefOf.Hunt)
-				pawn.jobs.StopAll();
-
-			return false;
 		}
 
 

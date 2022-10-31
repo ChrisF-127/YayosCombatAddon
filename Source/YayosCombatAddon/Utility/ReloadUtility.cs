@@ -12,6 +12,19 @@ namespace YayosCombatAddon
 {
 	public static class ReloadUtility
 	{
+		public static bool IsCapableOfReloading(this Pawn pawn) =>
+			pawn != null
+			&& pawn.Spawned
+			&& !pawn.Destroyed
+			&& !pawn.Discarded
+			&& !pawn.Downed
+			&& !pawn.Dead
+			&& !pawn.InMentalState
+			&& !pawn.InContainerEnclosed
+			&& !pawn.InCryptosleep
+			&& !pawn.Deathresting
+			&& pawn.CarriedBy == null;
+
 		public static bool TryAutoReloadSingle(
 			CompReloadable comp,
 			bool showOutOfAmmoWarning = false,
@@ -22,9 +35,9 @@ namespace YayosCombatAddon
 			var success = true;
 			if (comp?.RemainingCharges <= 0)
 			{
-				var pawn = comp.Wearer;
-				var thing = comp.parent;
-				if (pawn != null && thing != null)
+				if (comp.Wearer is Pawn pawn
+					&& pawn.IsCapableOfReloading()
+					&& comp.parent is ThingWithComps thing)
 				{
 					var ammoInInventory = pawn.CountAmmoInInventory(comp);
 
@@ -48,7 +61,11 @@ namespace YayosCombatAddon
 						success = TryReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), showJobWarnings, ignoreDistance, returnToStartingPosition);
 					// show out of ammo warning if reloading failed
 					if (showOutOfAmmoWarning && !success)
-						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate( new NamedArgument(pawn, "pawn")));
+						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
+				}
+				else
+				{
+					success = false;
 				}
 			}
 			return success;
@@ -64,38 +81,45 @@ namespace YayosCombatAddon
 			var things = pawn?.GetAllReloadableThings()?.ToArray();
 			if (things?.AnyAtLowAmmo(pawn, false) == true)
 			{
-				var reloadFromInventory = false;
-				foreach (var thing in things)
+				if (pawn.IsCapableOfReloading())
 				{
-					var comp = thing.TryGetComp<CompReloadable>();
-					var ammoInInventory = pawn.CountAmmoInInventory(comp);
-
-					// check if comp needs reloading - this should always be the case at this point
-					var minAmmoNeeded = comp.MinAmmoNeededChecked();
-
-					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
-					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					var reloadFromInventory = false;
+					foreach (var thing in things)
 					{
-						var ammo = ThingMaker.MakeThing(comp.AmmoDef);
-						ammo.stackCount = comp.MaxAmmoNeeded(false);
-						if (pawn.inventory.innerContainer.TryAdd(ammo))
-							ammoInInventory = ammo.stackCount;
+						var comp = thing.TryGetComp<CompReloadable>();
+						var ammoInInventory = pawn.CountAmmoInInventory(comp);
+
+						// check if comp needs reloading - this should always be the case at this point
+						var minAmmoNeeded = comp.MinAmmoNeededChecked();
+
+						// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
+						if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+						{
+							var ammo = ThingMaker.MakeThing(comp.AmmoDef);
+							ammo.stackCount = comp.MaxAmmoNeeded(false);
+							if (pawn.inventory.innerContainer.TryAdd(ammo))
+								ammoInInventory = ammo.stackCount;
+						}
+
+						// reload from inventory is there is anything that can be reloaded from inventory
+						if (ammoInInventory >= minAmmoNeeded)
+							reloadFromInventory = true;
 					}
 
-					// reload from inventory is there is anything that can be reloaded from inventory
-					if (ammoInInventory >= minAmmoNeeded) 
-						reloadFromInventory = true;
+					// reload from inventory
+					if (reloadFromInventory)
+						success = TryReloadFromInventory(pawn, things, showJobWarnings);
+					// reload from surrounding
+					else if (things.AnyAtLowAmmo(pawn, true))
+						success = TryReloadFromSurrounding(pawn, things, showJobWarnings, ignoreDistance, returnToStartingPosition);
+					// show out of ammo warning if reloading failed
+					if (showOutOfAmmoWarning && !success)
+						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
 				}
-
-				// reload from inventory
-				if (reloadFromInventory)
-					success = TryReloadFromInventory(pawn, things, showJobWarnings);
-				// reload from surrounding
-				else if (things.AnyAtLowAmmo(pawn, true))
-					success = TryReloadFromSurrounding(pawn, things, showJobWarnings, ignoreDistance, returnToStartingPosition);
-				// show out of ammo warning if reloading failed
-				if (showOutOfAmmoWarning && !success)
-					GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
+				else
+				{
+					success = false;
+				}
 			}
 			return success;
 		}

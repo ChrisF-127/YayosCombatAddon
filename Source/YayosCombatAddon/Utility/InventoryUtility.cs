@@ -109,7 +109,7 @@ namespace YayosCombatAddon
 						}
 					}
 
-					if (count > 0)
+					if (count > 0 && pawn.IsColonist)
 					{
 						GeneralUtility.ShowRejectMessage(
 							pawn, 
@@ -124,7 +124,7 @@ namespace YayosCombatAddon
 				if (enqueue)
 					pawn.jobs.jobQueue.EnqueueLast(JobMaker.MakeJob(JobDefOf.Goto, pawn.Position));
 			}
-			else
+			else if (pawn.IsColonist)
 			{
 				GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.NothingToRestock".Translate());
 			}

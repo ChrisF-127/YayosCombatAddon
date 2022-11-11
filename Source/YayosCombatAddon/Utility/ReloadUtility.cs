@@ -60,7 +60,7 @@ namespace YayosCombatAddon
 					else
 						success = TryReloadFromSurrounding(pawn, pawn.GetAllReloadableThings(), showJobWarnings, ignoreDistance, returnToStartingPosition);
 					// show out of ammo warning if reloading failed
-					if (showOutOfAmmoWarning && !success)
+					if (showOutOfAmmoWarning && !success && pawn.IsColonist)
 						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
 				}
 				else
@@ -113,7 +113,7 @@ namespace YayosCombatAddon
 					else if (things.AnyAtLowAmmo(pawn, true))
 						success = TryReloadFromSurrounding(pawn, things, showJobWarnings, ignoreDistance, returnToStartingPosition);
 					// show out of ammo warning if reloading failed
-					if (showOutOfAmmoWarning && !success)
+					if (showOutOfAmmoWarning && !success && pawn.IsColonist)
 						GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.OutOfAmmo".Translate(new NamedArgument(pawn, "pawn")));
 				}
 				else
@@ -152,7 +152,7 @@ namespace YayosCombatAddon
 					success = true;
 				}
 			}
-			else if (showWarnings) // nothing to reload
+			else if (showWarnings && pawn.IsColonist) // nothing to reload
 				GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.NothingToReload".Translate());
 
 			return success;
@@ -191,7 +191,7 @@ namespace YayosCombatAddon
 					success = true;
 				}
 			}
-			else if (showWarnings) // nothing to reload
+			else if (showWarnings && pawn.IsColonist) // nothing to reload
 				GeneralUtility.ShowRejectMessage(pawn, "SY_YCA.NothingToReload".Translate());
 
 			return success;
@@ -277,7 +277,7 @@ namespace YayosCombatAddon
 								output.RemoveAt(i);
 					}
 					// show warning if ammo not found
-					if (showWarnings && count > 0)
+					if (showWarnings && count > 0 && pawn.IsColonist)
 					{
 						GeneralUtility.ShowRejectMessage(
 							pawn, 
@@ -316,7 +316,7 @@ namespace YayosCombatAddon
 							output.Add(thing);
 					}
 					// show warning if ammo not found
-					else if (showWarnings)
+					else if (showWarnings && pawn.IsColonist)
 					{
 						GeneralUtility.ShowRejectMessage(
 							pawn,

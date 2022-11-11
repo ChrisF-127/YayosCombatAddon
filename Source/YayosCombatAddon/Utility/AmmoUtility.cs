@@ -28,7 +28,7 @@ namespace YayosCombatAddon
 				comp.Props.soundReload.PlayOneShot(new TargetInfo(pawn.Position, pawn.Map));
 				comp.remainingCharges = 0;
 			}
-			else
+			else if (pawn.IsColonist)
 			{
 				GeneralUtility.ShowRejectMessage(
 					comp.parent,

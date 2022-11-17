@@ -8,7 +8,6 @@
 	</supportedVersions>
 	<packageId>Syrus.YayosCombatAddon</packageId>
 	<loadAfter>
-		<li>com.yayo.combat3</li>
 		<li>Mlie.YayosCombat3</li>
 		<li>PeteTimesSix.SimpleSidearms</li>
 	</loadAfter>
@@ -24,11 +23,11 @@
 			<displayName>HugsLib</displayName>
 			<steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl>
 		</li>
-		<!-- <li> -->
-			<!-- <packageId>com.yayo.combat3</packageId> -->
-			<!-- <displayName>Yayo's Combat 3</displayName> -->
-			<!-- <steamWorkshopUrl>steam://url/CommunityFilePage/818773962</steamWorkshopUrl> -->
-		<!-- </li> -->
+		<li>
+			<packageId>Mlie.YayosCombat3</packageId>
+			<displayName>Yayo's Combat 3</displayName>
+			<steamWorkshopUrl>steam://url/CommunityFilePage/2854006492</steamWorkshopUrl>
+		</li>
 	</modDependencies>
 	<description>Ammo utility additions for Yayo's Combat 3.
 	

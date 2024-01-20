@@ -23,6 +23,9 @@ namespace YayosCombatAddon
 		private SettingHandle<float> _lowAmmoFactorForReloadWhileWaiting;
 		public static float LowAmmoFactorForReloadWhileWaiting = 0.1f;
 
+		private SettingHandle<bool> _ejectAmmoOnDowned;
+		public static bool EjectAmmoOnDowned = false;
+
 		public Main()
 		{
 			if (SimpleSidearmsCompatibility)
@@ -42,7 +45,7 @@ namespace YayosCombatAddon
 				s => int.TryParse(s, out int result) && result >= 0 && result <= 10);
 			NumberOfAmmoColumns = _numberOfAmmoColumnsSetting.Value;
 
-			// Setting: 
+			// Setting: low ammo before reload
 			_lowAmmoFactorForReloadWhileWaiting = Settings.GetHandle(
 				nameof(LowAmmoFactorForReloadWhileWaiting),
 				"SY_YCA.LowAmmoFactorForReloadWhileWaiting_title".Translate(),
@@ -51,6 +54,15 @@ namespace YayosCombatAddon
 				s => float.TryParse(s, out float result) && result >= 0f && result <= 90f);
 			_lowAmmoFactorForReloadWhileWaiting.ValueChanged += handle => LowAmmoFactorForReloadWhileWaiting = ((SettingHandle<float>)handle) * 1e-2f;
 			LowAmmoFactorForReloadWhileWaiting = _lowAmmoFactorForReloadWhileWaiting.Value * 1e-2f;
+
+			// Setting: eject ammo on downed
+			_ejectAmmoOnDowned = Settings.GetHandle(
+				nameof(EjectAmmoOnDowned),
+				"SY_YCA.EjectAmmoOnDowned_title".Translate(),
+				"SY_YCA.EjectAmmoOnDowned_desc".Translate(),
+				EjectAmmoOnDowned);
+			_ejectAmmoOnDowned.ValueChanged += handle => EjectAmmoOnDowned = (SettingHandle<bool>)handle;
+			EjectAmmoOnDowned = _ejectAmmoOnDowned.Value;
 
 
 			// Dynamic "Assign"-tab ammo-column initialization

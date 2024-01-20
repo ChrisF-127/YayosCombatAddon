@@ -8,6 +8,8 @@ Requires restarting the game!</SY_YCA.NumberOfAmmoColumns_desc>
 
   <SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>Low ammo before reload in %</SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>
   <SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>Drafted pawns will reload their weapon if its ammo falls below this limit while they are waiting (idle)</SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>
+  <SY_YCA.EjectAmmoOnDowned_title>Eject ammo on death/downed</SY_YCA.EjectAmmoOnDowned_title>
+  <SY_YCA.EjectAmmoOnDowned_desc>Toggles whether ammo is ejected from weapons when a pawn goes down or dies</SY_YCA.EjectAmmoOnDowned_desc>
 
   <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
   <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory

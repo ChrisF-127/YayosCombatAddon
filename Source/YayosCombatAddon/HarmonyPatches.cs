@@ -31,32 +31,37 @@ namespace YayosCombatAddon
 
 			// patch for reload gizmo
 			harmony.Patch(
-				typeof(Pawn_DraftController).GetMethod("GetGizmos", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				AccessTools.Method(typeof(Pawn_DraftController), "GetGizmos"),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_DraftController_GetGizmos)));
 			// patch for eject ammo gizmo
 			harmony.Patch(
-				typeof(ThingComp).GetMethod("CompGetGizmosExtra", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				AccessTools.Method(typeof(ThingComp), "CompGetGizmosExtra"),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ThingComp_CompGetGizmosExtra)));
 
 			// replace original patches
 			harmony.Patch(
-				typeof(patch_Pawn_TickRare).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
+				AccessTools.Method(typeof(patch_Pawn_TickRare), "Postfix"),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_Pawn_TickRare)));
 			harmony.Patch(
-				typeof(patch_CompReloadable_UsedOnce).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public), 
+				AccessTools.Method(typeof(patch_CompReloadable_UsedOnce), "Postfix"), 
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
-				typeof(patch_ThingWithComps_GetFloatMenuOptions).GetMethod("Postfix", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
+				AccessTools.Method(typeof(patch_ThingWithComps_GetFloatMenuOptions), "Postfix"),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_ThingWithComps_GetFloatMenuOptions)));
+
+			// patch to stop ejecting ammo on death
+			harmony.Patch(
+				AccessTools.Method(typeof(patch_Pawn_EquipmentTracker_DropAllEquipment), "Prefix"),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Pawn_EquipmentTraccker_DropAllEquipment)));
 
 			// patches to prevent reloading after hunting job fails (usually after timing out after 2h), stops pawns from going back and forth between hunting and reloading
 			harmony.Patch(
-				typeof(JobGiver_Reload).GetMethod("GetPriority", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				AccessTools.Method(typeof(JobGiver_Reload), "GetPriority"),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobGiver_Reload_GetPriority)));
 			harmony.Patch(
-				typeof(Pawn_JobTracker).GetMethod("EndCurrentJob", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+				AccessTools.Method(typeof(Pawn_JobTracker), "EndCurrentJob"),
 				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_JobTracker_EndCurrentJob)));
 
 			// SimpleSidearms compatibility patches
@@ -65,12 +70,12 @@ namespace YayosCombatAddon
 				// Info: original Yayo's Combat patch to ReloadableUtility.FindSomeReloadableComponent should be reworked as a postfix patch
 				// patch which makes this method also find sidearms in inventory
 				harmony.Patch(
-					typeof(ReloadableUtility).GetMethod("FindSomeReloadableComponent", BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
+					AccessTools.Method(typeof(ReloadableUtility), "FindSomeReloadableComponent"),
 					postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ReloadableUtility_FindSomeReloadableComponent)));
 
 				// patch to equip thing from inventory so it can be reloaded
 				harmony.Patch(
-					typeof(JobDriver_Reload).GetMethod("MakeNewToils", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+					AccessTools.Method(typeof(JobDriver_Reload), "MakeNewToils"),
 					prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobDriver_Reload_MakeNewToils)));
 			}
 		}
@@ -163,6 +168,10 @@ namespace YayosCombatAddon
 				else
 					yield return instruction;
 			}
+		}
+		static bool YC_Pawn_EquipmentTraccker_DropAllEquipment()
+		{
+			return Main.EjectAmmoOnDowned;
 		}
 
 

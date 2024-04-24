@@ -36,6 +36,7 @@
   <ItemGroup>
     <Reference Include="SimpleSidearms">
       <HintPath>F:\Steam\SteamApps\workshop\content\294100\927155256\v1.5\Assemblies\SimpleSidearms.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -44,6 +45,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="yayoCombat">
       <HintPath>F:\Steam\SteamApps\workshop\content\294100\2854006492\1.5\Assemblies\yayoCombat.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>

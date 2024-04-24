@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using RimWorld;
+using RimWorld.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,37 +33,37 @@ namespace YayosCombatAddon
 			// patch for reload gizmo
 			harmony.Patch(
 				AccessTools.Method(typeof(Pawn_DraftController), "GetGizmos"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_DraftController_GetGizmos)));
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_DraftController_GetGizmos)));
 			// patch for eject ammo gizmo
 			harmony.Patch(
 				AccessTools.Method(typeof(ThingComp), "CompGetGizmosExtra"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ThingComp_CompGetGizmosExtra)));
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ThingComp_CompGetGizmosExtra)));
 
 			// replace original patches
 			harmony.Patch(
 				AccessTools.Method(typeof(patch_Pawn_TickRare), "Postfix"),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_Pawn_TickRare)));
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_Pawn_TickRare)));
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_CompReloadable_UsedOnce), "Postfix"), 
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
+				AccessTools.Method(typeof(patch_CompApparelReloadable_UsedOnce), "Postfix"), 
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelReloadable_UsedOnce)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
 				AccessTools.Method(typeof(patch_ThingWithComps_GetFloatMenuOptions), "Postfix"),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_ThingWithComps_GetFloatMenuOptions)));
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_ThingWithComps_GetFloatMenuOptions)));
 
 			// patch to stop ejecting ammo on death
 			harmony.Patch(
 				AccessTools.Method(typeof(patch_Pawn_EquipmentTracker_DropAllEquipment), "Prefix"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Pawn_EquipmentTraccker_DropAllEquipment)));
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Pawn_EquipmentTraccker_DropAllEquipment)));
 
 			// patches to prevent reloading after hunting job fails (usually after timing out after 2h), stops pawns from going back and forth between hunting and reloading
 			harmony.Patch(
 				AccessTools.Method(typeof(JobGiver_Reload), "GetPriority"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobGiver_Reload_GetPriority)));
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobGiver_Reload_GetPriority)));
 			harmony.Patch(
 				AccessTools.Method(typeof(Pawn_JobTracker), "EndCurrentJob"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.Pawn_JobTracker_EndCurrentJob)));
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_JobTracker_EndCurrentJob)));
 
 			// SimpleSidearms compatibility patches
 			if (Main.SimpleSidearmsCompatibility)
@@ -71,12 +72,12 @@ namespace YayosCombatAddon
 				// patch which makes this method also find sidearms in inventory
 				harmony.Patch(
 					AccessTools.Method(typeof(ReloadableUtility), "FindSomeReloadableComponent"),
-					postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.ReloadableUtility_FindSomeReloadableComponent)));
+					postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ReloadableUtility_FindSomeReloadableComponent)));
 
 				// patch to equip thing from inventory so it can be reloaded
 				harmony.Patch(
 					AccessTools.Method(typeof(JobDriver_Reload), "MakeNewToils"),
-					prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.JobDriver_Reload_MakeNewToils)));
+					prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobDriver_Reload_MakeNewToils)));
 			}
 		}
 
@@ -94,7 +95,7 @@ namespace YayosCombatAddon
 			{
 				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
 				{
-					if (thing.TryGetComp<CompReloadable>() != null)
+					if (thing.TryGetComp<CompApparelReloadable>() != null)
 					{
 						addReloadGizmo = true;
 						break;
@@ -121,7 +122,7 @@ namespace YayosCombatAddon
 
 		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{
-			if (__instance is CompReloadable reloadable
+			if (__instance is CompApparelReloadable reloadable
 				&& reloadable.AmmoDef.IsAmmo()
 				&& (reloadable.Props.ammoCountToRefill > 0
 					|| reloadable.Props.ammoCountPerCharge > 0))
@@ -153,7 +154,7 @@ namespace YayosCombatAddon
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_Pawn_TickRare), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
-		static IEnumerable<CodeInstruction> YC_Patch_CompReloadable_UsedOnce(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_CompApparelReloadable_UsedOnce(IEnumerable<CodeInstruction> instructions)
 		{
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
@@ -215,13 +216,13 @@ namespace YayosCombatAddon
 			var job = __instance.CurJobDef;
 			// if attacking at range, try reloading only primary once it runs out of ammo
 			if (job == JobDefOf.AttackStatic)
-				ReloadUtility.TryAutoReloadSingle(__instance.GetPrimary().TryGetComp<CompReloadable>());
+				ReloadUtility.TryAutoReloadSingle(__instance.GetPrimary().TryGetComp<CompApparelReloadable>());
 			// if waiting (drafted), try reloading all weapons that are out of ammo and for which ammo can be found
 			else if (job == JobDefOf.Wait_Combat)
 				ReloadUtility.TryAutoReloadAll(__instance);
 		}
 
-		static void Patch_CompReloadable_UsedOnce(CompReloadable __instance)
+		static void Patch_CompReloadable_UsedOnce(CompApparelReloadable __instance)
 		{
 			if (!yayoCombat.yayoCombat.ammo || __instance.Wearer == null)
 				return;
@@ -243,14 +244,14 @@ namespace YayosCombatAddon
 		}
 
 
-		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
+		static CompApparelReloadable ReloadableUtility_FindSomeReloadableComponent(CompApparelReloadable __result, Pawn pawn, bool allowForcedReload)
 		{
 			if (__result == null)
 			{
 				foreach (var thing in pawn.GetSimpleSidearms())
 				{
 					// requires secondary patch to JobDriver_Reload.MakeNewToils (must only fail if comp.Wearer is neither pawn nor comp.Parent is in pawn's inventory)
-					var comp = thing.TryGetComp<CompReloadable>();
+					var comp = thing.TryGetComp<CompApparelReloadable>();
 					if (comp?.NeedsReload(allowForcedReload) == true 
 						&& comp.AmmoDef.AnyReservableReachableThing(pawn, comp.MinAmmoNeeded(allowForcedReload)))
 					{
@@ -264,7 +265,7 @@ namespace YayosCombatAddon
 		static void JobDriver_Reload_MakeNewToils(JobDriver_Reload __instance)
 		{
 			var pawn = __instance.pawn;
-			var comp = __instance.Gear?.TryGetComp<CompReloadable>();
+			var comp = __instance.Gear?.TryGetComp<CompApparelReloadable>();
 			var thing = comp?.parent;
 			if (pawn == null
 				|| comp == null

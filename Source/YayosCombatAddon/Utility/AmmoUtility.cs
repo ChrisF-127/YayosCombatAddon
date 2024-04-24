@@ -12,7 +12,7 @@ namespace YayosCombatAddon
 {
 	public static class AmmoUtility
 	{
-		public static void EjectAmmo(Pawn pawn, CompReloadable comp)
+		public static void EjectAmmo(Pawn pawn, CompApparelReloadable comp)
 		{
 			int count = comp.EjectableAmmo();
 			if (count > 0)
@@ -38,7 +38,7 @@ namespace YayosCombatAddon
 			}
 		}
 
-		public static int EjectableAmmo(this CompReloadable comp)
+		public static int EjectableAmmo(this CompApparelReloadable comp)
 		{
 			if (comp.Props.ammoCountToRefill > 0)
 				return comp.RemainingCharges == comp.MaxCharges ? comp.Props.ammoCountToRefill : 0;
@@ -58,7 +58,7 @@ namespace YayosCombatAddon
 			return def?.thingCategories?.Contains(ThingCategoryDef.Named(Main.AmmoCategoryName)) == true;
 		}
 
-		public static int CountAmmoInInventory(this Pawn pawn, CompReloadable comp)
+		public static int CountAmmoInInventory(this Pawn pawn, CompApparelReloadable comp)
 		{
 			var count = 0;
 			foreach (var thing in pawn.inventory.innerContainer)
@@ -67,7 +67,7 @@ namespace YayosCombatAddon
 			return count;
 		}
 
-		public static int MinAmmoNeededChecked(this CompReloadable comp)
+		public static int MinAmmoNeededChecked(this CompApparelReloadable comp)
 		{
 			var minAmmoNeeded = comp.MinAmmoNeeded(false);
 			if (minAmmoNeeded <= 0)
@@ -80,7 +80,7 @@ namespace YayosCombatAddon
 		}
 		public static int MinAmmoNeededForThing(this Thing thing)
 		{
-			var comp = thing?.TryGetComp<CompReloadable>();
+			var comp = thing?.TryGetComp<CompApparelReloadable>();
 			if (comp?.AmmoDef?.IsAmmo() == true)
 				return comp.MinAmmoNeededChecked();
 
@@ -88,7 +88,7 @@ namespace YayosCombatAddon
 		}
 		public static int MaxAmmoNeeded(this Thing thing, out Def ammoDef)
 		{
-			var comp = thing?.TryGetComp<CompReloadable>();
+			var comp = thing?.TryGetComp<CompApparelReloadable>();
 			if (comp?.AmmoDef?.IsAmmo() == true)
 			{
 				ammoDef = comp.AmmoDef;
@@ -99,7 +99,7 @@ namespace YayosCombatAddon
 		}
 		public static bool AtLowAmmo(this Thing thing, Pawn pawn, bool checkAvailable)
 		{
-			var comp = thing?.TryGetComp<CompReloadable>();
+			var comp = thing?.TryGetComp<CompApparelReloadable>();
 			return comp?.AmmoDef?.IsAmmo() == true 
 				&& ((comp.Props.ammoCountToRefill > 0 && comp.RemainingCharges <= 0) 
 					|| (comp.Props.ammoCountPerCharge > 0 && comp.RemainingCharges <= comp.MaxCharges * Main.LowAmmoFactorForReloadWhileWaiting))

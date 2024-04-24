@@ -45,7 +45,7 @@ namespace YayosCombatAddon
 				var actor = toil.GetActor();
 				var targetThingA = actor.CurJob.targetA.Thing;
 
-				var comp = targetThingA?.TryGetComp<CompReloadable>();
+				var comp = targetThingA?.TryGetComp<CompApparelReloadable>();
 				if (comp?.NeedsReload(true) == true)
 				{
 					var carriedThing = actor.carryTracker.CarriedThing;

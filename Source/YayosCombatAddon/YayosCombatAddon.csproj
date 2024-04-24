@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\1.4\Assemblies\</OutputPath>
+    <OutputPath>..\..\1.5\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -35,8 +35,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SimpleSidearms">
-      <HintPath>F:\Steam\SteamApps\workshop\content\294100\927155256\v1.4\Assemblies\SimpleSidearms.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>F:\Steam\SteamApps\workshop\content\294100\927155256\v1.5\Assemblies\SimpleSidearms.dll</HintPath>
     </Reference>
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -44,8 +43,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="yayoCombat">
-      <HintPath>F:\Steam\SteamApps\workshop\content\294100\2854006492\1.4\Assemblies\yayoCombat.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>F:\Steam\SteamApps\workshop\content\294100\2854006492\1.5\Assemblies\yayoCombat.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -76,15 +74,17 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>1.4.3901</Version>
+      <Version>1.5.4069</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <ExcludeAssets>runtime</ExcludeAssets>
-      <Version>2.2.2</Version>
+      <Version>2.3.3</Version>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="UnlimitedHugs.Rimworld.HugsLib">
       <ExcludeAssets>runtime</ExcludeAssets>
-      <Version>10.0.1</Version>
+      <Version>11.0.3</Version>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>

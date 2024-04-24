@@ -15,7 +15,7 @@ namespace YayosCombatAddon
 			Messages.Message(text, new LookTargets(target), MessageTypeDefOf.RejectInput, historical: false);
 
 
-		public static bool AnyReservableReachableThing(this CompReloadable comp, Pawn pawn) =>
+		public static bool AnyReservableReachableThing(this CompApparelReloadable comp, Pawn pawn) =>
 			comp.AmmoDef.AnyReservableReachableThing(pawn, comp.MinAmmoNeeded(false));
 		public static bool AnyReservableReachableThing(this ThingDef def, Pawn pawn, int minAmmoNeeded)
 		{

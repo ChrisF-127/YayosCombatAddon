@@ -53,7 +53,7 @@ namespace YayosCombatAddon
 		private bool TryMoveAmmoToCarriedThing()
 		{
 			var output = false;
-			var comp = TargetThingA?.TryGetComp<CompReloadable>();
+			var comp = TargetThingA?.TryGetComp<CompApparelReloadable>();
 
 			// check if target thing needs reloading and if we got targets to reload from
 			if (comp?.NeedsReload(true) == true && job.targetQueueB?.Count > 0)

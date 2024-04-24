@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using RimWorld.Utility;
 using Verse;
 using Verse.AI;
 using yayoCombat;
@@ -43,8 +44,8 @@ namespace YayosCombatAddon
 				AccessTools.Method(typeof(patch_Pawn_TickRare), "Postfix"),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_Pawn_TickRare)));
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_CompReloadable_UsedOnce), "Postfix"), 
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompReloadable_UsedOnce)));
+				AccessTools.Method(typeof(patch_CompApparelReloadable_UsedOnce), "Postfix"), 
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(HarmonyPatches.YC_Patch_CompApparelReloadable_UsedOnce)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
@@ -94,7 +95,7 @@ namespace YayosCombatAddon
 			{
 				foreach (var thing in pawn.equipment.AllEquipmentListForReading)
 				{
-					if (thing.TryGetComp<CompReloadable>() != null)
+					if (thing.TryGetComp<CompApparelReloadable>() != null)
 					{
 						addReloadGizmo = true;
 						break;
@@ -121,7 +122,7 @@ namespace YayosCombatAddon
 
 		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{
-			if (__instance is CompReloadable reloadable
+			if (__instance is CompApparelReloadable reloadable
 				&& reloadable.AmmoDef.IsAmmo()
 				&& (reloadable.Props.ammoCountToRefill > 0
 					|| reloadable.Props.ammoCountPerCharge > 0))
@@ -153,10 +154,10 @@ namespace YayosCombatAddon
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_Pawn_TickRare), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
-		static IEnumerable<CodeInstruction> YC_Patch_CompReloadable_UsedOnce(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_CompApparelReloadable_UsedOnce(IEnumerable<CodeInstruction> instructions)
 		{
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
+			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompApparelReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
 		static IEnumerable<CodeInstruction> YC_ThingWithComps_GetFloatMenuOptions(IEnumerable<CodeInstruction> codeInstructions)
@@ -215,13 +216,13 @@ namespace YayosCombatAddon
 			var job = __instance.CurJobDef;
 			// if attacking at range, try reloading only primary once it runs out of ammo
 			if (job == JobDefOf.AttackStatic)
-				ReloadUtility.TryAutoReloadSingle(__instance.GetPrimary().TryGetComp<CompReloadable>());
+				ReloadUtility.TryAutoReloadSingle(__instance.GetPrimary().TryGetComp<CompApparelReloadable>());
 			// if waiting (drafted), try reloading all weapons that are out of ammo and for which ammo can be found
 			else if (job == JobDefOf.Wait_Combat)
 				ReloadUtility.TryAutoReloadAll(__instance);
 		}
 
-		static void Patch_CompReloadable_UsedOnce(CompReloadable __instance)
+		static void Patch_CompApparelReloadable_UsedOnce(CompApparelReloadable __instance)
 		{
 			if (!yayoCombat.yayoCombat.ammo || __instance.Wearer == null)
 				return;
@@ -243,14 +244,14 @@ namespace YayosCombatAddon
 		}
 
 
-		static CompReloadable ReloadableUtility_FindSomeReloadableComponent(CompReloadable __result, Pawn pawn, bool allowForcedReload)
+		static CompApparelReloadable ReloadableUtility_FindSomeReloadableComponent(CompApparelReloadable __result, Pawn pawn, bool allowForcedReload)
 		{
 			if (__result == null)
 			{
 				foreach (var thing in pawn.GetSimpleSidearms())
 				{
 					// requires secondary patch to JobDriver_Reload.MakeNewToils (must only fail if comp.Wearer is neither pawn nor comp.Parent is in pawn's inventory)
-					var comp = thing.TryGetComp<CompReloadable>();
+					var comp = thing.TryGetComp<CompApparelReloadable>();
 					if (comp?.NeedsReload(allowForcedReload) == true 
 						&& comp.AmmoDef.AnyReservableReachableThing(pawn, comp.MinAmmoNeeded(allowForcedReload)))
 					{
@@ -264,10 +265,11 @@ namespace YayosCombatAddon
 		static void JobDriver_Reload_MakeNewToils(JobDriver_Reload __instance)
 		{
 			var pawn = __instance.pawn;
-			var comp = __instance.Gear?.TryGetComp<CompReloadable>();
+			var comp = __instance.Gear?.TryGetComp<CompApparelReloadable>();
 			var thing = comp?.parent;
 			if (pawn == null
 				|| comp == null
+				|| comp.Wearer == null
 				|| comp.Wearer == pawn
 				|| thing == null
 				|| !pawn.inventory.Contains(thing))

@@ -22,7 +22,7 @@ namespace YayosCombatAddon
 
         public override IEnumerable<Toil> MakeNewToils()
         {
-            var comp = Gear?.TryGetComp<CompReloadable>();
+            var comp = Gear?.TryGetComp<CompApparelReloadable>();
             job.count = Gear.stackCount;
 
             this.FailOn(() => comp == null);

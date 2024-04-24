@@ -26,7 +26,7 @@ namespace YayosCombatAddon
 			&& pawn.CarriedBy == null;
 
 		public static bool TryAutoReloadSingle(
-			CompReloadable comp,
+			CompApparelReloadable comp,
 			bool showOutOfAmmoWarning = false,
 			bool showJobWarnings = false,
 			bool ignoreDistance = false, 
@@ -86,7 +86,7 @@ namespace YayosCombatAddon
 					var reloadFromInventory = false;
 					foreach (var thing in things)
 					{
-						var comp = thing.TryGetComp<CompReloadable>();
+						var comp = thing.TryGetComp<CompApparelReloadable>();
 						var ammoInInventory = pawn.CountAmmoInInventory(comp);
 
 						// check if comp needs reloading - this should always be the case at this point

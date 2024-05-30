@@ -26,6 +26,12 @@ namespace YayosCombatAddon
 		private SettingHandle<bool> _ejectAmmoOnDowned;
 		public static bool EjectAmmoOnDowned = false;
 
+		private SettingHandle<float> _ammoDroppedOnDownedFactor;
+		public static float AmmoDroppedOnDownedFactor = 1.0f;
+
+		private SettingHandle<float> _ammoInWeaponOnDownedFactor;
+		public static float AmmoInWeaponOnDownedFactor = 1.0f;
+
 		public Main()
 		{
 			if (SimpleSidearmsCompatibility)
@@ -64,6 +70,25 @@ namespace YayosCombatAddon
 			_ejectAmmoOnDowned.ValueChanged += handle => EjectAmmoOnDowned = (SettingHandle<bool>)handle;
 			EjectAmmoOnDowned = _ejectAmmoOnDowned.Value;
 
+			// Setting: ammo dropped on death/downed factor
+			_ammoDroppedOnDownedFactor = Settings.GetHandle(
+				nameof(AmmoDroppedOnDownedFactor),
+				"SY_YCA.AmmoDroppedOnDownedFactor_title".Translate(),
+				"SY_YCA.AmmoDroppedOnDownedFactor_desc".Translate(),
+				AmmoDroppedOnDownedFactor * 1e2f, 
+				s => float.TryParse(s, out float result) && result >= 0f && result <= 100f);
+			_ammoDroppedOnDownedFactor.ValueChanged += handle => AmmoDroppedOnDownedFactor = ((SettingHandle<float>)handle) * 1e-2f;
+			AmmoDroppedOnDownedFactor = _ammoDroppedOnDownedFactor.Value * 1e-2f;
+
+			// Setting: ammo in weapon on death/downed factor
+			_ammoInWeaponOnDownedFactor = Settings.GetHandle(
+				nameof(AmmoInWeaponOnDownedFactor),
+				"SY_YCA.AmmoInWeaponOnDownedFactor_title".Translate(),
+				"SY_YCA.AmmoInWeaponOnDownedFactor_desc".Translate(),
+				AmmoInWeaponOnDownedFactor * 1e2f, 
+				s => float.TryParse(s, out float result) && result >= 0f && result <= 100f);
+			_ammoInWeaponOnDownedFactor.ValueChanged += handle => AmmoInWeaponOnDownedFactor = ((SettingHandle<float>)handle) * 1e-2f;
+			AmmoInWeaponOnDownedFactor = _ammoInWeaponOnDownedFactor.Value * 1e-2f;
 
 			// Dynamic "Assign"-tab ammo-column initialization
 			var assignTableDef = DefDatabase<PawnTableDef>.AllDefs.First(def => def.defName == "Assign");

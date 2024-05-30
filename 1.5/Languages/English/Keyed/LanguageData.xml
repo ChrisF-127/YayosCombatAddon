@@ -8,8 +8,18 @@ Requires restarting the game!</SY_YCA.NumberOfAmmoColumns_desc>
 
   <SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>Low ammo before reload in %</SY_YCA.LowAmmoFactorForReloadWhileWaiting_title>
   <SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>Drafted pawns will reload their weapon if its ammo falls below this limit while they are waiting (idle)</SY_YCA.LowAmmoFactorForReloadWhileWaiting_desc>
+  
   <SY_YCA.EjectAmmoOnDowned_title>Eject ammo on death/downed</SY_YCA.EjectAmmoOnDowned_title>
   <SY_YCA.EjectAmmoOnDowned_desc>Toggles whether ammo is ejected from weapons when a pawn goes down or dies</SY_YCA.EjectAmmoOnDowned_desc>
+  
+  <SY_YCA.AmmoDroppedOnDownedFactor_title>Ammo percentage dropped from inventory on death/downed</SY_YCA.AmmoDroppedOnDownedFactor_title>
+  <SY_YCA.AmmoDroppedOnDownedFactor_desc>Reduces the amount of ammo dropped from inventory when an enemy or ally is downed or killed
+Has no effect if the pawn carries no ammo on them
+This setting allows reducing the amount of ammo gained from raids making acquiring ammo more difficult</SY_YCA.AmmoDroppedOnDownedFactor_desc>
+  
+  <SY_YCA.AmmoInWeaponOnDownedFactor_title>Ammo percentage in dropped weapon on death/downed</SY_YCA.AmmoInWeaponOnDownedFactor_title>
+  <SY_YCA.AmmoInWeaponOnDownedFactor_desc>Reduces the amount of ammo in or ejected from weapons dropped by downed or killed allies and enemies
+This setting allows reducing the amount of ammo gained from raids making acquiring ammo more difficult</SY_YCA.AmmoInWeaponOnDownedFactor_desc>
 
   <SY_YCA.ReloadGizmo_title>Reload</SY_YCA.ReloadGizmo_title>
   <SY_YCA.ReloadGizmo_desc>Reload weapon using ammo carried in inventory

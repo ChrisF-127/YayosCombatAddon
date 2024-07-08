@@ -121,7 +121,7 @@ namespace YayosCombatAddon
 					DefGenerator.AddImpliedDef(inventory);
 					DefGenerator.AddImpliedDef(column);
 
-					assignTableDef.columns.Add(column);
+					assignTableDef.columns.Insert(assignTableDef.columns.Count - 1, column);
 				}
 			}
 			else

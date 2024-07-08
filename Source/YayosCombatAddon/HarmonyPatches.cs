@@ -75,7 +75,7 @@ namespace YayosCombatAddon
 				AccessTools.Method(typeof(patch_CompApparelVerbOwner_Charged_PostPostMake), "Postfix"),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelVerbOwner_Charged_PostPostMake)));
 
-			// patches to prevent reloading after hunting job fails (usually after timing out after 2h), stops pawns from going back and forth between hunting and reloading
+			// patches to prevent reloading after hunting job fails (times out after 2h), stops pawns from going back and forth between hunting and reloading
 			harmony.Patch(
 				AccessTools.Method(typeof(JobGiver_Reload), "GetPriority"),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobGiver_Reload_GetPriority)));

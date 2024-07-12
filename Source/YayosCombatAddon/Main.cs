@@ -89,7 +89,9 @@ namespace YayosCombatAddon
 				s => float.TryParse(s, out float result) && result >= 0f && result <= 100f);
 			_ammoInWeaponOnDownedFactor.ValueChanged += handle => AmmoInWeaponOnDownedFactor = ((SettingHandle<float>)handle) * 1e-2f;
 			AmmoInWeaponOnDownedFactor = _ammoInWeaponOnDownedFactor.Value * 1e-2f;
-
+   
+			if (yayoCombat.yayoCombat.ammo)
+   				return;
 			// Dynamic "Assign"-tab ammo-column initialization
 			var assignTableDef = DefDatabase<PawnTableDef>.AllDefs.First(def => def.defName == "Assign");
 			var ammoDefs = DefDatabase<ThingDef>.AllDefs.Where(def => def.IsAmmo(true))?.ToList();

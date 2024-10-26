@@ -103,6 +103,6 @@ exit /b 1
 )
 
 set dir=$(TargetDir)
-if "x!dir:RimWorld\Mods=!"=="x%25dir%25" D:\0Stuff\RimWorld\_mods\_deploy.bat $(TargetName)</PostBuildEvent>
+if "x!dir:RimWorld\Mods=!"=="x%25dir%25" D:\0Stuff\2Games\RimWorld\_mods\_deploy.bat $(TargetName)</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -13,6 +13,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using yayoCombat;
+using yayoCombat.HarmonyPatches;
 
 namespace YayosCombatAddon
 {
@@ -33,55 +34,55 @@ namespace YayosCombatAddon
 
 			// patch for reload gizmo
 			harmony.Patch(
-				AccessTools.Method(typeof(Pawn_DraftController), "GetGizmos"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_DraftController_GetGizmos)));
+				AccessTools.Method(typeof(Pawn_DraftController), nameof(Pawn_DraftController.GetGizmos)),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_DraftController_GetGizmos_Postfix)));
 			// patch for eject ammo gizmo
 			harmony.Patch(
-				AccessTools.Method(typeof(ThingComp), "CompGetGizmosExtra"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ThingComp_CompGetGizmosExtra)));
+				AccessTools.Method(typeof(ThingComp), nameof(ThingComp.CompGetGizmosExtra)),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ThingComp_CompGetGizmosExtra_Postfix)));
 
 			// replace original patches
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_Pawn_TickRare), "Postfix"),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_Pawn_TickRare)));
+				AccessTools.Method(typeof(Pawn_TickRare), nameof(Pawn_TickRare.Postfix)),
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_Pawn_TickRare_Transpiler)));
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_CompApparelReloadable_UsedOnce), "Postfix"), 
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelReloadable_UsedOnce)));
+				AccessTools.Method(typeof(CompApparelReloadable_UsedOnce), nameof(CompApparelReloadable_UsedOnce.Postfix)), 
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelReloadable_UsedOnce_Transpiler)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_ThingWithComps_GetFloatMenuOptions), "Postfix"),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_ThingWithComps_GetFloatMenuOptions)));
+				AccessTools.Method(typeof(ThingWithComps_GetFloatMenuOptions), nameof(ThingWithComps_GetFloatMenuOptions.Postfix)),
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_ThingWithComps_GetFloatMenuOptions_Transpiler)));
 
 			// patch to stop ejecting ammo on death
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_Pawn_EquipmentTracker_DropAllEquipment), "Prefix"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Pawn_EquipmentTracker_DropAllEquipment)));
+				AccessTools.Method(typeof(Pawn_EquipmentTracker_DropAllEquipment), nameof(Pawn_EquipmentTracker_DropAllEquipment.Prefix)),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Pawn_EquipmentTracker_DropAllEquipment_Prefix)));
 
 			// patch to reduce ammo in dropped weapons
 			harmony.Patch(
-				AccessTools.Method(typeof(Pawn_EquipmentTracker), "DropAllEquipment"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_EquipmentTracker_DropAllEquipment)));
+				AccessTools.Method(typeof(Pawn_EquipmentTracker), nameof(Pawn_EquipmentTracker.DropAllEquipment)),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_EquipmentTracker_DropAllEquipment_Prefix)));
 			// patch to reduce dropped ammo amount
 			harmony.Patch(
-				AccessTools.Method(typeof(Pawn_InventoryTracker), "DropAllNearPawn"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_InventoryTracker_DropAllNearPawn)));
+				AccessTools.Method(typeof(Pawn_InventoryTracker), nameof(Pawn_InventoryTracker.DropAllNearPawn)),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_InventoryTracker_DropAllNearPawn_Prefix)));
 
 			// patches to generate ammo in inventory instead of filling the weapon with more ammo than it can carry
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_PawnGenerator_GenerateGearFor), "Postfix"),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_PawnGenerator_GenerateGearFor)));
+				AccessTools.Method(typeof(PawnGenerator_GenerateGearFor), nameof(PawnGenerator_GenerateGearFor.Postfix)),
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_PawnGenerator_GenerateGearFor_Transpiler)));
 			harmony.Patch(
-				AccessTools.Method(typeof(patch_CompApparelVerbOwner_Charged_PostPostMake), "Postfix"),
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelVerbOwner_Charged_PostPostMake)));
+				AccessTools.Method(typeof(CompApparelVerbOwner_Charged_PostPostMake), nameof(CompApparelVerbOwner_Charged_PostPostMake.Postfix)),
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelVerbOwner_Charged_PostPostMake_Transpiler)));
 
 			// patches to prevent reloading after hunting job fails (times out after 2h), stops pawns from going back and forth between hunting and reloading
 			harmony.Patch(
-				AccessTools.Method(typeof(JobGiver_Reload), "GetPriority"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobGiver_Reload_GetPriority)));
+				AccessTools.Method(typeof(JobGiver_Reload), nameof(JobGiver_Reload.GetPriority)),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobGiver_Reload_GetPriority_Postfix)));
 			harmony.Patch(
-				AccessTools.Method(typeof(Pawn_JobTracker), "EndCurrentJob"),
-				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_JobTracker_EndCurrentJob)));
+				AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.EndCurrentJob)),
+				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_JobTracker_EndCurrentJob_Prefix)));
 
 			// SimpleSidearms compatibility patches
 			if (Main.SimpleSidearmsCompatibility)
@@ -89,18 +90,18 @@ namespace YayosCombatAddon
 				// Info: original Yayo's Combat patch to ReloadableUtility.FindSomeReloadableComponent should be reworked as a postfix patch
 				// patch which makes this method also find sidearms in inventory
 				harmony.Patch(
-					AccessTools.Method(typeof(ReloadableUtility), "FindSomeReloadableComponent"),
-					postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ReloadableUtility_FindSomeReloadableComponent)));
+					AccessTools.Method(typeof(ReloadableUtility), nameof(ReloadableUtility.FindSomeReloadableComponent)),
+					postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ReloadableUtility_FindSomeReloadableComponent_Postfix)));
 
 				// patch to equip thing from inventory so it can be reloaded
 				harmony.Patch(
-					AccessTools.Method(typeof(JobDriver_Reload), "MakeNewToils"),
-					prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobDriver_Reload_MakeNewToils)));
+					AccessTools.Method(typeof(JobDriver_Reload), nameof(JobDriver_Reload.MakeNewToils)),
+					prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(JobDriver_Reload_MakeNewToils_Prefix)));
 			}
 		}
 
 
-		static IEnumerable<Gizmo> Pawn_DraftController_GetGizmos(IEnumerable<Gizmo> __result, Pawn_DraftController __instance)
+		static IEnumerable<Gizmo> Pawn_DraftController_GetGizmos_Postfix(IEnumerable<Gizmo> __result, Pawn_DraftController __instance)
 		{
 			var addReloadGizmo = false;
 
@@ -138,7 +139,7 @@ namespace YayosCombatAddon
 				Log.ErrorOnce($"{nameof(YayosCombatAddon)}: Failed to add 'Reload' gizmo!", 0x18051848);
 		}
 
-		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra(IEnumerable<Gizmo> __result, ThingComp __instance)
+		static IEnumerable<Gizmo> ThingComp_CompGetGizmosExtra_Postfix(IEnumerable<Gizmo> __result, ThingComp __instance)
 		{
 			if (__instance is CompApparelReloadable reloadable
 				&& reloadable.AmmoDef.IsAmmo()
@@ -166,7 +167,7 @@ namespace YayosCombatAddon
 		}
 
 
-		static IEnumerable<CodeInstruction> YC_Patch_Pawn_TickRare(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_Pawn_TickRare_Transpiler(IEnumerable<CodeInstruction> _)
 		{
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_Pawn_TickRare), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
@@ -189,7 +190,7 @@ namespace YayosCombatAddon
 				ReloadUtility.TryAutoReloadAll(__instance);
 		}
 
-		static IEnumerable<CodeInstruction> YC_Patch_CompApparelReloadable_UsedOnce(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_CompApparelReloadable_UsedOnce_Transpiler(IEnumerable<CodeInstruction> _)
 		{
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
 			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
@@ -216,7 +217,7 @@ namespace YayosCombatAddon
 				pawn.jobs.StopAll();
 		}
 
-		static IEnumerable<CodeInstruction> YC_ThingWithComps_GetFloatMenuOptions(IEnumerable<CodeInstruction> codeInstructions)
+		static IEnumerable<CodeInstruction> YC_ThingWithComps_GetFloatMenuOptions_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
 		{
 			foreach (var instruction in codeInstructions)
 			{
@@ -227,13 +228,13 @@ namespace YayosCombatAddon
 			}
 		}
 
-		static bool YC_Pawn_EquipmentTracker_DropAllEquipment()
+		static bool YC_Pawn_EquipmentTracker_DropAllEquipment_Prefix()
 		{
 			// do not eject ammo from weapons dropped on death/downed if eject ammo disabled
 			return Main.EjectAmmoOnDowned;
 		}
 
-		static void Pawn_EquipmentTracker_DropAllEquipment(Pawn_EquipmentTracker __instance)
+		static void Pawn_EquipmentTracker_DropAllEquipment_Prefix(Pawn_EquipmentTracker __instance)
 		{
 			// only non-player pawns
 			if (__instance?.pawn?.IsPlayerControlled != false)
@@ -247,7 +248,7 @@ namespace YayosCombatAddon
 				TryReduceWeaponAmmo(thing);
 		}
 
-		static void Pawn_InventoryTracker_DropAllNearPawn(Pawn_InventoryTracker __instance)
+		static void Pawn_InventoryTracker_DropAllNearPawn_Prefix(Pawn_InventoryTracker __instance)
 		{
 			// only non-player pawns
 			if (__instance?.pawn?.IsPlayerControlled != false)
@@ -294,7 +295,7 @@ namespace YayosCombatAddon
 			return true;
 		}
 
-		static IEnumerable<CodeInstruction> YC_Patch_PawnGenerator_GenerateGearFor(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_PawnGenerator_GenerateGearFor_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var previous = default(OpCode);
 			foreach (var instruction in instructions)
@@ -310,7 +311,7 @@ namespace YayosCombatAddon
 				yield return instruction;
 				previous = instruction.opcode;
 			}
-			Log.Error($"{nameof(YayosCombatAddon)}: failed to apply '{nameof(YC_Patch_PawnGenerator_GenerateGearFor)}'");
+			Log.Error($"{nameof(YayosCombatAddon)}: failed to apply '{nameof(YC_Patch_PawnGenerator_GenerateGearFor_Transpiler)}'");
 		}
 		static void Patch_PawnGenerator_GenerateGearFor(List<CompApparelReloadable> allWeaponsComps, Pawn pawn)
 		{
@@ -341,7 +342,7 @@ namespace YayosCombatAddon
 			}
 		}
 
-		static IEnumerable<CodeInstruction> YC_Patch_CompApparelVerbOwner_Charged_PostPostMake(IEnumerable<CodeInstruction> instructions)
+		static IEnumerable<CodeInstruction> YC_Patch_CompApparelVerbOwner_Charged_PostPostMake_Transpiler(IEnumerable<CodeInstruction> _)
 		{
 			// overwrite original functionality
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -359,7 +360,7 @@ namespace YayosCombatAddon
 		}
 
 
-		static float JobGiver_Reload_GetPriority(float __result, Pawn pawn)
+		static float JobGiver_Reload_GetPriority_Postfix(float __result, Pawn pawn)
 		{
 			// do not reload if hunting failed "Incompletable", it probably timed out and we don't want pawns running back and forth between reloading & hunting
 			if (PawnPreviousJobTable.TryGetValue(pawn, out var jobInfo)
@@ -368,7 +369,7 @@ namespace YayosCombatAddon
 				__result = -1f;
 			return __result;
 		}
-		static void Pawn_JobTracker_EndCurrentJob(Pawn ___pawn, Job ___curJob, JobCondition condition)
+		static void Pawn_JobTracker_EndCurrentJob_Prefix(Pawn ___pawn, Job ___curJob, JobCondition condition)
 		{
 			if (___pawn?.IsColonist == true 
 				&& ___curJob != null)
@@ -387,7 +388,7 @@ namespace YayosCombatAddon
 			}
 		}
 
-		static CompApparelReloadable ReloadableUtility_FindSomeReloadableComponent(CompApparelReloadable __result, Pawn pawn, bool allowForcedReload)
+		static CompApparelReloadable ReloadableUtility_FindSomeReloadableComponent_Postfix(CompApparelReloadable __result, Pawn pawn, bool allowForcedReload)
 		{
 			if (__result == null)
 			{
@@ -405,7 +406,7 @@ namespace YayosCombatAddon
 			}
 			return __result;
 		}
-		static void JobDriver_Reload_MakeNewToils(JobDriver_Reload __instance)
+		static void JobDriver_Reload_MakeNewToils_Prefix(JobDriver_Reload __instance)
 		{
 			var pawn = __instance.pawn;
 			var comp = __instance.Gear?.TryGetComp<CompApparelReloadable>();

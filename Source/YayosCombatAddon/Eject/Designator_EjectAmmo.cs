@@ -24,9 +24,7 @@ namespace YayosCombatAddon
         }
 
 		#region OVERRIDES
-		public override int DraggableDimensions => 2;
-
-        public override DesignationDef Designation => 
+		public override DesignationDef Designation => 
             YCA_DesignationDefOf.YCA_EjectAmmo;
 
 		public override AcceptanceReport CanDesignateThing(Thing thing)

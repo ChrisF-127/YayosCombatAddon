@@ -34,7 +34,7 @@ namespace YayosCombatAddon
 				string inventory_label, inventory_tooltip;
 				string surrounding_label, surrounding_tooltip;
 
-				if (Main.SimpleSidearmsCompatibility)
+				if (YayosCombatAddon.SimpleSidearmsCompatibility)
 				{
 					inventory_label = "SY_YCA.ReloadAllWeaponFromInventory_label";
 					inventory_tooltip = "SY_YCA.ReloadAllWeaponFromInventory_tooltip";

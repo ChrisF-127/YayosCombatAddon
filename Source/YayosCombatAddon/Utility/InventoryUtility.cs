@@ -34,7 +34,7 @@ namespace YayosCombatAddon
 		}
 
 		/// <summary>
-		/// Remember to check for <see cref="Main.SimpleSidearmsCompatibility"/> before executing, it can't be checked inside the method (probably due to optimization)
+		/// Remember to check for <see cref="YayosCombatAddon.SimpleSidearmsCompatibility"/> before executing, it can't be checked inside the method (probably due to optimization)
 		/// </summary>
 		/// <param name="pawn"></param>
 		/// <returns></returns>

@@ -55,7 +55,7 @@ namespace YayosCombatAddon
 			if (!forceCheck)
 				return true;
 #endif
-			return def?.thingCategories?.Contains(ThingCategoryDef.Named(Main.AmmoCategoryName)) == true;
+			return def?.thingCategories?.Contains(ThingCategoryDef.Named(YayosCombatAddon.AmmoCategoryName)) == true;
 		}
 
 		public static int CountAmmoInInventory(this Pawn pawn, CompApparelReloadable comp)
@@ -102,7 +102,7 @@ namespace YayosCombatAddon
 			var comp = thing?.TryGetComp<CompApparelReloadable>();
 			return comp?.AmmoDef?.IsAmmo() == true 
 				&& ((comp.Props.ammoCountToRefill > 0 && comp.RemainingCharges <= 0) 
-					|| (comp.Props.ammoCountPerCharge > 0 && comp.RemainingCharges <= comp.MaxCharges * Main.LowAmmoFactorForReloadWhileWaiting))
+					|| (comp.Props.ammoCountPerCharge > 0 && comp.RemainingCharges <= comp.MaxCharges * YayosCombatAddon.Settings.LowAmmoFactorForReloadWhileWaiting * 0.01f))
 				&& (!checkAvailable || comp.AnyReservableReachableThing(pawn));
 		}
 		public static bool AnyAtLowAmmo(this IEnumerable<Thing> things, Pawn pawn, bool checkAvailable)

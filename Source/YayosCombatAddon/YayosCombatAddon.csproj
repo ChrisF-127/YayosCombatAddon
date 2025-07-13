@@ -25,7 +25,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\..\1.5\Assemblies\</OutputPath>
+    <OutputPath>..\..\1.6\Assemblies\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControlsBuilder.cs" />
     <Compile Include="Eject\WorkGiver_EjectAmmo.cs" />
     <Compile Include="Stuff\YCA_DesignationDefOf.cs" />
     <Compile Include="Utility\AmmoUtility.cs" />
@@ -59,7 +60,7 @@
     <Compile Include="Jobs\YCA_JobUtility.cs" />
     <Compile Include="Jobs\YCA_JobDefOf.cs" />
     <Compile Include="Jobs\JobDriver_ReloadFromInventory.cs" />
-    <Compile Include="Main.cs" />
+    <Compile Include="YayosCombatAddon.cs" />
     <Compile Include="Loadout\PawnColumnWorker_CarryAmmo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Eject\Designator_EjectAmmo.cs" />
@@ -68,24 +69,20 @@
     <Compile Include="Utility\ReloadUtility.cs" />
     <Compile Include="Stuff\YCA_SoundDefOf.cs" />
     <Compile Include="Stuff\YCA_Textures.cs" />
+    <Compile Include="YayosCombatAddonSettings.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer">
-      <Version>2.2.1</Version>
+      <Version>2.3.0</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Krafs.Rimworld.Ref">
-      <Version>1.5.4069</Version>
+      <Version>1.6.4518</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <ExcludeAssets>runtime</ExcludeAssets>
-      <Version>2.3.3</Version>
-      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="UnlimitedHugs.Rimworld.HugsLib">
-      <ExcludeAssets>runtime</ExcludeAssets>
-      <Version>11.0.3</Version>
+      <Version>2.3.6</Version>
       <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>

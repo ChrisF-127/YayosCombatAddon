@@ -33,8 +33,8 @@ namespace YayosCombatAddon
 							num2,
 							rect.height - 4f),
 						pawn,
-						(Pawn p) => p.inventoryStock.GetDesiredThingForGroup(group),
-						(Pawn p) => GenerateThingButtons(p, group),
+						p => p.inventoryStock.GetDesiredThingForGroup(group),
+						p => GenerateThingButtons(p, group),
 						buttonIcon: pawn.inventoryStock.GetDesiredThingForGroup(group).uiIcon,
 						paintable: true);
 

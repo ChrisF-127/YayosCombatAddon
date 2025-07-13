@@ -85,7 +85,7 @@ namespace YayosCombatAddon
 				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Pawn_JobTracker_EndCurrentJob_Prefix)));
 
 			// SimpleSidearms compatibility patches
-			if (Main.SimpleSidearmsCompatibility)
+			if (YayosCombatAddon.SimpleSidearmsCompatibility)
 			{
 				// Info: original Yayo's Combat patch to ReloadableUtility.FindSomeReloadableComponent should be reworked as a postfix patch
 				// patch which makes this method also find sidearms in inventory
@@ -231,7 +231,7 @@ namespace YayosCombatAddon
 		static bool YC_Pawn_EquipmentTracker_DropAllEquipment_Prefix()
 		{
 			// do not eject ammo from weapons dropped on death/downed if eject ammo disabled
-			return Main.EjectAmmoOnDowned;
+			return YayosCombatAddon.Settings.EjectAmmoOnDowned;
 		}
 
 		static void Pawn_EquipmentTracker_DropAllEquipment_Prefix(Pawn_EquipmentTracker __instance)
@@ -240,7 +240,7 @@ namespace YayosCombatAddon
 			if (__instance?.pawn?.IsPlayerControlled != false)
 				return;
 			// skip if all ammo is dropped
-			if (Main.AmmoInWeaponOnDownedFactor == 1f)
+			if (YayosCombatAddon.Settings.AmmoInWeaponOnDownedFactor == 100)
 				return;
 
 			// reduce ammo in weapon
@@ -254,8 +254,8 @@ namespace YayosCombatAddon
 			if (__instance?.pawn?.IsPlayerControlled != false)
 				return;
 			// skip if all ammo is dropped
-			if (Main.AmmoDroppedOnDownedFactor == 1f
-				&& Main.AmmoInWeaponOnDownedFactor == 1f)
+			if (YayosCombatAddon.Settings.AmmoDroppedOnDownedFactor == 100
+				&& YayosCombatAddon.Settings.AmmoInWeaponOnDownedFactor == 100)
 				return;
 
 			// iterate through inventory
@@ -279,7 +279,7 @@ namespace YayosCombatAddon
 			if (!thing.IsAmmo(true))
 				return -1;
 			// reduce dropped ammo
-			var count = Mathf.RoundToInt(thing.stackCount * Main.AmmoDroppedOnDownedFactor);
+			var count = Mathf.RoundToInt(thing.stackCount * YayosCombatAddon.Settings.AmmoDroppedOnDownedFactor * 0.01f);
 			if (count > 0)
 				thing.stackCount = count;
 			return count;
@@ -291,7 +291,7 @@ namespace YayosCombatAddon
 			if (comp?.AmmoDef?.IsAmmo() != true)
 				return false;
 			// reduce ammo in dropped weapon
-			comp.remainingCharges = Mathf.RoundToInt(comp.remainingCharges * Main.AmmoInWeaponOnDownedFactor);
+			comp.remainingCharges = Mathf.RoundToInt(comp.remainingCharges * YayosCombatAddon.Settings.AmmoInWeaponOnDownedFactor * 0.01f);
 			return true;
 		}
 
@@ -378,7 +378,7 @@ namespace YayosCombatAddon
 				jobInfo.Def = ___curJob.def;
 				jobInfo.EndCondition = condition;
 
-				if (Main.SimpleSidearmsCompatibility
+				if (YayosCombatAddon.SimpleSidearmsCompatibility
 					&& ___curJob.def == JobDefOf.Reload
 					&& jobInfo.PreviousWeapon != null)
 				{

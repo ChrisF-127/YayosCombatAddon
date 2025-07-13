@@ -207,7 +207,7 @@ namespace YayosCombatAddon
 					if (thing.MaxAmmoNeeded(out _) > 0)
 						things.Add(thing);
 
-				if (Main.SimpleSidearmsCompatibility)
+				if (YayosCombatAddon.SimpleSidearmsCompatibility)
 				{
 					foreach (var thing in pawn.GetSimpleSidearms())
 						if (thing.MaxAmmoNeeded(out _) > 0)

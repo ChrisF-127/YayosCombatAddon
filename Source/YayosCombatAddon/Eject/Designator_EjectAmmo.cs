@@ -10,8 +10,8 @@ using Verse;
 namespace YayosCombatAddon
 {
     public class Designator_EjectAmmo : Designator
-    {
-        public Designator_EjectAmmo()
+	{
+		public Designator_EjectAmmo()
         {
             defaultLabel = "SY_YCA.EjectAmmo_label".Translate();
             defaultDesc = "SY_YCA.EjectAmmo_desc".Translate();
@@ -27,6 +27,9 @@ namespace YayosCombatAddon
 		public override DesignationDef Designation => 
             YCA_DesignationDefOf.YCA_EjectAmmo;
 
+		public override DrawStyleCategoryDef DrawStyleCategory =>
+			DrawStyleCategoryDefOf.Orders;
+
 		public override AcceptanceReport CanDesignateThing(Thing thing)
         {
             if (Map.designationManager.DesignationOn(thing, Designation) != null)
@@ -36,8 +39,8 @@ namespace YayosCombatAddon
         }
 
 		public override AcceptanceReport CanDesignateCell(IntVec3 cell)
-        {
-            if (!cell.InBounds(Map) || cell.Fogged(Map))
+		{
+			if (!cell.InBounds(Map) || cell.Fogged(Map))
                 return false;
 
             var things = GetEjectableWeapons(cell, Map);
@@ -52,8 +55,8 @@ namespace YayosCombatAddon
         }
 
         public override void DesignateSingleCell(IntVec3 cell)
-        {
-            foreach (var thing in GetEjectableWeapons(cell, Map))
+		{
+			foreach (var thing in GetEjectableWeapons(cell, Map))
                 DesignateThing(thing);
         }
 

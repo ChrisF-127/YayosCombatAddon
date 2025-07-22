@@ -43,7 +43,7 @@ namespace YayosCombatAddon
 
 			// replace original patches
 			harmony.Patch(
-				AccessTools.Method(typeof(Pawn_TickRare), nameof(Pawn_TickRare.Postfix)),
+				AccessTools.Method(typeof(Pawn_Tick), nameof(Pawn_Tick.Postfix)),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_Pawn_TickRare_Transpiler)));
 			harmony.Patch(
 				AccessTools.Method(typeof(CompApparelReloadable_UsedOnce), nameof(CompApparelReloadable_UsedOnce.Postfix)), 

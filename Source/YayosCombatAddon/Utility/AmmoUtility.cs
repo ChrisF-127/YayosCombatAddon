@@ -47,15 +47,15 @@ namespace YayosCombatAddon
 			return -1;
 		}
 
-		public static bool IsAmmo(this Thing thing, bool forceCheck = false) =>
-			thing?.def?.IsAmmo(forceCheck) == true;
-		public static bool IsAmmo(this ThingDef def, bool forceCheck = false)
+		public static bool IsAmmo(this Thing thing, bool deepCheck = false) =>
+			thing?.def.IsAmmo(deepCheck) == true;
+		public static bool IsAmmo(this ThingDef def, bool deepCheck = false)
 		{
-#if !ALWAYS_CHECK_ISAMMO
-			if (!forceCheck)
-				return true;
-#endif
-			return def?.thingCategories?.Contains(ThingCategoryDef.Named(YayosCombatAddon.AmmoCategoryName)) == true;
+			if (def == null)
+				return false;
+			if (deepCheck)
+				return def.thingCategories?.Contains(ThingCategoryDef.Named(YayosCombatAddon.AmmoCategoryName)) == true;
+			return true;
 		}
 
 		public static int CountAmmoInInventory(this Pawn pawn, CompApparelReloadable comp)
@@ -81,7 +81,7 @@ namespace YayosCombatAddon
 		public static int MinAmmoNeededForThing(this Thing thing)
 		{
 			var comp = thing?.TryGetComp<CompApparelReloadable>();
-			if (comp?.AmmoDef?.IsAmmo() == true)
+			if (comp?.AmmoDef.IsAmmo() == true)
 				return comp.MinAmmoNeededChecked();
 
 			throw new Exception($"{nameof(YayosCombatAddon)}: invalid thing for {nameof(MinAmmoNeededForThing)}: '{thing}'");
@@ -89,7 +89,7 @@ namespace YayosCombatAddon
 		public static int MaxAmmoNeeded(this Thing thing, out Def ammoDef)
 		{
 			var comp = thing?.TryGetComp<CompApparelReloadable>();
-			if (comp?.AmmoDef?.IsAmmo() == true)
+			if (comp?.AmmoDef.IsAmmo() == true)
 			{
 				ammoDef = comp.AmmoDef;
 				return comp.MaxAmmoNeeded(false);
@@ -100,7 +100,7 @@ namespace YayosCombatAddon
 		public static bool AtLowAmmo(this Thing thing, Pawn pawn, bool checkAvailable)
 		{
 			var comp = thing?.TryGetComp<CompApparelReloadable>();
-			return comp?.AmmoDef?.IsAmmo() == true 
+			return comp?.AmmoDef.IsAmmo() == true 
 				&& ((comp.Props.ammoCountToRefill > 0 && comp.RemainingCharges <= 0) 
 					|| (comp.Props.ammoCountPerCharge > 0 && comp.RemainingCharges <= comp.MaxCharges * YayosCombatAddon.Settings.LowAmmoFactorForReloadWhileWaiting * 0.01f))
 				&& (!checkAvailable || comp.AnyReservableReachableThing(pawn));

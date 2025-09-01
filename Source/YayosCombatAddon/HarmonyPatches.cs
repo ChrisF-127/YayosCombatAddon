@@ -200,11 +200,12 @@ namespace YayosCombatAddon
 		{
 			if (!yayoCombat.yayoCombat.ammo || __instance.Wearer == null)
 				return;
-
-			// (new) don't try to reload ammo that's not part of Yayo's Combat
-			if (__instance.AmmoDef?.IsAmmo() != true)
+			// (new) only reload equippable weapons
+			if (__instance.ReloadableThing?.def?.equipmentType != EquipmentType.Primary)
 				return;
-
+			// (new) only reload valid ammo
+			if (__instance.AmmoDef.IsAmmo() != true)
+				return;
 			// (replacement) Replaced with new method
 			var pawn = __instance.Wearer;
 			var drafted = pawn.Drafted;
@@ -288,7 +289,7 @@ namespace YayosCombatAddon
 		{
 			var comp = thing?.TryGetComp<CompApparelReloadable>();
 			// only reduce ammo if applicable
-			if (comp?.AmmoDef?.IsAmmo() != true)
+			if (comp?.AmmoDef.IsAmmo() != true)
 				return false;
 			// reduce ammo in dropped weapon
 			comp.remainingCharges = Mathf.RoundToInt(comp.remainingCharges * YayosCombatAddon.Settings.AmmoInWeaponOnDownedFactor * 0.01f);
@@ -394,6 +395,8 @@ namespace YayosCombatAddon
 			{
 				foreach (var thing in pawn.GetSimpleSidearms())
 				{
+					if (thing.def.equipmentType != EquipmentType.Primary)
+						continue;
 					// requires secondary patch to JobDriver_Reload.MakeNewToils (must only fail if comp.Wearer is neither pawn nor comp.Parent is in pawn's inventory)
 					var comp = thing.TryGetComp<CompApparelReloadable>();
 					if (comp?.NeedsReload(allowForcedReload) == true 

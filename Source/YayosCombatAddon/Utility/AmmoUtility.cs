@@ -12,6 +12,63 @@ namespace YayosCombatAddon
 {
 	public static class AmmoUtility
 	{
+		#region PROPERTIES
+		public static ThingDef[] AmmoDefs =
+		{
+			YCA_DefOf.yy_ammo_primitive_light,
+			YCA_DefOf.yy_ammo_primitive,
+			YCA_DefOf.yy_ammo_primitive_heavy,
+
+			YCA_DefOf.yy_ammo_industrial_light,
+			YCA_DefOf.yy_ammo_industrial,
+			YCA_DefOf.yy_ammo_industrial_heavy,
+
+			YCA_DefOf.yy_ammo_spacer_light,
+			YCA_DefOf.yy_ammo_spacer,
+			YCA_DefOf.yy_ammo_spacer_heavy,
+		};
+		public static RecipeDef[] AmmoRecipeDefs =
+		{
+			YCA_DefOf.Make_yy_ammo_primitive_light,
+			YCA_DefOf.Make_yy_ammo_primitive_light10,
+			YCA_DefOf.Make_yy_ammo_primitive_heavy,
+			YCA_DefOf.Make_yy_ammo_primitive_heavy10,
+
+			YCA_DefOf.Make_yy_ammo_industrial_light,
+			YCA_DefOf.Make_yy_ammo_industrial_light10,
+			YCA_DefOf.Make_yy_ammo_industrial_heavy,
+			YCA_DefOf.Make_yy_ammo_industrial_heavy10,
+
+			YCA_DefOf.Make_yy_ammo_spacer_light,
+			YCA_DefOf.Make_yy_ammo_spacer_light10,
+			YCA_DefOf.Make_yy_ammo_spacer_heavy,
+			YCA_DefOf.Make_yy_ammo_spacer_heavy10,
+		};
+		#endregion
+
+		public static void AdjustAmmoType(this ThingDef weapon)
+		{
+			//if (weapon?.IsRangedWeapon != true)
+			//	return;
+			var reloadable = weapon?.GetCompProperties<CompProperties_ApparelReloadable>();
+			if (reloadable == null)
+				return;
+			var ammoDef = reloadable.ammoDef;
+			//if (!AmmoDefs.Contains(ammoDef))
+			//	return;
+
+			var damage = weapon.verbs.FirstOrDefault(v => typeof(Verb_LaunchProjectile).IsAssignableFrom(v.verbClass))?.defaultProjectile?.projectile?.GetDamageAmount(null);
+			foreach (var setting in YayosCombatAddon.Settings.AmmoSettings.Where(s => s is AmmoSetting a && a.BaseAmmoDef == ammoDef).Cast<AmmoSetting>())
+			{
+				if (setting.IsEnabled && (setting.ParameterGreater ? damage > setting.Parameter : damage < setting.Parameter))
+				{
+					if (reloadable.ammoDef != setting.AmmoDef)
+						reloadable.ammoDef = setting.AmmoDef;
+					break;
+				}
+			}
+		}
+
 		public static void EjectAmmo(Pawn pawn, CompApparelReloadable comp)
 		{
 			int count = comp.EjectableAmmo();

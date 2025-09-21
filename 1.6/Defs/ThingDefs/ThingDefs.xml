@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+	<!-- Primitive Light -->
+	<ThingDef ParentName="yy_ammo_primitive_base">
+		<defName>yy_ammo_primitive_light</defName>
+		<label>primitive ammo (light)</label>
+		<description>Ammunition used in light primitive and medieval ranged weapons.</description>
+		<graphicData>
+			<texPath>YCA_PrimitiveAmmoLight</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<stackLimit>400</stackLimit>
+	</ThingDef>
+	<!-- Primitive Heavy -->
+	<ThingDef ParentName="yy_ammo_primitive_base">
+		<defName>yy_ammo_primitive_heavy</defName>
+		<label>primitive ammo (heavy)</label>
+		<description>Ammunition used in powerful primitive and medieval ranged weapons.</description>
+		<graphicData>
+			<texPath>YCA_PrimitiveAmmoHeavy</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<stackLimit>100</stackLimit>
+	</ThingDef>
+
+	<!-- Industrial Light -->
+	<ThingDef ParentName="yy_ammo_industrial_base">
+		<defName>yy_ammo_industrial_light</defName>
+		<label>industrial ammo (light)</label>
+		<description>Ammunition used for light weapons in the industrial tech.</description>
+		<graphicData>
+			<texPath>YCA_IndustrialAmmoLight</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<stackLimit>400</stackLimit>
+	</ThingDef>
+	<!-- Industrial Heavy -->
+	<ThingDef ParentName="yy_ammo_industrial_base">
+		<defName>yy_ammo_industrial_heavy</defName>
+		<label>industrial ammo (heavy)</label>
+		<description>Ammunition used for powerful weapons in the industrial tech.</description>
+		<graphicData>
+			<texPath>YCA_IndustrialAmmoHeavy</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<stackLimit>100</stackLimit>
+	</ThingDef>
+
+	<!-- Spacer Light -->
+	<ThingDef ParentName="yy_ammo_spacer_base">
+		<defName>yy_ammo_spacer_light</defName>
+		<label>spacer ammo (light)</label>
+		<description>Ammunition used for light weapons in the spacer tech.</description>
+		<graphicData>
+			<texPath>YCA_SpacerAmmoLight</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<stackLimit>400</stackLimit>
+	</ThingDef>
+	<!-- Spacer Heavy -->
+	<ThingDef ParentName="yy_ammo_spacer_base">
+		<defName>yy_ammo_spacer_heavy</defName>
+		<label>spacer ammo (heavy)</label>
+		<description>Ammunition used for powerful weapons in the spacer tech.</description>
+		<graphicData>
+			<texPath>YCA_SpacerAmmoHeavy</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+		</graphicData>
+		<stackLimit>100</stackLimit>
+	</ThingDef>
+	
+</Defs>

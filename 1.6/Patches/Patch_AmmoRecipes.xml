@@ -9,4 +9,37 @@
 		</value>
 	</Operation>
 	
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_primitive"]</xpath>
+		<attribute>Name</attribute>
+		<value>Make_yy_ammo_primitive_base</value>
+	</Operation>
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_primitive10"]</xpath>
+		<attribute>Name</attribute>
+		<value>Make_yy_ammo_primitive10_base</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_industrial"]</xpath>
+		<attribute>Name</attribute>
+		<value>Make_yy_ammo_industrial_base</value>
+	</Operation>
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_industrial10"]</xpath>
+		<attribute>Name</attribute>
+		<value>Make_yy_ammo_industrial10_base</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_spacer"]</xpath>
+		<attribute>Name</attribute>
+		<value>Make_yy_ammo_spacer_base</value>
+	</Operation>
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/RecipeDef[defName="Make_yy_ammo_spacer10"]</xpath>
+		<attribute>Name</attribute>
+		<value>Make_yy_ammo_spacer10_base</value>
+	</Operation>
+	
 </Patch>

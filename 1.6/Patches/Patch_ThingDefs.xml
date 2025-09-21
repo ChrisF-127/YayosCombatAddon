@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/ThingDef[defName="yy_ammo_primitive"]</xpath>
+		<attribute>Name</attribute>
+		<value>yy_ammo_primitive_base</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/ThingDef[defName="yy_ammo_industrial"]</xpath>
+		<attribute>Name</attribute>
+		<value>yy_ammo_industrial_base</value>
+	</Operation>
+	
+	<Operation Class="PatchOperationAttributeAdd">
+		<xpath>/Defs/ThingDef[defName="yy_ammo_spacer"]</xpath>
+		<attribute>Name</attribute>
+		<value>yy_ammo_spacer_base</value>
+	</Operation>
+	
+</Patch>

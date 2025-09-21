@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using yayoCombat;
 using yayoCombat.HarmonyPatches;
 
 namespace YayosCombatAddon
@@ -20,7 +19,7 @@ namespace YayosCombatAddon
 	[StaticConstructorOnStartup]
 	public static class HarmonyPatches
 	{
-		class JobInfo
+		private class JobInfo
 		{
 			public JobDef Def;
 			public JobCondition EndCondition;
@@ -40,6 +39,11 @@ namespace YayosCombatAddon
 			harmony.Patch(
 				AccessTools.Method(typeof(ThingComp), nameof(ThingComp.CompGetGizmosExtra)),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ThingComp_CompGetGizmosExtra_Postfix)));
+
+			// replace original patches
+			harmony.Patch(
+				AccessTools.Method(typeof(yayoCombat.yayoCombat), "DefsLoaded"),
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_DefsLoaded)));
 
 			// replace original patches
 			harmony.Patch(
@@ -167,10 +171,54 @@ namespace YayosCombatAddon
 		}
 
 
+		static void YC_DefsLoaded()
+		{
+			if (yayoCombat.yayoCombat.ammo)
+			{
+				foreach (var baseAmmoSetting in YayosCombatAddon.Settings.AmmoSettings)
+				{
+					if (baseAmmoSetting is AmmoSetting ammoSetting && !ammoSetting.IsEnabled)
+					{
+						var ammoDef = ammoSetting.AmmoDef;
+						ammoDef.tradeability = Tradeability.None;
+						ammoDef.tradeTags = null;
+
+						ammoSetting.RecipeDef.recipeUsers?.Clear();
+						ammoSetting.RecipeDef10.recipeUsers?.Clear();
+					}
+				}
+
+				var weaponSettings = YayosCombatAddon.Settings.WeaponSettings;
+				for (int i = weaponSettings.Count - 1; i >= 0; i--)
+				{
+					var weaponSetting = weaponSettings[i];
+					var reloadable = weaponSetting.Reloadable;
+					if (reloadable?.ammoDef == null || !AmmoUtility.AmmoDefs.Contains(reloadable.ammoDef))
+					{
+						weaponSettings.Remove(weaponSetting);
+						continue;
+					}
+
+					weaponSetting.DefsLoaded(reloadable.ammoDef, reloadable.maxCharges);
+					weaponSetting.WeaponDef.AdjustAmmoType();
+				}
+			}
+			else
+			{
+				foreach (var ammoDef in AmmoUtility.AmmoDefs)
+				{
+					ammoDef.tradeability = Tradeability.None;
+					ammoDef.tradeTags = null;
+				}
+				foreach (var recipeDef in AmmoUtility.AmmoRecipeDefs)
+					recipeDef.recipeUsers?.Clear();
+			}
+		}
+
 		static IEnumerable<CodeInstruction> YC_Patch_Pawn_TickRare_Transpiler(IEnumerable<CodeInstruction> _)
 		{
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_Pawn_TickRare), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
+			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(HarmonyPatches), nameof(Patch_Pawn_TickRare)));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
 		static void Patch_Pawn_TickRare(Pawn __instance)
@@ -193,7 +241,7 @@ namespace YayosCombatAddon
 		static IEnumerable<CodeInstruction> YC_Patch_CompApparelReloadable_UsedOnce_Transpiler(IEnumerable<CodeInstruction> _)
 		{
 			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, typeof(HarmonyPatches).GetMethod(nameof(Patch_CompReloadable_UsedOnce), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
+			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(HarmonyPatches), nameof(Patch_CompReloadable_UsedOnce)));
 			yield return new CodeInstruction(OpCodes.Ret);
 		}
 		static void Patch_CompReloadable_UsedOnce(CompApparelReloadable __instance)
@@ -223,7 +271,7 @@ namespace YayosCombatAddon
 			foreach (var instruction in codeInstructions)
 			{
 				if (instruction.opcode == OpCodes.Callvirt && ((MethodInfo)instruction.operand).Name == "get_RemainingCharges")
-					yield return new CodeInstruction(OpCodes.Call, typeof(AmmoUtility).GetMethod(nameof(AmmoUtility.EjectableAmmo), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public));
+					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(AmmoUtility), nameof(AmmoUtility.EjectableAmmo)));
 				else
 					yield return instruction;
 			}

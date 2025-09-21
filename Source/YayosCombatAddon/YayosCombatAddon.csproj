@@ -49,7 +49,9 @@
   <ItemGroup>
     <Compile Include="ControlsBuilder.cs" />
     <Compile Include="Eject\WorkGiver_EjectAmmo.cs" />
-    <Compile Include="Stuff\YCA_DesignationDefOf.cs" />
+    <Compile Include="Defs\YCA_DesignationDefOf.cs" />
+    <Compile Include="Settings\AmmoSetting.cs" />
+    <Compile Include="Settings\WeaponSetting.cs" />
     <Compile Include="Utility\AmmoUtility.cs" />
     <Compile Include="Utility\GeneralUtility.cs" />
     <Compile Include="HarmonyPatches.cs" />
@@ -65,9 +67,10 @@
     <Compile Include="Reload\Command_ReloadActions.cs" />
     <Compile Include="Utility\InventoryUtility.cs" />
     <Compile Include="Utility\ReloadUtility.cs" />
-    <Compile Include="Stuff\YCA_SoundDefOf.cs" />
-    <Compile Include="Stuff\YCA_Textures.cs" />
+    <Compile Include="Defs\YCA_SoundDefOf.cs" />
+    <Compile Include="Defs\YCA_Textures.cs" />
     <Compile Include="YayosCombatAddonSettings.cs" />
+    <Compile Include="Defs\YCA_DefOf.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Krafs.Publicizer">

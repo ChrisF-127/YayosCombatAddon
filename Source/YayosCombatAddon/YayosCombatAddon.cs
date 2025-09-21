@@ -9,7 +9,7 @@ using Verse;
 
 namespace YayosCombatAddon
 {
-	public class YayosCombatAddon : Mod
+	internal class YayosCombatAddon : Mod
 	{
 		#region PROPERTIES
 		public static YayosCombatAddon Instance { get; private set; }

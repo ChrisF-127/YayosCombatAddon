@@ -24,16 +24,17 @@ namespace SyControlsBuilder
 		#endregion
 
 		#region FIELDS
-		private static readonly Dictionary<string, object> ValueBuffers = new Dictionary<string, object>();
+		public static readonly Dictionary<string, object> ValueBuffers = new Dictionary<string, object>();
 
-		private static readonly Color ModifiedColor = Color.cyan;
+		public static readonly Color SelectionColor = Color.green;
+		public static readonly Color ModifiedColor = Color.cyan;
 
-		private static GameFont OriTextFont;
-		private static TextAnchor OriTextAnchor;
-		private static Color OriColor;
+		public static GameFont OriTextFont;
+		public static TextAnchor OriTextAnchor;
+		public static Color OriColor;
 
-		private static float SettingsViewHeight = 0f;
-		private static Vector2 SettingsScrollPosition = new Vector2();
+		public static float SettingsViewHeight = 0f;
+		public static Vector2 SettingsScrollPosition = new Vector2();
 		#endregion
 
 		#region PUBLIC METHODS
@@ -262,12 +263,7 @@ namespace SyControlsBuilder
 		public static float GetControlWidth(float viewWidth) =>
 			viewWidth / 3 - 4;
 
-		public static void ResetValueBuffers() => 
-			ValueBuffers.Clear();
-		#endregion
-
-		#region PRIVATE METHODS
-		private static ValueBuffer<T> GetValueBuffer<T>(string key, T value)
+		public static ValueBuffer<T> GetValueBuffer<T>(string key, T value)
 			where T : struct, IComparable
 		{
 			// find value buffer in dictionary
@@ -290,10 +286,13 @@ namespace SyControlsBuilder
 			ValueBuffers[key] = newVB;
 			return newVB;
 		}
+
+		public static void ResetValueBuffers() => 
+			ValueBuffers.Clear();
 		#endregion
 
 		#region CLASSES
-		private class ValueBuffer<T>
+		public class ValueBuffer<T>
 			where T : struct, IComparable
 		{
 			public string Buffer = null;

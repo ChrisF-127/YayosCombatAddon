@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Defs>
+
+	<!-- Primitive Light -->
+	<RecipeDef ParentName="Make_yy_ammo_primitive_base">
+		<defName>Make_yy_ammo_primitive_light</defName>
+		<label>make primitive ammo (light)</label>
+		<products Inherit="False">
+			<yy_ammo_primitive_light>40</yy_ammo_primitive_light>
+		</products>
+	</RecipeDef>
+	<RecipeDef ParentName="Make_yy_ammo_primitive10_base">
+		<defName>Make_yy_ammo_primitive_light10</defName>
+		<label>make primitive ammo (light) 10</label>
+		<products Inherit="False">
+			<yy_ammo_primitive_light>400</yy_ammo_primitive_light>
+		</products>
+	</RecipeDef>
+	<!-- Primitive Heavy -->
+	<RecipeDef ParentName="Make_yy_ammo_primitive_base">
+		<defName>Make_yy_ammo_primitive_heavy</defName>
+		<label>make primitive ammo (heavy)</label>
+		<products Inherit="False">
+			<yy_ammo_primitive_heavy>10</yy_ammo_primitive_heavy>
+		</products>
+	</RecipeDef>
+	<RecipeDef ParentName="Make_yy_ammo_primitive10_base">
+		<defName>Make_yy_ammo_primitive_heavy10</defName>
+		<label>make primitive ammo (heavy) 10</label>
+		<products Inherit="False">
+			<yy_ammo_primitive_heavy>100</yy_ammo_primitive_heavy>
+		</products>
+	</RecipeDef>
+
+	<!-- Industrial Light -->
+	<RecipeDef ParentName="Make_yy_ammo_industrial_base">
+		<defName>Make_yy_ammo_industrial_light</defName>
+		<label>make industrial ammo (light)</label>
+		<products Inherit="False">
+			<yy_ammo_industrial_light>40</yy_ammo_industrial_light>
+		</products>
+	</RecipeDef>
+	<RecipeDef ParentName="Make_yy_ammo_industrial10_base">
+		<defName>Make_yy_ammo_industrial_light10</defName>
+		<label>make industrial ammo (light) 10</label>
+		<products Inherit="False">
+			<yy_ammo_industrial_light>400</yy_ammo_industrial_light>
+		</products>
+	</RecipeDef>
+	<!-- Industrial Heavy -->
+	<RecipeDef ParentName="Make_yy_ammo_industrial_base">
+		<defName>Make_yy_ammo_industrial_heavy</defName>
+		<label>make industrial ammo (heavy)</label>
+		<products Inherit="False">
+			<yy_ammo_industrial_heavy>10</yy_ammo_industrial_heavy>
+		</products>
+	</RecipeDef>
+	<RecipeDef ParentName="Make_yy_ammo_industrial10_base">
+		<defName>Make_yy_ammo_industrial_heavy10</defName>
+		<label>make industrial ammo (heavy) 10</label>
+		<products Inherit="False">
+			<yy_ammo_industrial_heavy>100</yy_ammo_industrial_heavy>
+		</products>
+	</RecipeDef>
+
+	<!-- Spacer Light -->
+	<RecipeDef ParentName="Make_yy_ammo_spacer_base">
+		<defName>Make_yy_ammo_spacer_light</defName>
+		<label>make spacer ammo (light)</label>
+		<products Inherit="False">
+			<yy_ammo_spacer_light>40</yy_ammo_spacer_light>
+		</products>
+	</RecipeDef>
+	<RecipeDef ParentName="Make_yy_ammo_spacer10_base">
+		<defName>Make_yy_ammo_spacer_light10</defName>
+		<label>make spacer ammo (light) 10</label>
+		<products Inherit="False">
+			<yy_ammo_spacer_light>400</yy_ammo_spacer_light>
+		</products>
+	</RecipeDef>
+	<!-- Spacer Heavy -->
+	<RecipeDef ParentName="Make_yy_ammo_spacer_base">
+		<defName>Make_yy_ammo_spacer_heavy</defName>
+		<label>make spacer ammo (heavy)</label>
+		<products Inherit="False">
+			<yy_ammo_spacer_heavy>10</yy_ammo_spacer_heavy>
+		</products>
+	</RecipeDef>
+	<RecipeDef ParentName="Make_yy_ammo_spacer10_base">
+		<defName>Make_yy_ammo_spacer_heavy10</defName>
+		<label>make spacer ammo (heavy) 10</label>
+		<products Inherit="False">
+			<yy_ammo_spacer_heavy>100</yy_ammo_spacer_heavy>
+		</products>
+	</RecipeDef>
+	
+</Defs>

@@ -29,7 +29,7 @@ namespace YayosCombatAddon
 
 		static HarmonyPatches()
 		{
-			Harmony harmony = new Harmony("syrus.yayoscombataddon");
+			var harmony = new Harmony("syrus.yayoscombataddon");
 
 			// patch for reload gizmo
 			harmony.Patch(
@@ -43,7 +43,7 @@ namespace YayosCombatAddon
 			// replace original patches
 			harmony.Patch(
 				AccessTools.Method(typeof(yayoCombat.yayoCombat), "DefsLoaded"),
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_DefsLoaded)));
+				postfix: new HarmonyMethod(typeof(YayosCombatAddon), nameof(YayosCombatAddon.DefsLoaded)));
 
 			// replace original patches
 			harmony.Patch(
@@ -170,50 +170,6 @@ namespace YayosCombatAddon
 				yield return gizmo;
 		}
 
-
-		static void YC_DefsLoaded()
-		{
-			if (yayoCombat.yayoCombat.ammo)
-			{
-				foreach (var baseAmmoSetting in YayosCombatAddon.Settings.AmmoSettings)
-				{
-					if (baseAmmoSetting is AmmoSetting ammoSetting && !ammoSetting.IsEnabled)
-					{
-						var ammoDef = ammoSetting.AmmoDef;
-						ammoDef.tradeability = Tradeability.None;
-						ammoDef.tradeTags = null;
-
-						ammoSetting.RecipeDef.recipeUsers?.Clear();
-						ammoSetting.RecipeDef10.recipeUsers?.Clear();
-					}
-				}
-
-				var weaponSettings = YayosCombatAddon.Settings.WeaponSettings;
-				for (int i = weaponSettings.Count - 1; i >= 0; i--)
-				{
-					var weaponSetting = weaponSettings[i];
-					var reloadable = weaponSetting.Reloadable;
-					if (reloadable?.ammoDef == null || !AmmoUtility.AmmoDefs.Contains(reloadable.ammoDef))
-					{
-						weaponSettings.Remove(weaponSetting);
-						continue;
-					}
-
-					weaponSetting.DefsLoaded(reloadable.ammoDef, reloadable.maxCharges);
-					weaponSetting.WeaponDef.AdjustAmmoType();
-				}
-			}
-			else
-			{
-				foreach (var ammoDef in AmmoUtility.AmmoDefs)
-				{
-					ammoDef.tradeability = Tradeability.None;
-					ammoDef.tradeTags = null;
-				}
-				foreach (var recipeDef in AmmoUtility.AmmoRecipeDefs)
-					recipeDef.recipeUsers?.Clear();
-			}
-		}
 
 		static IEnumerable<CodeInstruction> YC_Patch_Pawn_TickRare_Transpiler(IEnumerable<CodeInstruction> _)
 		{

@@ -12,7 +12,8 @@ using Verse;
 
 namespace YayosCombatAddon
 {
-#warning TODO translations
+#warning TODO ammo icons
+#warning TODO traders: postFix ThingSetMaker_TraderStock.Generate, add light/heavy if medium available, s. ThingSetMaker_TraderStock_Generate.addAmmo
 	internal class YayosCombatAddonSettings : ModSettings
 	{
 		#region ENUMS
@@ -79,20 +80,23 @@ namespace YayosCombatAddon
 					SettingsSubMenuEnum.General,
 					false);
 				subMenButtonOffsetX += buttonWidth;
-				// Ammo
-				CreateSubMenuSelector(
-					new Rect(subMenButtonOffsetX + 2, offsetY, buttonWidth - 4, buttonHeight),
-					"SY_YCA.SubMenuAmmo".Translate(),
-					SettingsSubMenuEnum.Ammo,
-					false);
-				subMenButtonOffsetX += buttonWidth;
-				// Weapons
-				CreateSubMenuSelector(
-					new Rect(subMenButtonOffsetX + 2, offsetY, buttonWidth - 4, buttonHeight),
-					"SY_YCA.SubMenuWeapons".Translate(),
-					SettingsSubMenuEnum.Weapons,
-					false);
-				subMenButtonOffsetX += buttonWidth;
+				if (yayoCombat.yayoCombat.ammo)
+				{
+					// Ammo
+					CreateSubMenuSelector(
+						new Rect(subMenButtonOffsetX + 2, offsetY, buttonWidth - 4, buttonHeight),
+						"SY_YCA.SubMenuAmmo".Translate(),
+						SettingsSubMenuEnum.Ammo,
+						false);
+					subMenButtonOffsetX += buttonWidth;
+					// Weapons
+					CreateSubMenuSelector(
+						new Rect(subMenButtonOffsetX + 2, offsetY, buttonWidth - 4, buttonHeight),
+						"SY_YCA.SubMenuWeapons".Translate(),
+						SettingsSubMenuEnum.Weapons,
+						false);
+					subMenButtonOffsetX += buttonWidth;
+				}
 
 				ControlsBuilder.Begin(inRect);
 				try
@@ -172,7 +176,7 @@ namespace YayosCombatAddon
 									ammoSetting.IsEnabled = ControlsBuilder.CreateCheckbox(
 										ref offsetY,
 										width,
-										ammoSetting.AmmoDef.LabelCap + " " + "SY_YCA.Enabled".Translate(),
+										"SY_YCA.Enable".Translate() + " " + ammoSetting.AmmoDef.label,
 										"SY_YCA.AmmoEnable_desc".Translate(),
 										ammoSetting.IsEnabled,
 										false);
@@ -203,17 +207,14 @@ namespace YayosCombatAddon
 							break;
 
 						case SettingsSubMenuEnum.Weapons:
-							if (yayoCombat.yayoCombat.ammo)
+							foreach (var weaponSetting in WeaponSettings)
 							{
-								foreach (var weaponSetting in WeaponSettings)
-								{
-									CreateWeaponSettingControl(
-										ref offsetY,
-										width,
-										"SY_YCA.WeaponMaxCharges_desc".Translate(),
-										"SY_YCA.WeaponMaxCharges_desc".Translate(),
-										weaponSetting);
-								}
+								CreateWeaponSettingControl(
+									ref offsetY,
+									width,
+									"SY_YCA.WeaponAmmoDef_desc".Translate(),
+									"SY_YCA.WeaponMaxCharges_desc".Translate(),
+									weaponSetting);
 							}
 							break;
 					}
@@ -355,11 +356,10 @@ namespace YayosCombatAddon
 		private void CreateWeaponSettingControl(
 			ref float offsetY,
 			float viewWidth,
-			string tooltipMaxCharges,
 			string tooltipAmmoDef,
+			string tooltipMaxCharges,
 			WeaponSetting weaponSetting)
 		{
-			Log.Message($"{weaponSetting.Name} {weaponSetting.Reloadable.ammoDef} {weaponSetting.AmmoDef}");
 			var label = weaponSetting.WeaponDef.LabelCap;
 
 			var maxCharges = weaponSetting.MaxCharges;
@@ -427,7 +427,6 @@ namespace YayosCombatAddon
 			weaponSetting.AmmoDef = ammoDefWrapper.Value;
 			weaponSetting.MaxCharges = maxCharges;
 			weaponSetting.Apply();
-
 		}
 		#endregion
 	}

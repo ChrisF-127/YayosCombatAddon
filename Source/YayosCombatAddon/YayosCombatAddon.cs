@@ -32,6 +32,54 @@ namespace YayosCombatAddon
 		}
 		#endregion
 
+		#region PUBLIC METHODS
+		public static void DefsLoaded()
+		{
+			if (yayoCombat.yayoCombat.ammo)
+			{
+				foreach (var baseAmmoSetting in Settings.AmmoSettings)
+				{
+					if (baseAmmoSetting is AmmoSetting ammoSetting && !ammoSetting.IsEnabled)
+					{
+						var ammoDef = ammoSetting.AmmoDef;
+						ammoDef.tradeability = Tradeability.None;
+						ammoDef.tradeTags = null;
+
+						ammoSetting.RecipeDef.recipeUsers?.Clear();
+						ammoSetting.RecipeDef10.recipeUsers?.Clear();
+					}
+				}
+
+				var weaponSettings = Settings.WeaponSettings;
+				for (int i = weaponSettings.Count - 1; i >= 0; i--)
+				{
+					var weaponSetting = weaponSettings[i];
+					var reloadable = weaponSetting.Reloadable;
+					if (reloadable?.ammoDef == null || !AmmoUtility.AmmoDefs.Contains(reloadable.ammoDef))
+					{
+						weaponSettings.Remove(weaponSetting);
+						continue;
+					}
+
+					weaponSetting.DefsLoaded(reloadable.ammoDef, reloadable.maxCharges);
+					weaponSetting.WeaponDef.AdjustAmmoType();
+				}
+
+				weaponSettings.Sort((x, y) => x.WeaponDef.label.CompareTo(y.WeaponDef.label));
+			}
+			else
+			{
+				foreach (var ammoDef in AmmoUtility.AmmoDefs)
+				{
+					ammoDef.tradeability = Tradeability.None;
+					ammoDef.tradeTags = null;
+				}
+				foreach (var recipeDef in AmmoUtility.AmmoRecipeDefs)
+					recipeDef.recipeUsers?.Clear();
+			}
+		}
+		#endregion
+
 		#region OVERRIDES
 		public override string SettingsCategory() =>
 			"Yayo's Combat 3 - Addon";

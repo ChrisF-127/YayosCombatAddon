@@ -43,6 +43,19 @@ Right click for more options</SY_YCA.ReloadGizmo_desc>
   <SY_YCA.RestockAmmoFromSurrounding_label>Restock inventory ammo</SY_YCA.RestockAmmoFromSurrounding_label>
   <SY_YCA.RestockAmmoFromSurrounding_tooltip>Restock inventory with ammo assigned to the pawn via the "assign" ammo settings or assigned drug policy
 Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurrounding_tooltip>
+
+  <SY_YCA.SubMenuGeneral>General</SY_YCA.SubMenuGeneral>
+  <SY_YCA.SubMenuAmmo>Ammo</SY_YCA.SubMenuAmmo>
+  <SY_YCA.SubMenuWeapons>Weapons</SY_YCA.SubMenuWeapons>
+  
+  <SY_YCA.AmmoRequireRestart>En-/disabling ammo requires game restart!</SY_YCA.AmmoRequireRestart>
+  <SY_YCA.AmmoEnable_desc>Enable this ammo type</SY_YCA.AmmoEnable_desc>
+  <SY_YCA.AmmoParameterGreater_desc>Ammo type is applied to weapons with higher damage than this value</SY_YCA.AmmoParameterGreater_desc>
+  <SY_YCA.AmmoParameterLess_desc>Ammo type is applied to weapons with lower damage than this value</SY_YCA.AmmoParameterLess_desc>
+  <SY_YCA.AmmoRecipeAmount_desc>Items produced when crafting this ammo type</SY_YCA.AmmoRecipeAmount_desc>
+  
+  <SY_YCA.WeaponAmmoDef_desc>Ammo type to be used for this weapon</SY_YCA.WeaponAmmoDef_desc>
+  <SY_YCA.WeaponMaxCharges_desc>"Magazine"-size of this weapon</SY_YCA.WeaponMaxCharges_desc>
   
   <SY_YCA.NothingToReload>No weapon to reload</SY_YCA.NothingToReload>
   <SY_YCA.NothingToRestock>Nothing requires restocking</SY_YCA.NothingToRestock>
@@ -50,6 +63,8 @@ Search for ammo nearby and put it into the inventory</SY_YCA.RestockAmmoFromSurr
   <SY_YCA.NoAmmoInventory>{pawn} could not find enough '{ammo}' in their inventory, missing {count}</SY_YCA.NoAmmoInventory>
   <SY_YCA.NoAmmoRestock>{pawn} could not find enough '{ammo}', missing {count} out of a desired {max}</SY_YCA.NoAmmoRestock>
   <SY_YCA.OutOfAmmo>{pawn} ran out of ammo and could not find any to reload</SY_YCA.OutOfAmmo>
+  <SY_YCA.Enable>Enable</SY_YCA.Enable>
+  <SY_YCA.Damage>damage</SY_YCA.Damage>
   <SY_YCA.Amount>amount</SY_YCA.Amount>
   
 </LanguageData>

@@ -13,7 +13,6 @@ using Verse;
 namespace YayosCombatAddon
 {
 #warning TODO ammo icons
-#warning TODO traders: postFix ThingSetMaker_TraderStock.Generate, add light/heavy if medium available, s. ThingSetMaker_TraderStock_Generate.addAmmo
 	internal class YayosCombatAddonSettings : ModSettings
 	{
 		#region ENUMS
@@ -70,9 +69,9 @@ namespace YayosCombatAddon
 				GUI.BeginGroup(inRect);
 
 				// Sub menu buttons
-				float buttonWidth = width / 3f;
-				float buttonHeight = ControlsBuilder.SettingsRowHeight / 4f * 3f;
-				float subMenButtonOffsetX = 0;
+				var buttonWidth = width / 3f;
+				var buttonHeight = ControlsBuilder.SettingsRowHeight / 4f * 3f;
+				var subMenButtonOffsetX = 0f;
 				// General
 				CreateSubMenuSelector(
 					new Rect(subMenButtonOffsetX + 2, offsetY, buttonWidth - 4, buttonHeight),
@@ -98,12 +97,14 @@ namespace YayosCombatAddon
 					subMenButtonOffsetX += buttonWidth;
 				}
 
-				ControlsBuilder.Begin(inRect);
-				try
+				inRect.height -= ControlsBuilder.SettingsRowHeight;
+
+				switch (_selectedSettingsSubMenu)
 				{
-					switch (_selectedSettingsSubMenu)
-					{
-						case SettingsSubMenuEnum.General:
+					case SettingsSubMenuEnum.General:
+						ControlsBuilder.Begin(inRect);
+						try
+						{
 							NumberOfAmmoColumns = ControlsBuilder.CreateNumeric(
 								ref offsetY,
 								width,
@@ -162,13 +163,21 @@ namespace YayosCombatAddon
 								0,
 								100,
 								unit: "%");
-							break;
+						}
+						finally
+						{
+							ControlsBuilder.End(offsetY);
+						}
+						break;
 
-						case SettingsSubMenuEnum.Ammo:
-							ControlsBuilder.CreateText(ref offsetY, width, "SY_YCA.AmmoRequireRestart".Translate(), Color.red, TextAnchor.MiddleCenter, GameFont.Medium);
+					case SettingsSubMenuEnum.Ammo:
+						offsetY += ControlsBuilder.SettingsRowHeight * 0.8f;
+						ControlsBuilder.CreateText(ref offsetY, width, "SY_YCA.AmmoRequireRestart".Translate(), Color.red, TextAnchor.MiddleCenter, GameFont.Medium);
 
-							offsetY += ControlsBuilder.SettingsRowHeight * 0.5f;
-
+						ControlsBuilder.Begin(new Rect(inRect.x, inRect.y + ControlsBuilder.SettingsRowHeight * 0.75f, inRect.width, inRect.height));
+						try
+						{
+							offsetY = 0f;
 							foreach (var baseAmmoSetting in AmmoSettings)
 							{
 								if (baseAmmoSetting is AmmoSetting ammoSetting)
@@ -204,9 +213,17 @@ namespace YayosCombatAddon
 
 								offsetY += ControlsBuilder.SettingsRowHeight * 0.5f;
 							}
-							break;
+						}
+						finally
+						{
+							ControlsBuilder.End(offsetY);
+						}
+						break;
 
-						case SettingsSubMenuEnum.Weapons:
+					case SettingsSubMenuEnum.Weapons:
+						ControlsBuilder.Begin(inRect);
+						try
+						{
 							foreach (var weaponSetting in WeaponSettings)
 							{
 								CreateWeaponSettingControl(
@@ -216,12 +233,12 @@ namespace YayosCombatAddon
 									"SY_YCA.WeaponMaxCharges_desc".Translate(),
 									weaponSetting);
 							}
-							break;
-					}
-				}
-				finally
-				{
-					ControlsBuilder.End(offsetY);
+						}
+						finally
+						{
+							ControlsBuilder.End(offsetY);
+						}
+						break;
 				}
 			}
 			finally
@@ -273,7 +290,7 @@ namespace YayosCombatAddon
 					Scribe_Values.Look(ref intValue, $"{ammoSetting.Name}_Parameter", ammoSetting.DefaultParameter);
 					ammoSetting.Parameter = intValue;
 				}
-				
+
 				intValue = baseAmmoSetting.RecipeAmount;
 				Scribe_Values.Look(ref intValue, $"{baseAmmoSetting.Name}_RecipeAmount", baseAmmoSetting.DefaultRecipeAmount);
 				baseAmmoSetting.RecipeAmount = intValue;
@@ -321,6 +338,8 @@ namespace YayosCombatAddon
 			var spacer = "spacer";
 			var light = "light";
 			var heavy = "heavy";
+
+			// using default values
 
 			addAmmoSetting(primitive, light, 12, false);
 			addAmmoSetting(primitive);
@@ -412,14 +431,17 @@ namespace YayosCombatAddon
 			ControlsBuilder.DrawTooltip(numericRect, tooltipMaxCharges);
 
 			// Reset button
-			var resetRect = new Rect((controlWidth + 2) * 3, offsetY + 2, ControlsBuilder.SettingsRowHeight * 2 - 4, ControlsBuilder.SettingsRowHeight - 4);
-			ControlsBuilder.DrawTooltip(resetRect, $"Reset to '{defaultAmmoDef.LabelCap}' x{defaultMaxCharges}");
-			if (isModified && Widgets.ButtonText(resetRect, "Reset"))
+			if (isModified)
 			{
-				maxCharges = defaultMaxCharges;
-				ControlsBuilder.ValueBuffers.Remove(valueBufferKey);
+				var resetRect = new Rect((controlWidth + 2) * 3, offsetY + 2, ControlsBuilder.SettingsRowHeight * 2 - 4, ControlsBuilder.SettingsRowHeight - 4);
+				ControlsBuilder.DrawTooltip(resetRect, $"Reset to '{defaultAmmoDef.LabelCap}' x{defaultMaxCharges}");
+				if (Widgets.ButtonText(resetRect, "Reset"))
+				{
+					maxCharges = defaultMaxCharges;
+					ControlsBuilder.ValueBuffers.Remove(valueBufferKey);
 
-				ammoDefWrapper.Value = defaultAmmoDef;
+					ammoDefWrapper.Value = defaultAmmoDef;
+				}
 			}
 
 			offsetY += ControlsBuilder.SettingsRowHeight;

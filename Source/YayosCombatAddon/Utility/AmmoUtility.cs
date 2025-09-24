@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RimWorld.Planet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -168,6 +169,110 @@ namespace YayosCombatAddon
 				if (thing.AtLowAmmo(pawn, checkAvailable))
 					return true;
 			return false;
+		}
+
+		public static void TraderStock_Generate_AddAmmo(TraderKindDef traderKindDef, Faction makingFaction, PlanetTile forTile, List<Thing> outThings)
+		{
+			const float baseAmount = 400f;
+			const float min = 0.25f;
+			const float max = 1.50f;
+			const float light = 2.0f;
+			const float heavy = 0.5f;
+
+			if (!yayoCombat.yayoCombat.ammo)
+				return;
+
+			var isWeaponsTrader = false;
+			var isExoticTrader = false;
+			foreach (var stockGenerator in traderKindDef.stockGenerators)
+			{
+				switch (stockGenerator)
+				{
+					case StockGenerator_MarketValue marketValue:
+						if (marketValue.tradeTag == "WeaponRanged")
+							isWeaponsTrader = true;
+						break;
+					case StockGenerator_Tag tag:
+						if (tag.tradeTag == "ExoticMisc")
+							isExoticTrader = true;
+						break;
+				}
+			}
+
+			if (isWeaponsTrader)
+				isExoticTrader = false;
+
+			if (!traderKindDef.defName.ToLower().Contains("bulkgoods")
+				&& !isWeaponsTrader
+				&& !isExoticTrader
+				&& Rand.Value > 0.33f)
+				return;
+
+			var tech = makingFaction?.def.techLevel ?? TechLevel.Spacer;
+			if (tech < TechLevel.Neolithic)
+				return;
+
+			// Primitive
+			var random = Rand.Value;
+			if (!isExoticTrader                                         //   0% for Exotic Traders
+				&& (   tech <= TechLevel.Medieval						// 100% for Neolithic & Medieval
+					|| tech <= TechLevel.Industrial && random <= 0.2f	//  20% for Industrial
+					|| random <= 0.1f))									//  10% for Post-Industrial
+			{
+				var primitiveAmount = baseAmount;
+				if (tech > TechLevel.Medieval)
+					primitiveAmount *= 0.5f;
+
+				add(YCA_DefOf.yy_ammo_primitive_light, primitiveAmount * light);
+				add(YCA_DefOf.yy_ammo_primitive_heavy, primitiveAmount * heavy);
+			}
+
+			// Industrial
+			random = Rand.Value;
+			if (!isExoticTrader											//   0% for Exotic Traders
+				&& (   tech == TechLevel.Industrial						// 100% for Industrial
+					|| tech >  TechLevel.Industrial && random <= 0.8f	//  80% for Post-Industrial
+					|| random <= 0.2f))									//  20% for Pre-Industrial
+			{
+				var industrialAmount = baseAmount;
+				if (tech < TechLevel.Industrial)
+					industrialAmount /= (int)TechLevel.Industrial - (int)tech;
+
+				add(YCA_DefOf.yy_ammo_industrial_light, industrialAmount * light);
+				add(YCA_DefOf.yy_ammo_industrial_heavy, industrialAmount * heavy);
+			}
+
+
+			// Spacer
+			random = Rand.Value;
+			if (isExoticTrader                                          // 100% for Exotic Traders
+				|| tech >= TechLevel.Spacer								// 100% for Spacer & Post-Spacer 
+				|| tech == TechLevel.Industrial && random <= 0.5f		//  50% for Industrial
+				|| random <= 0.1f)										//  10% for Pre-Industrial
+			{
+				var spacerAmount = baseAmount;
+				if (tech < TechLevel.Spacer)
+					spacerAmount /= (int)TechLevel.Spacer - (int)tech;
+
+				add(YCA_DefOf.yy_ammo_spacer_light, spacerAmount * light);
+				add(YCA_DefOf.yy_ammo_spacer_heavy, spacerAmount * heavy);
+			}
+
+
+			void add(ThingDef ammoDef, float amount)
+			{
+				if (YayosCombatAddon.Settings.AmmoSettings.First(ws => ws.AmmoDef == ammoDef) is AmmoSetting ammoSetting && ammoSetting.IsEnabled)
+				{
+					var count = Mathf.RoundToInt(Rand.Range(min, max) * yayoCombat.yayoCombat.ammoGen * amount);
+					if (count > 20)
+					{
+						var thing = ThingMaker.MakeThing(ammoDef);
+						thing.stackCount = count;
+						thing.PostGeneratedForTrader(traderKindDef, forTile, makingFaction);
+						outThings.Add(thing);
+					}
+				}
+			}
 		}
 	}
 }

@@ -61,8 +61,8 @@ namespace YayosCombatAddon
 						continue;
 					}
 
-					weaponSetting.DefsLoaded(reloadable.ammoDef, reloadable.maxCharges);
 					weaponSetting.WeaponDef.AdjustAmmoType();
+					weaponSetting.DefsLoaded(reloadable.ammoDef, reloadable.maxCharges);
 				}
 
 				weaponSettings.Sort((x, y) => x.WeaponDef.label.CompareTo(y.WeaponDef.label));

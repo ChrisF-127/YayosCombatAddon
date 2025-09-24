@@ -40,10 +40,13 @@ namespace YayosCombatAddon
 				AccessTools.Method(typeof(ThingComp), nameof(ThingComp.CompGetGizmosExtra)),
 				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(ThingComp_CompGetGizmosExtra_Postfix)));
 
-			// replace original patches
+			// attach patches to original methods
 			harmony.Patch(
 				AccessTools.Method(typeof(yayoCombat.yayoCombat), "DefsLoaded"),
 				postfix: new HarmonyMethod(typeof(YayosCombatAddon), nameof(YayosCombatAddon.DefsLoaded)));
+			harmony.Patch(
+				AccessTools.Method(typeof(ThingSetMaker_TraderStock_Generate), nameof(ThingSetMaker_TraderStock_Generate.addAmmo)),
+				postfix: new HarmonyMethod(typeof(AmmoUtility), nameof(AmmoUtility.TraderStock_Generate_AddAmmo)));
 
 			// replace original patches
 			harmony.Patch(

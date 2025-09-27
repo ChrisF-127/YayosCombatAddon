@@ -27,6 +27,15 @@ namespace YayosCombatAddon
 			YCA_DefOf.yy_ammo_spacer_light,
 			YCA_DefOf.yy_ammo_spacer,
 			YCA_DefOf.yy_ammo_spacer_heavy,
+
+			YCA_DefOf.yy_ammo_primitive_fire,
+			YCA_DefOf.yy_ammo_primitive_emp,
+
+			YCA_DefOf.yy_ammo_industrial_fire,
+			YCA_DefOf.yy_ammo_industrial_emp,
+
+			YCA_DefOf.yy_ammo_spacer_fire,
+			YCA_DefOf.yy_ammo_spacer_emp,
 		};
 		public static RecipeDef[] AmmoRecipeDefs =
 		{

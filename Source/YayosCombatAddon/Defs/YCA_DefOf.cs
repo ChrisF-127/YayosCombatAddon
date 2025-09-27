@@ -25,6 +25,15 @@ namespace YayosCombatAddon
 		public static ThingDef yy_ammo_spacer;
 		public static ThingDef yy_ammo_spacer_heavy;
 
+		public static ThingDef yy_ammo_primitive_fire;
+		public static ThingDef yy_ammo_primitive_emp;
+
+		public static ThingDef yy_ammo_industrial_fire;
+		public static ThingDef yy_ammo_industrial_emp;
+
+		public static ThingDef yy_ammo_spacer_fire;
+		public static ThingDef yy_ammo_spacer_emp;
+
 		// RecipeDefs
 		public static RecipeDef Make_yy_ammo_primitive_light;
 		public static RecipeDef Make_yy_ammo_primitive_light10;

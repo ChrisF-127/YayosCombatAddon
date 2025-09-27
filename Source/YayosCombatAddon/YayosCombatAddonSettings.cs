@@ -402,12 +402,12 @@ namespace YayosCombatAddon
 			// AmmoDef Menu Generator
 			IEnumerable<Widgets.DropdownMenuElement<ThingDef>> menuGenerator(TargetWrapper<ThingDef> vWrapper)
 			{
-				foreach (var item in AmmoUtility.AmmoDefs)
+				foreach (var ammoDef in AmmoUtility.AmmoDefs)
 				{
 					yield return new Widgets.DropdownMenuElement<ThingDef>
 					{
-						option = new FloatMenuOption(item.LabelCap, () => vWrapper.Value = item),
-						payload = item,
+						option = new FloatMenuOption(ammoDef.LabelCap, () => vWrapper.Value = ammoDef),
+						payload = ammoDef,
 					};
 				}
 			}

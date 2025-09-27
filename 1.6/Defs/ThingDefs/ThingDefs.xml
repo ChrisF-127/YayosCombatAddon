@@ -11,6 +11,9 @@
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<stackLimit>400</stackLimit>
+		<statBases>
+			<Mass>0.025</Mass>
+		</statBases>
 	</ThingDef>
 	<!-- Primitive Heavy -->
 	<ThingDef ParentName="yy_ammo_primitive_base">
@@ -22,6 +25,9 @@
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<stackLimit>100</stackLimit>
+		<statBases>
+			<Mass>0.1</Mass>
+		</statBases>
 	</ThingDef>
 
 	<!-- Industrial Light -->
@@ -34,6 +40,9 @@
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<stackLimit>400</stackLimit>
+		<statBases>
+			<Mass>0.025</Mass>
+		</statBases>
 	</ThingDef>
 	<!-- Industrial Heavy -->
 	<ThingDef ParentName="yy_ammo_industrial_base">
@@ -45,6 +54,9 @@
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<stackLimit>100</stackLimit>
+		<statBases>
+			<Mass>0.1</Mass>
+		</statBases>
 	</ThingDef>
 
 	<!-- Spacer Light -->
@@ -57,6 +69,9 @@
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<stackLimit>400</stackLimit>
+		<statBases>
+			<Mass>0.025</Mass>
+		</statBases>
 	</ThingDef>
 	<!-- Spacer Heavy -->
 	<ThingDef ParentName="yy_ammo_spacer_base">
@@ -68,6 +83,9 @@
 			<graphicClass>Graphic_Single</graphicClass>
 		</graphicData>
 		<stackLimit>100</stackLimit>
+		<statBases>
+			<Mass>0.1</Mass>
+		</statBases>
 	</ThingDef>
 	
 </Defs>

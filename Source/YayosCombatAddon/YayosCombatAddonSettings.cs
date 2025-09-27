@@ -12,7 +12,6 @@ using Verse;
 
 namespace YayosCombatAddon
 {
-#warning TODO ammo icons
 	internal class YayosCombatAddonSettings : ModSettings
 	{
 		#region ENUMS

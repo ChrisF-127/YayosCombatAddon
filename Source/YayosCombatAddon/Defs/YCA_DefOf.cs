@@ -55,6 +55,21 @@ namespace YayosCombatAddon
 		public static RecipeDef Make_yy_ammo_spacer10;
 		public static RecipeDef Make_yy_ammo_spacer_heavy;
 		public static RecipeDef Make_yy_ammo_spacer_heavy10;
+
+		public static RecipeDef Make_yy_ammo_primitive_emp;
+		public static RecipeDef Make_yy_ammo_primitive_emp10;
+		public static RecipeDef Make_yy_ammo_primitive_fire;
+		public static RecipeDef Make_yy_ammo_primitive_fire10;
+
+		public static RecipeDef Make_yy_ammo_industrial_emp;
+		public static RecipeDef Make_yy_ammo_industrial_emp10;
+		public static RecipeDef Make_yy_ammo_industrial_fire;
+		public static RecipeDef Make_yy_ammo_industrial_fire10;
+
+		public static RecipeDef Make_yy_ammo_spacer_emp;
+		public static RecipeDef Make_yy_ammo_spacer_emp10;
+		public static RecipeDef Make_yy_ammo_spacer_fire;
+		public static RecipeDef Make_yy_ammo_spacer_fire10;
 #pragma warning restore 0649
 	}
 }

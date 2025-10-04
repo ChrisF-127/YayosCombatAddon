@@ -37,45 +37,80 @@ namespace YayosCombatAddon
 		{
 			if (yayoCombat.yayoCombat.ammo)
 			{
+				// setup ammo defs
+				var recipeDefsToRemove = new List<RecipeDef>();
 				foreach (var baseAmmoSetting in Settings.AmmoSettings)
 				{
 					if (baseAmmoSetting is AmmoSetting ammoSetting && !ammoSetting.IsEnabled)
 					{
+						// set ammo to non-tradeable
 						var ammoDef = ammoSetting.AmmoDef;
 						ammoDef.tradeability = Tradeability.None;
 						ammoDef.tradeTags = null;
 
+						// remove recipe users from recipes
 						ammoSetting.RecipeDef.recipeUsers?.Clear();
 						ammoSetting.RecipeDef10.recipeUsers?.Clear();
+
+						// remember recipes to remove from thingDefs
+						recipeDefsToRemove.Add(ammoSetting.RecipeDef);
+						recipeDefsToRemove.Add(ammoSetting.RecipeDef10);
 					}
 				}
+				// remove recipes from thingDefs
+				Parallel.ForEach(
+					DefDatabase<ThingDef>.AllDefs,
+					thingDef =>
+					{
+						if (!thingDef.IsWorkTable)
+							return; // skip
+						thingDef.recipes?.RemoveAll(recipeDef => recipeDefsToRemove.Contains(recipeDef));
+						thingDef.allRecipesCached?.RemoveAll(recipeDef => recipeDefsToRemove.Contains(recipeDef));
+					});
 
+
+				// setup weapon settings, removing ones without or incorrect ammo defs
 				var weaponSettings = Settings.WeaponSettings;
 				for (int i = weaponSettings.Count - 1; i >= 0; i--)
 				{
 					var weaponSetting = weaponSettings[i];
 					var reloadable = weaponSetting.Reloadable;
-					if (reloadable?.ammoDef == null || !AmmoUtility.AmmoDefs.Contains(reloadable.ammoDef))
+					if (reloadable?.ammoDef == null || !AmmoUtility.AllAmmoDefs.Contains(reloadable.ammoDef))
 					{
+						// remove weapon settings for weapons without or incorrect ammo defs
 						weaponSettings.Remove(weaponSetting);
 						continue;
 					}
 
+					// adjust and apply ammo defs for weapon settings
 					weaponSetting.WeaponDef.AdjustAmmoType();
 					weaponSetting.DefsLoaded(reloadable.ammoDef, reloadable.maxCharges);
 				}
 
+				// sort weapon settings by label
 				weaponSettings.Sort((x, y) => x.WeaponDef.label.CompareTo(y.WeaponDef.label));
 			}
 			else
 			{
-				foreach (var ammoDef in AmmoUtility.AmmoDefs)
+				// set ammo to non-tradeable
+				foreach (var ammoDef in AmmoUtility.AllAmmoDefs)
 				{
 					ammoDef.tradeability = Tradeability.None;
 					ammoDef.tradeTags = null;
 				}
-				foreach (var recipeDef in AmmoUtility.AmmoRecipeDefs)
+				// remove recipe users from recipes
+				foreach (var recipeDef in AmmoUtility.AllAmmoRecipeDefs)
 					recipeDef.recipeUsers?.Clear();
+				// remove recipes from thingDefs
+				Parallel.ForEach(
+					DefDatabase<ThingDef>.AllDefs,
+					thingDef =>
+					{
+						if (!thingDef.IsWorkTable)
+							return; // skip
+						thingDef.recipes?.RemoveAll(recipeDef => AmmoUtility.AllAmmoRecipeDefs.Contains(recipeDef));
+						thingDef.allRecipesCached?.RemoveAll(recipeDef => AmmoUtility.AllAmmoRecipeDefs.Contains(recipeDef));
+					});
 			}
 		}
 		#endregion

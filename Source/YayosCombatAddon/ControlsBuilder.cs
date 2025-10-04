@@ -1,12 +1,8 @@
-﻿using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
-using Verse.Noise;
 
 namespace SyControlsBuilder
 {
@@ -69,6 +65,7 @@ namespace SyControlsBuilder
 		}
 
 		public static void CreateText(
+			float offsetX,
 			ref float offsetY,
 			float viewWidth,
 			string text, 
@@ -87,7 +84,7 @@ namespace SyControlsBuilder
 			Text.Font = font;
 
 			// draw text
-			Widgets.Label(new Rect(2, offsetY, viewWidth - 4, SettingsRowHeight), text);
+			Widgets.Label(new Rect(offsetX + 2, offsetY, viewWidth - 4, SettingsRowHeight), text);
 
 			// reset to previous style
 			Text.Font = prevFont;
@@ -98,6 +95,7 @@ namespace SyControlsBuilder
 		}
 
 		public static T CreateNumeric<T>(
+			float offsetX,
 			ref float offsetY,
 			float viewWidth,
 			string label,
@@ -117,11 +115,11 @@ namespace SyControlsBuilder
 			// Label
 			if (isModified)
 				GUI.color = ModifiedColor;
-			Widgets.Label(new Rect(0, offsetY, controlWidth - 8, SettingsRowHeight), label);
+			Widgets.Label(new Rect(offsetX, offsetY, controlWidth - 8, SettingsRowHeight), label);
 			GUI.color = OriColor;
 
 			// Setting
-			var textFieldRect = new Rect(controlWidth + 2, offsetY + 6, controlWidth - 4, SettingsRowHeight - 12);
+			var textFieldRect = new Rect(offsetX + controlWidth + 2, offsetY + 6, controlWidth - 4, SettingsRowHeight - 12);
 			var valueBuffer = GetValueBuffer(valueBufferKey, value); // required for typing decimal points etc.
 			Widgets.TextFieldNumeric(textFieldRect, ref value, ref valueBuffer.Buffer, min, max);
 
@@ -142,7 +140,7 @@ namespace SyControlsBuilder
 			}
 
 			// Reset button
-			if (isModified && DrawResetButton(offsetY, viewWidth, defaultValue.ToString()))
+			if (isModified && DrawResetButton(offsetX, offsetY, viewWidth, defaultValue.ToString()))
 			{
 				value = defaultValue;
 				ValueBuffers.Remove(valueBufferKey);
@@ -153,6 +151,7 @@ namespace SyControlsBuilder
 		}
 
 		public static bool CreateCheckbox(
+			float offsetX,
 			ref float offsetY,
 			float viewWidth,
 			string label,
@@ -167,20 +166,20 @@ namespace SyControlsBuilder
 			// Label
 			if (isModified)
 				GUI.color = ModifiedColor;
-			Widgets.Label(new Rect(0, offsetY, controlWidth, SettingsRowHeight), label);
+			Widgets.Label(new Rect(offsetX, offsetY, controlWidth, SettingsRowHeight), label);
 			GUI.color = OriColor;
 
 			// Setting
 			var checkboxSize = SettingsRowHeight - 8;
-			Widgets.Checkbox(controlWidth, offsetY + (SettingsRowHeight - checkboxSize) / 2, ref value, checkboxSize);
-			DrawTooltip(new Rect(controlWidth, offsetY, checkboxSize, checkboxSize), tooltip);
+			Widgets.Checkbox(offsetX + controlWidth, offsetY + (SettingsRowHeight - checkboxSize) / 2, ref value, checkboxSize);
+			DrawTooltip(new Rect(offsetX + controlWidth, offsetY, checkboxSize, checkboxSize), tooltip);
 
 			// Text
 			if (text != null)
-				Widgets.Label(new Rect(controlWidth + checkboxSize + 4, offsetY + 4, controlWidth - checkboxSize - 6, SettingsRowHeight - 8), text ?? "");
+				Widgets.Label(new Rect(offsetX + controlWidth + checkboxSize + 4, offsetY + 4, controlWidth - checkboxSize - 6, SettingsRowHeight - 8), text ?? "");
 
 			// Reset button
-			if (isModified && DrawResetButton(offsetY, viewWidth, defaultValue.ToString()))
+			if (isModified && DrawResetButton(offsetX, offsetY, viewWidth, defaultValue.ToString()))
 				value = defaultValue;
 
 			offsetY += SettingsRowHeight;
@@ -188,6 +187,7 @@ namespace SyControlsBuilder
 		}
 
 		public static T CreateDropdown<T>(
+			float offsetX,
 			ref float offsetY,
 			float viewWidth,
 			string label,
@@ -204,7 +204,7 @@ namespace SyControlsBuilder
 			// Label
 			if (isModified)
 				GUI.color = ModifiedColor;
-			Widgets.Label(new Rect(0, offsetY, controlWidth - 8, SettingsRowHeight), label);
+			Widgets.Label(new Rect(offsetX, offsetY, controlWidth - 8, SettingsRowHeight), label);
 			GUI.color = OriColor;
 
 			// Menu Generator
@@ -221,7 +221,7 @@ namespace SyControlsBuilder
 			}
 
 			// Dropdown
-			var rect = new Rect(controlWidth + 2, offsetY + 2, controlWidth - 4, SettingsRowHeight - 4);
+			var rect = new Rect(offsetX + controlWidth + 2, offsetY + 2, controlWidth - 4, SettingsRowHeight - 4);
 			Widgets.Dropdown(
 				rect,
 				valueWrapper,
@@ -231,7 +231,7 @@ namespace SyControlsBuilder
 			DrawTooltip(rect, tooltip);
 
 			// Reset
-			if (isModified && DrawResetButton(offsetY, viewWidth, itemToString(defaultValue)))
+			if (isModified && DrawResetButton(offsetX,offsetY, viewWidth, itemToString(defaultValue)))
 				valueWrapper.Value = defaultValue;
 
 			offsetY += SettingsRowHeight;
@@ -239,12 +239,17 @@ namespace SyControlsBuilder
 		}
 
 
-		public static bool DrawResetButton(float offsetY, float viewWidth, string tooltip)
+		public static bool DrawResetButton(
+			float offsetX,
+			float offsetY, 
+			float viewWidth, 
+			string tooltip)
 		{
-			var buttonRect = new Rect(viewWidth / 3 * 2 + 4, offsetY + 2, SettingsRowHeight * 2 - 4, SettingsRowHeight - 4);
+			var buttonRect = new Rect(offsetX + viewWidth / 3 * 2 + 4, offsetY + 2, SettingsRowHeight * 2 - 4, SettingsRowHeight - 4);
 			DrawTooltip(buttonRect, "Reset to " + tooltip);
 			return Widgets.ButtonText(buttonRect, "Reset");
 		}
+
 		public static void DrawTooltip(Rect rect, string tooltip)
 		{
 			if (Mouse.IsOver(rect))

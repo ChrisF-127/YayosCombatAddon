@@ -1,12 +1,9 @@
-﻿using HarmonyLib;
-using RimWorld;
+﻿using RimWorld;
 using SyControlsBuilder;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
@@ -52,8 +49,38 @@ namespace YayosCombatAddon
 		public YayosCombatAddonSettings() :
 			base()
 		{
-			CreateAmmoSettings();
-			CreateWeaponSettings();
+			// setup ammo settings
+			var primitive = "primitive";
+			var industrial = "industrial";
+			var spacer = "spacer";
+			var light = "light";
+			var heavy = "heavy";
+
+			// using default values
+			addAmmoSetting(primitive, light, 12, false);
+			addAmmoSetting(primitive);
+			addAmmoSetting(primitive, heavy, 18, true);
+			addAmmoSetting(industrial, light, 11, false);
+			addAmmoSetting(industrial);
+			addAmmoSetting(industrial, heavy, 17, true);
+			addAmmoSetting(spacer, light, 15, false);
+			addAmmoSetting(spacer);
+			addAmmoSetting(spacer, heavy, 25, true);
+			void addAmmoSetting(string tech, string type = null, int parameter = -1, bool greater = false)
+			{
+				if (type == null)
+					AmmoSettings.Add(new BaseAmmoSetting(tech));
+				else
+					AmmoSettings.Add(new AmmoSetting(tech, type, parameter, greater));
+			}
+
+			// setup weapon settings
+			foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
+			{
+				if (thingDef?.IsRangedWeapon != true)
+					continue;
+				WeaponSettings.Add(new WeaponSetting(thingDef));
+			}
 		}
 		#endregion
 
@@ -105,6 +132,7 @@ namespace YayosCombatAddon
 						try
 						{
 							NumberOfAmmoColumns = ControlsBuilder.CreateNumeric(
+								0f,
 								ref offsetY,
 								width,
 								"SY_YCA.NumberOfAmmoColumns_title".Translate(),
@@ -118,6 +146,7 @@ namespace YayosCombatAddon
 							offsetY += ControlsBuilder.SettingsRowHeight * 0.5f;
 
 							LowAmmoFactorForReloadWhileWaiting = ControlsBuilder.CreateNumeric(
+								0f,
 								ref offsetY,
 								width,
 								"SY_YCA.LowAmmoFactorForReloadWhileWaiting_title".Translate(),
@@ -132,6 +161,7 @@ namespace YayosCombatAddon
 							offsetY += ControlsBuilder.SettingsRowHeight * 0.5f;
 
 							EjectAmmoOnDowned = ControlsBuilder.CreateCheckbox(
+								0f,
 								ref offsetY,
 								width,
 								"SY_YCA.EjectAmmoOnDowned_title".Translate(),
@@ -140,6 +170,7 @@ namespace YayosCombatAddon
 								Default_EjectAmmoOnDowned);
 
 							AmmoDroppedOnDownedFactor = ControlsBuilder.CreateNumeric(
+								0f,
 								ref offsetY,
 								width,
 								"SY_YCA.AmmoDroppedOnDownedFactor_title".Translate(),
@@ -152,6 +183,7 @@ namespace YayosCombatAddon
 								unit: "%");
 
 							AmmoInWeaponOnDownedFactor = ControlsBuilder.CreateNumeric(
+								0f,
 								ref offsetY,
 								width,
 								"SY_YCA.AmmoInWeaponOnDownedFactor_title".Translate(),
@@ -171,7 +203,7 @@ namespace YayosCombatAddon
 
 					case SettingsSubMenuEnum.Ammo:
 						offsetY += ControlsBuilder.SettingsRowHeight * 0.8f;
-						ControlsBuilder.CreateText(ref offsetY, width, "SY_YCA.AmmoRequireRestart".Translate(), Color.red, TextAnchor.MiddleCenter, GameFont.Medium);
+						ControlsBuilder.CreateText(0f, ref offsetY, width, "SY_YCA.AmmoRequireRestart".Translate(), Color.red, TextAnchor.MiddleCenter, GameFont.Medium);
 
 						ControlsBuilder.Begin(new Rect(inRect.x, inRect.y + ControlsBuilder.SettingsRowHeight * 0.75f, inRect.width, inRect.height));
 						try
@@ -179,38 +211,10 @@ namespace YayosCombatAddon
 							offsetY = 0f;
 							foreach (var baseAmmoSetting in AmmoSettings)
 							{
-								if (baseAmmoSetting is AmmoSetting ammoSetting)
-								{
-									ammoSetting.IsEnabled = ControlsBuilder.CreateCheckbox(
-										ref offsetY,
-										width,
-										"SY_YCA.Enable".Translate() + " " + ammoSetting.AmmoDef.label,
-										"SY_YCA.AmmoEnable_desc".Translate(),
-										ammoSetting.IsEnabled,
-										false);
-									ammoSetting.Parameter = ControlsBuilder.CreateNumeric(
-										ref offsetY,
-										width,
-										ammoSetting.AmmoDef.LabelCap + " " + "SY_YCA.Damage".Translate(),
-										$"SY_YCA.AmmoParameter{(ammoSetting.ParameterGreater ? "Greater" : "Less")}_desc".Translate(),
-										ammoSetting.Parameter,
-										ammoSetting.DefaultParameter,
-										$"{ammoSetting.Name}_Parameter",
-										unit: ammoSetting.ParameterGreater ? "<" : ">");
-								}
-
-								baseAmmoSetting.RecipeAmount = ControlsBuilder.CreateNumeric(
+								CreateAmmoSettingControl(
 									ref offsetY,
 									width,
-									baseAmmoSetting.RecipeDef.LabelCap + " " + "SY_YCA.Amount".Translate(),
-									"SY_YCA.AmmoRecipeAmount_desc".Translate(),
-									baseAmmoSetting.RecipeAmount,
-									baseAmmoSetting.DefaultRecipeAmount,
-									$"{baseAmmoSetting.Name}_RecipeAmount",
-									1,
-									1000);
-
-								offsetY += ControlsBuilder.SettingsRowHeight * 0.5f;
+									baseAmmoSetting);
 							}
 						}
 						finally
@@ -223,13 +227,12 @@ namespace YayosCombatAddon
 						ControlsBuilder.Begin(inRect);
 						try
 						{
+							offsetY = 0f;
 							foreach (var weaponSetting in WeaponSettings)
 							{
 								CreateWeaponSettingControl(
 									ref offsetY,
 									width,
-									"SY_YCA.WeaponAmmoDef_desc".Translate(),
-									"SY_YCA.WeaponMaxCharges_desc".Translate(),
 									weaponSetting);
 							}
 						}
@@ -330,54 +333,63 @@ namespace YayosCombatAddon
 		#endregion
 
 		#region PRIVATE METHODS
-		private void CreateAmmoSettings()
+		private void CreateAmmoSettingControl(
+			ref float offsetY,
+			float viewWidth,
+			BaseAmmoSetting baseAmmoSetting)
 		{
-			var primitive = "primitive";
-			var industrial = "industrial";
-			var spacer = "spacer";
-			var light = "light";
-			var heavy = "heavy";
+			var iconSize = ControlsBuilder.SettingsRowHeight - 2f;
 
-			// using default values
+			// Icon
+			Widgets.DefIcon(new Rect(0f, offsetY, iconSize, iconSize), baseAmmoSetting.AmmoDef);
+			var offsetX = iconSize + 8;
+			viewWidth -= offsetX;
 
-			addAmmoSetting(primitive, light, 12, false);
-			addAmmoSetting(primitive);
-			addAmmoSetting(primitive, heavy, 18, true);
-
-			addAmmoSetting(industrial, light, 11, false);
-			addAmmoSetting(industrial);
-			addAmmoSetting(industrial, heavy, 17, true);
-
-			addAmmoSetting(spacer, light, 15, false);
-			addAmmoSetting(spacer);
-			addAmmoSetting(spacer, heavy, 25, true);
-
-			void addAmmoSetting(string tech, string type = null, int parameter = -1, bool greater = false)
+			if (baseAmmoSetting is AmmoSetting ammoSetting)
 			{
-				if (type == null)
-					AmmoSettings.Add(new BaseAmmoSetting(tech));
-				else
-					AmmoSettings.Add(new AmmoSetting(tech, type, parameter, greater));
+				ammoSetting.IsEnabled = ControlsBuilder.CreateCheckbox(
+					offsetX,
+					ref offsetY,
+					viewWidth,
+					"SY_YCA.Enable".Translate() + " " + ammoSetting.AmmoDef.label,
+					"SY_YCA.AmmoEnable_desc".Translate(),
+					ammoSetting.IsEnabled,
+					false);
+				ammoSetting.Parameter = ControlsBuilder.CreateNumeric(
+					offsetX,
+					ref offsetY,
+					viewWidth,
+					ammoSetting.AmmoDef.LabelCap + " " + "SY_YCA.Damage".Translate(),
+					$"SY_YCA.AmmoParameter{(ammoSetting.ParameterGreater ? "Greater" : "Less")}_desc".Translate(),
+					ammoSetting.Parameter,
+					ammoSetting.DefaultParameter,
+					$"{ammoSetting.Name}_Parameter",
+					unit: ammoSetting.ParameterGreater ? "<" : ">");
 			}
-		}
 
-		private void CreateWeaponSettings()
-		{
-			foreach (var thingDef in DefDatabase<ThingDef>.AllDefs)
-			{
-				if (thingDef?.IsRangedWeapon != true)
-					continue;
-				WeaponSettings.Add(new WeaponSetting(thingDef));
-			}
+			baseAmmoSetting.RecipeAmount = ControlsBuilder.CreateNumeric(
+				offsetX,
+				ref offsetY,
+				viewWidth,
+				baseAmmoSetting.RecipeDef.LabelCap + " " + "SY_YCA.Amount".Translate(),
+				"SY_YCA.AmmoRecipeAmount_desc".Translate(),
+				baseAmmoSetting.RecipeAmount,
+				baseAmmoSetting.DefaultRecipeAmount,
+				$"{baseAmmoSetting.Name}_RecipeAmount",
+				1,
+				1000);
+
+			offsetY += ControlsBuilder.SettingsRowHeight * 0.5f;
 		}
 
 		private void CreateWeaponSettingControl(
 			ref float offsetY,
 			float viewWidth,
-			string tooltipAmmoDef,
-			string tooltipMaxCharges,
 			WeaponSetting weaponSetting)
 		{
+			if (weaponSetting.AmmoDef == null)
+				return;
+
 			var label = weaponSetting.WeaponDef.LabelCap;
 
 			var maxCharges = weaponSetting.MaxCharges;
@@ -391,18 +403,25 @@ namespace YayosCombatAddon
 			var valueBufferKey = weaponSetting.Name + "_MaxCharges";
 
 			var isModified = !maxCharges.Equals(defaultMaxCharges) || !ammoDefWrapper.Value.Equals(defaultAmmoDef);
-			var controlWidth = viewWidth / 4 - 4;
+			var iconSize = ControlsBuilder.SettingsRowHeight - 2f;
+			var controlWidth = (viewWidth - iconSize - 4) / 4 - 16;
+			var offsetX = 0f;
+
+			// Icon
+			Widgets.DefIcon(new Rect(offsetX, offsetY, iconSize, iconSize), weaponSetting.WeaponDef);
+			offsetX += iconSize + 8;
 
 			// Label
 			if (isModified)
 				GUI.color = ControlsBuilder.ModifiedColor;
-			Widgets.Label(new Rect(0, offsetY, controlWidth - 8, ControlsBuilder.SettingsRowHeight), label);
+			Widgets.Label(new Rect(offsetX, offsetY, controlWidth - 8, ControlsBuilder.SettingsRowHeight), label);
 			GUI.color = ControlsBuilder.OriColor;
+			offsetX += controlWidth;
 
 			// AmmoDef Menu Generator
 			IEnumerable<Widgets.DropdownMenuElement<ThingDef>> menuGenerator(TargetWrapper<ThingDef> vWrapper)
 			{
-				foreach (var ammoDef in AmmoUtility.AmmoDefs)
+				foreach (var ammoDef in AmmoUtility.AllAmmoDefs)
 				{
 					yield return new Widgets.DropdownMenuElement<ThingDef>
 					{
@@ -412,7 +431,7 @@ namespace YayosCombatAddon
 				}
 			}
 			// AmmoDef Dropdown
-			var rect = new Rect(controlWidth + 2, offsetY + 2, controlWidth - 4, ControlsBuilder.SettingsRowHeight - 4);
+			var rect = new Rect(offsetX, offsetY + 2, controlWidth - 8, ControlsBuilder.SettingsRowHeight - 4);
 			Widgets.Dropdown(
 				rect,
 				ammoDefWrapper,
@@ -420,19 +439,21 @@ namespace YayosCombatAddon
 				menuGenerator,
 				ammoDefWrapper.Value.LabelCap);
 			// Tooltip
-			ControlsBuilder.DrawTooltip(rect, tooltipAmmoDef);
+			ControlsBuilder.DrawTooltip(rect, "SY_YCA.WeaponAmmoDef_desc".Translate());
+			offsetX += controlWidth;
 
 			// Max Charges
-			var numericRect = new Rect((controlWidth + 2) * 2, offsetY + 6, controlWidth - 4, ControlsBuilder.SettingsRowHeight - 12);
+			var numericRect = new Rect(offsetX, offsetY + 6, controlWidth - 8, ControlsBuilder.SettingsRowHeight - 12);
 			var valueBuffer = ControlsBuilder.GetValueBuffer(valueBufferKey, maxCharges); // required for typing decimal points etc.
 			Widgets.TextFieldNumeric(numericRect, ref maxCharges, ref valueBuffer.Buffer, 1f, 1e+9f);
 			// Tooltip
-			ControlsBuilder.DrawTooltip(numericRect, tooltipMaxCharges);
+			ControlsBuilder.DrawTooltip(numericRect, "SY_YCA.WeaponMaxCharges_desc".Translate());
+			offsetX += controlWidth;
 
 			// Reset button
 			if (isModified)
 			{
-				var resetRect = new Rect((controlWidth + 2) * 3, offsetY + 2, ControlsBuilder.SettingsRowHeight * 2 - 4, ControlsBuilder.SettingsRowHeight - 4);
+				var resetRect = new Rect(offsetX, offsetY + 2, controlWidth - 8, ControlsBuilder.SettingsRowHeight - 4);
 				ControlsBuilder.DrawTooltip(resetRect, $"Reset to '{defaultAmmoDef.LabelCap}' x{defaultMaxCharges}");
 				if (Widgets.ButtonText(resetRect, "Reset"))
 				{
@@ -441,6 +462,7 @@ namespace YayosCombatAddon
 
 					ammoDefWrapper.Value = defaultAmmoDef;
 				}
+				offsetX += controlWidth;
 			}
 
 			offsetY += ControlsBuilder.SettingsRowHeight;

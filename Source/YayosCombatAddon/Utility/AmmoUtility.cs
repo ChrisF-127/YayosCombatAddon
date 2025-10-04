@@ -14,7 +14,7 @@ namespace YayosCombatAddon
 	public static class AmmoUtility
 	{
 		#region PROPERTIES
-		public static ThingDef[] AmmoDefs =
+		public static ThingDef[] AllAmmoDefs =
 		{
 			YCA_DefOf.yy_ammo_primitive_light,
 			YCA_DefOf.yy_ammo_primitive,
@@ -37,22 +37,43 @@ namespace YayosCombatAddon
 			YCA_DefOf.yy_ammo_spacer_fire,
 			YCA_DefOf.yy_ammo_spacer_emp,
 		};
-		public static RecipeDef[] AmmoRecipeDefs =
+		public static RecipeDef[] AllAmmoRecipeDefs =
 		{
 			YCA_DefOf.Make_yy_ammo_primitive_light,
 			YCA_DefOf.Make_yy_ammo_primitive_light10,
+			YCA_DefOf.Make_yy_ammo_primitive,
+			YCA_DefOf.Make_yy_ammo_primitive10,
 			YCA_DefOf.Make_yy_ammo_primitive_heavy,
 			YCA_DefOf.Make_yy_ammo_primitive_heavy10,
 
 			YCA_DefOf.Make_yy_ammo_industrial_light,
 			YCA_DefOf.Make_yy_ammo_industrial_light10,
+			YCA_DefOf.Make_yy_ammo_industrial,
+			YCA_DefOf.Make_yy_ammo_industrial10,
 			YCA_DefOf.Make_yy_ammo_industrial_heavy,
 			YCA_DefOf.Make_yy_ammo_industrial_heavy10,
 
 			YCA_DefOf.Make_yy_ammo_spacer_light,
 			YCA_DefOf.Make_yy_ammo_spacer_light10,
+			YCA_DefOf.Make_yy_ammo_spacer,
+			YCA_DefOf.Make_yy_ammo_spacer10,
 			YCA_DefOf.Make_yy_ammo_spacer_heavy,
 			YCA_DefOf.Make_yy_ammo_spacer_heavy10,
+
+			YCA_DefOf.Make_yy_ammo_primitive_emp,
+			YCA_DefOf.Make_yy_ammo_primitive_emp10,
+			YCA_DefOf.Make_yy_ammo_primitive_fire,
+			YCA_DefOf.Make_yy_ammo_primitive_fire10,
+
+			YCA_DefOf.Make_yy_ammo_industrial_emp,
+			YCA_DefOf.Make_yy_ammo_industrial_emp10,
+			YCA_DefOf.Make_yy_ammo_industrial_fire,
+			YCA_DefOf.Make_yy_ammo_industrial_fire10,
+
+			YCA_DefOf.Make_yy_ammo_spacer_emp,
+			YCA_DefOf.Make_yy_ammo_spacer_emp10,
+			YCA_DefOf.Make_yy_ammo_spacer_fire,
+			YCA_DefOf.Make_yy_ammo_spacer_fire10,
 		};
 		#endregion
 

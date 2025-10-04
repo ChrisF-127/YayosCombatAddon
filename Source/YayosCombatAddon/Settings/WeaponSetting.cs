@@ -34,7 +34,7 @@ namespace YayosCombatAddon
 		public void DefsLoaded(ThingDef ammoDef, int maxCharges)
 		{
 			DefaultAmmoDef = ammoDef;
-			if (AmmoDef != null)
+			if (AmmoDef != null && YayosCombatAddon.Settings.AmmoSettings.FirstOrDefault(s => s.AmmoDef == AmmoDef) is AmmoSetting ammoSetting && ammoSetting.IsEnabled)
 				Reloadable.ammoDef = AmmoDef;
 			else
 				AmmoDef = ammoDef;

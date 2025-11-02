@@ -12,6 +12,7 @@ namespace YayosCombatAddon
 	internal class YCA_Textures
 	{
 		public static readonly Texture2D AmmoEject = ContentFinder<Texture2D>.Get("YCA_AmmoEject", true);
+		public static readonly Texture2D AmmoEjectInventory = ContentFinder<Texture2D>.Get("YCA_AmmoEjectInventory", true);
 		public static readonly Texture2D AmmoReload = ContentFinder<Texture2D>.Get("YCA_AmmoReload", true);
 	}
 }

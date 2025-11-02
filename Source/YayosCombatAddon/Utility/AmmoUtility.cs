@@ -125,7 +125,6 @@ namespace YayosCombatAddon
 						new NamedArgument(comp.parent, "thing")));
 			}
 		}
-
 		public static int EjectableAmmo(this CompApparelReloadable comp)
 		{
 			if (comp.Props.ammoCountToRefill > 0)
@@ -133,6 +132,11 @@ namespace YayosCombatAddon
 			if (comp.Props.ammoCountPerCharge > 0)
 				return comp.RemainingCharges * comp.Props.ammoCountPerCharge;
 			return -1;
+		}
+		public static bool HasEjectableAmmo(this Thing thing)
+		{
+			var comp = thing?.TryGetComp<CompApparelReloadable>();
+			return comp?.AmmoDef.IsAmmo() == true && comp.RemainingCharges > 0;
 		}
 
 		public static bool IsAmmo(this Thing thing, bool deepCheck = false) =>

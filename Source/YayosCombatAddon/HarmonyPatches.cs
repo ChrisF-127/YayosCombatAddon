@@ -3,6 +3,7 @@ using RimWorld;
 using RimWorld.Utility;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -10,6 +11,7 @@ using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using Verse.Sound;
 using yayoCombat.HarmonyPatches;
 
 namespace YayosCombatAddon
@@ -63,6 +65,11 @@ namespace YayosCombatAddon
 			harmony.Patch(
 				AccessTools.Method(typeof(Pawn_EquipmentTracker_DropAllEquipment), nameof(Pawn_EquipmentTracker_DropAllEquipment.Prefix)),
 				prefix: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Pawn_EquipmentTracker_DropAllEquipment_Prefix)));
+
+			// patch to add eject ammo button for weapons in inventory
+			harmony.Patch(
+				AccessTools.Method(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.DrawThingRow)),
+				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(ITab_Pawn_Gear_DrawThingRow_Transpiler)));
 
 			// patch to reduce ammo in dropped weapons
 			harmony.Patch(
@@ -225,19 +232,87 @@ namespace YayosCombatAddon
 
 		static IEnumerable<CodeInstruction> YC_ThingWithComps_GetFloatMenuOptions_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
 		{
+			var patched = false;
 			foreach (var instruction in codeInstructions)
 			{
 				if (instruction.opcode == OpCodes.Callvirt && ((MethodInfo)instruction.operand).Name == "get_RemainingCharges")
+				{
 					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(AmmoUtility), nameof(AmmoUtility.EjectableAmmo)));
+					patched = true;
+				}
 				else
 					yield return instruction;
 			}
+			if (!patched)
+				Log.Error($"{nameof(YayosCombatAddon)}: failed to apply '{nameof(YC_ThingWithComps_GetFloatMenuOptions_Transpiler)}'");
 		}
 
 		static bool YC_Pawn_EquipmentTracker_DropAllEquipment_Prefix()
 		{
 			// do not eject ammo from weapons dropped on death/downed if eject ammo disabled
 			return YayosCombatAddon.Settings.EjectAmmoOnDowned;
+		}
+
+		static IEnumerable<CodeInstruction> ITab_Pawn_Gear_DrawThingRow_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
+		{
+			var patched = false;
+			var fiThing = default(FieldInfo);
+
+			var list = codeInstructions.ToList();
+			for (int i = 0; i < list.Count - 1; i++)
+			{
+				if (fiThing == null)
+				{
+					if (list[i].opcode == OpCodes.Stfld && list[i].operand is FieldInfo fi && fi.FieldType == typeof(Thing))
+						fiThing = fi;
+				}
+				else
+				{
+					// find code before drop inventory thing button
+					if (list[i].opcode == OpCodes.Ldloc_S && list[i].operand is LocalBuilder lb && lb.LocalIndex == 6 && lb.LocalType == typeof(Rect)
+						&& list[i + 1].opcode == OpCodes.Ldsfld && list[i + 1].operand is FieldInfo fi && fi.Name == nameof(TexButton.Drop))
+					{
+						// insert code for drop ammo button
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldarg_0));
+						list.Insert(i++, new CodeInstruction(OpCodes.Call, AccessTools.PropertyGetter(typeof(ITab_Pawn_Gear), nameof(ITab_Pawn_Gear.SelPawnForGear))));
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldloc_0));
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldfld, fiThing));
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldloc_S, 1));  // Rect		- dropRect
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldloc_S, 11)); // Color	- color
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldloc_S, 12)); // Color	- mouseoverColor
+						list.Insert(i++, new CodeInstruction(OpCodes.Ldloc_2));
+						list.Insert(i++, new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(HarmonyPatches), nameof(ITab_Pawn_Gear_DrawThingRow_CreateEjectAmmoButton))));
+
+						patched = true;
+						break;
+					}
+				}
+			}
+
+			if (!patched)
+				Log.Error($"{nameof(YayosCombatAddon)}: failed to apply '{nameof(ITab_Pawn_Gear_DrawThingRow_Transpiler)}'");
+
+			return list;
+		}
+		static void ITab_Pawn_Gear_DrawThingRow_CreateEjectAmmoButton(Pawn pawn, Thing thing, Rect outerRect, Color color, Color mouseoverColor, bool disabled)
+		{
+			if (!yayoCombat.yayoCombat.ammo)
+				return;
+
+			var comp = thing?.TryGetComp<CompApparelReloadable>();
+			if (comp?.AmmoDef.IsAmmo() != true || comp.RemainingCharges <= 0)
+				return;
+
+			var rect = new Rect(outerRect.width - 50f, outerRect.y, 24f, 24f);
+
+			if (!disabled && Mouse.IsOver(rect))
+				TooltipHandler.TipRegion(rect, "SY_YCA.EjectAmmo_desc".Translate());
+
+			if (Widgets.ButtonImage(rect, YCA_Textures.AmmoEjectInventory, color, mouseoverColor, !disabled) && !disabled)
+			{
+				YCA_SoundDefOf.YCA_Designate_EjectAmmo.PlayOneShotOnCamera();
+				AmmoUtility.EjectAmmo(pawn, comp);
+			}
 		}
 
 		static void Pawn_EquipmentTracker_DropAllEquipment_Prefix(Pawn_EquipmentTracker __instance)

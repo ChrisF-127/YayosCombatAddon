@@ -213,7 +213,7 @@ namespace YayosCombatAddon
 			const float light = 2.0f;
 			const float heavy = 0.5f;
 
-			if (!yayoCombat.yayoCombat.ammo)
+			if (!yayoCombat.YayoCombatCore.ammo)
 				return;
 
 			var isWeaponsTrader = false;
@@ -297,7 +297,7 @@ namespace YayosCombatAddon
 			{
 				if (YayosCombatAddon.Settings.AmmoSettings.First(ws => ws.AmmoDef == ammoDef) is AmmoSetting ammoSetting && ammoSetting.IsEnabled)
 				{
-					var count = Mathf.RoundToInt(Rand.Range(min, max) * yayoCombat.yayoCombat.ammoGen * amount);
+					var count = Mathf.RoundToInt(Rand.Range(min, max) * yayoCombat.YayoCombatCore.ammoGen * amount);
 					if (count > 20)
 					{
 						var thing = ThingMaker.MakeThing(ammoDef);

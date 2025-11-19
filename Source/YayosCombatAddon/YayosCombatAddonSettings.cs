@@ -105,7 +105,7 @@ namespace YayosCombatAddon
 					SettingsSubMenuEnum.General,
 					false);
 				subMenButtonOffsetX += buttonWidth;
-				if (yayoCombat.yayoCombat.ammo)
+				if (yayoCombat.YayoCombatCore.ammo)
 				{
 					// Ammo
 					CreateSubMenuSelector(

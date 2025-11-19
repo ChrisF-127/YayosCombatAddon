@@ -19,7 +19,7 @@ namespace YayosCombatAddon
 				var group = DefDatabase<InventoryStockGroupDef>.AllDefs.First((def) => def.defName == this.def.defName);
 
 				int localI = 0;
-				if (yayoCombat.yayoCombat.ammo)
+				if (yayoCombat.YayoCombatCore.ammo)
 				{
 					float num = rect.width - 4f;
 					int num2 = Mathf.FloorToInt(num / 3f);
@@ -72,17 +72,17 @@ namespace YayosCombatAddon
 
 		public override int GetMinWidth(PawnTable table)
 		{
-			return yayoCombat.yayoCombat.ammo ? Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(54f)) : 0;
+			return yayoCombat.YayoCombatCore.ammo ? Mathf.Max(base.GetMinWidth(table), Mathf.CeilToInt(54f)) : 0;
 		}
 
 		public override int GetOptimalWidth(PawnTable table)
 		{
-			return yayoCombat.yayoCombat.ammo ? Mathf.Clamp(Mathf.CeilToInt(104f), GetMinWidth(table), GetMaxWidth(table)) : 0;
+			return yayoCombat.YayoCombatCore.ammo ? Mathf.Clamp(Mathf.CeilToInt(104f), GetMinWidth(table), GetMaxWidth(table)) : 0;
 		}
 
 		public override int GetMinHeaderHeight(PawnTable table)
 		{
-			return yayoCombat.yayoCombat.ammo ? Mathf.Max(base.GetMinHeaderHeight(table), 65) : 0;
+			return yayoCombat.YayoCombatCore.ammo ? Mathf.Max(base.GetMinHeaderHeight(table), 65) : 0;
 		}
 
 		public override int Compare(Pawn a, Pawn b)

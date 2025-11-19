@@ -42,8 +42,8 @@ namespace YayosCombatAddon
 
 			// attach patches to original methods
 			harmony.Patch(
-				AccessTools.Method(typeof(yayoCombat.yayoCombat), "DefsLoaded"),
-				postfix: new HarmonyMethod(typeof(YayosCombatAddon), nameof(YayosCombatAddon.DefsLoaded)));
+				AccessTools.Method(typeof(yayoCombat.YayoCombatCore), nameof(yayoCombat.YayoCombatCore.ApplyDefPatches)),
+				postfix: new HarmonyMethod(typeof(YayosCombatAddon), nameof(YayosCombatAddon.ApplyDefPatches)));
 			harmony.Patch(
 				AccessTools.Method(typeof(ThingSetMaker_TraderStock_Generate), nameof(ThingSetMaker_TraderStock_Generate.addAmmo)),
 				postfix: new HarmonyMethod(typeof(AmmoUtility), nameof(AmmoUtility.TraderStock_Generate_AddAmmo)));
@@ -118,7 +118,7 @@ namespace YayosCombatAddon
 			var addReloadGizmo = false;
 
 			var pawn = __instance?.pawn;
-			if (yayoCombat.yayoCombat.ammo
+			if (yayoCombat.YayoCombatCore.ammo
 				&& pawn != null
 				&& pawn.Faction?.IsPlayer == true
 				&& pawn.Drafted
@@ -187,7 +187,7 @@ namespace YayosCombatAddon
 		}
 		static void Patch_Pawn_TickRare(Pawn __instance)
 		{
-			if (!yayoCombat.yayoCombat.ammo
+			if (!yayoCombat.YayoCombatCore.ammo
 				|| __instance?.Drafted != true
 				|| Find.TickManager.TicksGame % 60 != 0
 				|| __instance.equipment == null)
@@ -210,7 +210,7 @@ namespace YayosCombatAddon
 		}
 		static void Patch_CompReloadable_UsedOnce(CompApparelReloadable __instance)
 		{
-			if (!yayoCombat.yayoCombat.ammo || __instance.Wearer == null)
+			if (!yayoCombat.YayoCombatCore.ammo || __instance.Wearer == null)
 				return;
 			// (new) only reload equippable weapons
 			if (__instance.ReloadableThing?.def?.equipmentType != EquipmentType.Primary)
@@ -296,7 +296,7 @@ namespace YayosCombatAddon
 		}
 		static void ITab_Pawn_Gear_DrawThingRow_CreateEjectAmmoButton(Pawn pawn, Thing thing, Rect outerRect, Color color, Color mouseoverColor, bool disabled)
 		{
-			if (!yayoCombat.yayoCombat.ammo)
+			if (!yayoCombat.YayoCombatCore.ammo)
 				return;
 
 			var comp = thing?.TryGetComp<CompApparelReloadable>();
@@ -403,7 +403,7 @@ namespace YayosCombatAddon
 			var ammoDict = new Dictionary<ThingDef, int>();
 			foreach (var comp in allWeaponsComps)
 			{
-				var ammo = Mathf.RoundToInt(comp.MaxCharges * yayoCombat.yayoCombat.s_enemyAmmo * Rand.Range(0.7f, 1.3f));
+				var ammo = Mathf.RoundToInt(comp.MaxCharges * yayoCombat.YayoCombatCore.s_enemyAmmo * Rand.Range(0.7f, 1.3f));
 				var charges = Math.Min(ammo, comp.MaxCharges);
 				comp.remainingCharges = charges;
 
@@ -433,11 +433,11 @@ namespace YayosCombatAddon
 		}
 		static void Patch_CompApparelVerbOwner_Charged_PostPostMake(CompApparelVerbOwner_Charged __instance, ref int ___remainingCharges)
 		{
-			if (!yayoCombat.yayoCombat.ammo || !__instance.parent.def.IsWeapon)
+			if (!yayoCombat.YayoCombatCore.ammo || !__instance.parent.def.IsWeapon)
 				return;
 
 			// when first generating the world, at most add "max charges" to a weapon, not more, otherwise keep the weapon empty
-			___remainingCharges = GenTicks.TicksGame > 5 ? 0 : Math.Min(Mathf.RoundToInt(__instance.Props.maxCharges * yayoCombat.yayoCombat.s_enemyAmmo), __instance.Props.maxCharges);
+			___remainingCharges = GenTicks.TicksGame > 5 ? 0 : Math.Min(Mathf.RoundToInt(__instance.Props.maxCharges * yayoCombat.YayoCombatCore.s_enemyAmmo), __instance.Props.maxCharges);
 		}
 
 

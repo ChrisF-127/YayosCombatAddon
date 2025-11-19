@@ -33,9 +33,9 @@ namespace YayosCombatAddon
 		#endregion
 
 		#region PUBLIC METHODS
-		public static void DefsLoaded()
+		public static void ApplyDefPatches()
 		{
-			if (yayoCombat.yayoCombat.ammo)
+			if (yayoCombat.YayoCombatCore.ammo)
 			{
 				// setup ammo defs
 				var recipeDefsToRemove = new List<RecipeDef>();

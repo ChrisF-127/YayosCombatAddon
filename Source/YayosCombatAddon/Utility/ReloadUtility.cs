@@ -45,7 +45,7 @@ namespace YayosCombatAddon
 					var minAmmoNeeded = comp.MinAmmoNeededChecked();
 
 					// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
-					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+					if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.YayoCombatCore.refillMechAmmo)
 					{
 						var ammo = ThingMaker.MakeThing(comp.AmmoDef);
 						ammo.stackCount = comp.MaxAmmoNeeded(false);
@@ -93,7 +93,7 @@ namespace YayosCombatAddon
 						var minAmmoNeeded = comp.MinAmmoNeededChecked();
 
 						// add ammo to inventory if pawn is not humanlike; for example a mech or a llama wielding a shotgun
-						if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.yayoCombat.refillMechAmmo)
+						if (ammoInInventory < minAmmoNeeded && !pawn.RaceProps.Humanlike && yayoCombat.YayoCombatCore.refillMechAmmo)
 						{
 							var ammo = ThingMaker.MakeThing(comp.AmmoDef);
 							ammo.stackCount = comp.MaxAmmoNeeded(false);
@@ -161,7 +161,7 @@ namespace YayosCombatAddon
 		public static bool TryReloadFromSurrounding(Pawn pawn, IEnumerable<Thing> reloadables, bool showWarnings, bool ignoreDistance, bool returnToStartingPosition = true)
 		{
 			bool success = false;
-			if (!ignoreDistance && yayoCombat.yayoCombat.supplyAmmoDist < 0)
+			if (!ignoreDistance && yayoCombat.YayoCombatCore.supplyAmmoDist < 0)
 				return success;
 
 			// check for things requiring reloading
@@ -307,7 +307,7 @@ namespace YayosCombatAddon
 						pawn,
 						pawn.Position,
 						new IntRange(minAmmoNeeded, count),
-						t => t.def == ammoDef && (ignoreDistance || IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.yayoCombat.supplyAmmoDist));
+						t => t.def == ammoDef && (ignoreDistance || IntVec3Utility.DistanceTo(pawn.Position, t.Position) <= yayoCombat.YayoCombatCore.supplyAmmoDist));
 
 					// add found things to output
 					if (things?.Count > 0)

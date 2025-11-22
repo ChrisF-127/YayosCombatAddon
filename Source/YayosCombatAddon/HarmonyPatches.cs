@@ -42,9 +42,6 @@ namespace YayosCombatAddon
 
 			// attach patches to original methods
 			harmony.Patch(
-				AccessTools.Method(typeof(yayoCombat.YayoCombatCore), nameof(yayoCombat.YayoCombatCore.ApplyDefPatches)),
-				postfix: new HarmonyMethod(typeof(YayosCombatAddon), nameof(YayosCombatAddon.ApplyDefPatches)));
-			harmony.Patch(
 				AccessTools.Method(typeof(ThingSetMaker_TraderStock_Generate), nameof(ThingSetMaker_TraderStock_Generate.addAmmo)),
 				postfix: new HarmonyMethod(typeof(AmmoUtility), nameof(AmmoUtility.TraderStock_Generate_AddAmmo)));
 

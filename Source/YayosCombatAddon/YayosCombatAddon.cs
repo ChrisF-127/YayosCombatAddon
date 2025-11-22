@@ -24,7 +24,8 @@ namespace YayosCombatAddon
 		#endregion
 
 		#region CONSTRUCTORS
-		public YayosCombatAddon(ModContentPack content) : base(content)
+		public YayosCombatAddon(ModContentPack content) : 
+			base(content)
 		{
 			Instance = this;
 
@@ -133,6 +134,8 @@ namespace YayosCombatAddon
 			if (SimpleSidearmsCompatibility)
 				Log.Message($"[{nameof(YayosCombatAddon)}] SimpleSidearms active, compatibility will be applied");
 
+			yayoCombat.YayoCombatCore.ApplyDefPatches();
+
 			Settings = GetSettings<YayosCombatAddonSettings>();
 
 			// Dynamic "Assign"-tab ammo-column initialization
@@ -171,6 +174,8 @@ namespace YayosCombatAddon
 			}
 			else
 				Log.Error($"{nameof(YayosCombatAddon)}: could not find any things using the '{AmmoCategoryName}'-ThingCategory (no ammo found); assign tab columns could not be created!");
+
+			ApplyDefPatches();
 		}
 		#endregion
 	}

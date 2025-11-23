@@ -33,8 +33,17 @@ namespace YayosCombatAddon
 		public void DefsLoaded(ThingDef ammoDef, int maxCharges)
 		{
 			DefaultAmmoDef = ammoDef;
-			if (AmmoDef != null && YayosCombatAddon.Settings.AmmoSettings.FirstOrDefault(s => s.AmmoDef == AmmoDef) is AmmoSetting ammoSetting && ammoSetting.IsEnabled)
-				Reloadable.ammoDef = AmmoDef;
+			if (AmmoDef != null)
+			{
+				if (YayosCombatAddon.Settings.AmmoSettings.FirstOrDefault(s => s.AmmoDef == AmmoDef) is BaseAmmoSetting baseAmmoSetting
+					&& (!(baseAmmoSetting is AmmoSetting ammoSetting) || ammoSetting.IsEnabled))
+					Reloadable.ammoDef = AmmoDef;
+				else
+				{
+					Log.Message($"[{nameof(YayosCombatAddon)}] {WeaponDef}: ammo type '{AmmoDef}' not enabled/found, defaulting to '{ammoDef}'");
+					AmmoDef = ammoDef;
+				}
+			}
 			else
 				AmmoDef = ammoDef;
 

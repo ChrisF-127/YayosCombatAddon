@@ -37,6 +37,8 @@ namespace YayosCombatAddon
 			YCA_DefOf.yy_ammo_spacer_fire,
 			YCA_DefOf.yy_ammo_spacer_emp,
 		};
+		public static ThingDef[] ActiveAmmoDefs;
+
 		public static RecipeDef[] AllAmmoRecipeDefs =
 		{
 			YCA_DefOf.Make_yy_ammo_primitive_light,

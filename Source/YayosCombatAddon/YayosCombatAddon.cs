@@ -36,6 +36,8 @@ namespace YayosCombatAddon
 		#region PUBLIC METHODS
 		public static void ApplyDefPatches()
 		{
+			AmmoUtility.ActiveAmmoDefs = GetActiveAmmoDefs().ToArray();
+
 			if (yayoCombat.YayoCombatCore.ammo)
 			{
 				// setup ammo defs
@@ -176,6 +178,15 @@ namespace YayosCombatAddon
 				Log.Error($"{nameof(YayosCombatAddon)}: could not find any things using the '{AmmoCategoryName}'-ThingCategory (no ammo found); assign tab columns could not be created!");
 
 			ApplyDefPatches();
+		}
+
+		private static IEnumerable<ThingDef> GetActiveAmmoDefs()
+		{
+			foreach (var ammoDef in AmmoUtility.AllAmmoDefs)
+			{
+				if (!(Settings.AmmoSettings.FirstOrDefault(s => s.AmmoDef == ammoDef) is AmmoSetting ammoSetting) || ammoSetting.IsEnabled)
+					yield return ammoDef;
+			}
 		}
 		#endregion
 	}

@@ -55,17 +55,26 @@ namespace YayosCombatAddon
 			var spacer = "spacer";
 			var light = "light";
 			var heavy = "heavy";
+			var emp = "_emp";
+			var fire = "_fire";
 
 			// using default values
 			addAmmoSetting(primitive, light, 12, false);
 			addAmmoSetting(primitive);
 			addAmmoSetting(primitive, heavy, 18, true);
+			addAmmoSetting(primitive + emp);
+			addAmmoSetting(primitive + fire);
 			addAmmoSetting(industrial, light, 11, false);
 			addAmmoSetting(industrial);
 			addAmmoSetting(industrial, heavy, 17, true);
+			addAmmoSetting(industrial + emp);
+			addAmmoSetting(industrial + fire);
 			addAmmoSetting(spacer, light, 15, false);
 			addAmmoSetting(spacer);
 			addAmmoSetting(spacer, heavy, 25, true);
+			addAmmoSetting(spacer + emp);
+			addAmmoSetting(spacer + fire);
+
 			void addAmmoSetting(string tech, string type = null, int parameter = -1, bool greater = false)
 			{
 				if (type == null)
@@ -421,7 +430,7 @@ namespace YayosCombatAddon
 			// AmmoDef Menu Generator
 			IEnumerable<Widgets.DropdownMenuElement<ThingDef>> menuGenerator(TargetWrapper<ThingDef> vWrapper)
 			{
-				foreach (var ammoDef in AmmoUtility.AllAmmoDefs)
+				foreach (var ammoDef in AmmoUtility.ActiveAmmoDefs)
 				{
 					yield return new Widgets.DropdownMenuElement<ThingDef>
 					{

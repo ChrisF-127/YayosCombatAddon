@@ -87,17 +87,23 @@ namespace YayosCombatAddon
 			if (reloadable == null)
 				return;
 			var ammoDef = reloadable.ammoDef;
-			//if (!AmmoDefs.Contains(ammoDef))
+			//if (!AmmoDefs.Contains(ammoDef)) // -- only place where this method is used already checks for this
 			//	return;
 
-			var damage = weapon.verbs.FirstOrDefault(v => typeof(Verb_LaunchProjectile).IsAssignableFrom(v.verbClass))?.defaultProjectile?.projectile?.GetDamageAmount(null);
-			foreach (var setting in YayosCombatAddon.Settings.AmmoSettings.Where(s => s is AmmoSetting a && a.BaseAmmoDef == ammoDef).Cast<AmmoSetting>())
+			var projectile = weapon.verbs.FirstOrDefault(v => typeof(Verb_LaunchProjectile).IsAssignableFrom(v.verbClass))?.defaultProjectile?.projectile;
+			if (projectile != null && projectile.damageAmountBase == -1 && projectile.damageDef == null)
+				Log.ErrorOnce($"Failed to find sane damage amount: '{weapon.defName}' '{projectile}'", 91094882);
+			else
 			{
-				if (setting.IsEnabled && (setting.ParameterGreater ? damage > setting.Parameter : damage < setting.Parameter))
+				var damage = projectile?.GetDamageAmount(null);
+				foreach (var setting in YayosCombatAddon.Settings.AmmoSettings.Where(s => s is AmmoSetting a && a.BaseAmmoDef == ammoDef).Cast<AmmoSetting>())
 				{
-					if (reloadable.ammoDef != setting.AmmoDef)
-						reloadable.ammoDef = setting.AmmoDef;
-					break;
+					if (setting.IsEnabled && (setting.ParameterGreater ? damage > setting.Parameter : damage < setting.Parameter))
+					{
+						if (reloadable.ammoDef != setting.AmmoDef)
+							reloadable.ammoDef = setting.AmmoDef;
+						break;
+					}
 				}
 			}
 		}

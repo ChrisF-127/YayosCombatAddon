@@ -91,11 +91,13 @@ namespace YayosCombatAddon
 			//	return;
 
 			var projectile = weapon.verbs.FirstOrDefault(v => typeof(Verb_LaunchProjectile).IsAssignableFrom(v.verbClass))?.defaultProjectile?.projectile;
-			if (projectile != null && projectile.damageAmountBase == -1 && projectile.damageDef == null)
-				Log.ErrorOnce($"Failed to find sane damage amount: '{weapon.defName}' '{projectile}'", 91094882);
+			if (projectile == null)
+			{ }
+			else if (projectile.damageAmountBase == -1 && projectile.damageDef == null)
+				Log.WarningOnce($"{nameof(YayosCombatAddon)}: failed to find sane damage amount: '{weapon.defName}' '{projectile}'", -91094882); // 91094882 is used by "GetDamageAmount"
 			else
 			{
-				var damage = projectile?.GetDamageAmount(null);
+				var damage = projectile.GetDamageAmount(null);
 				foreach (var setting in YayosCombatAddon.Settings.AmmoSettings.Where(s => s is AmmoSetting a && a.BaseAmmoDef == ammoDef).Cast<AmmoSetting>())
 				{
 					if (setting.IsEnabled && (setting.ParameterGreater ? damage > setting.Parameter : damage < setting.Parameter))

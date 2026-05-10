@@ -50,8 +50,8 @@ namespace YayosCombatAddon
 				AccessTools.Method(typeof(Pawn_Tick), nameof(Pawn_Tick.Postfix)),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_Pawn_TickRare_Transpiler)));
 			harmony.Patch(
-				AccessTools.Method(typeof(CompApparelReloadable_UsedOnce), nameof(CompApparelReloadable_UsedOnce.Postfix)), 
-				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_CompApparelReloadable_UsedOnce_Transpiler)));
+				AccessTools.Method(typeof(CompApparelReloadable), nameof(CompApparelReloadable.UsedOnce)), 
+				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Patch_CompReloadable_UsedOnce)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
@@ -199,12 +199,6 @@ namespace YayosCombatAddon
 				ReloadUtility.TryAutoReloadAll(__instance);
 		}
 
-		static IEnumerable<CodeInstruction> YC_Patch_CompApparelReloadable_UsedOnce_Transpiler(IEnumerable<CodeInstruction> _)
-		{
-			yield return new CodeInstruction(OpCodes.Ldarg_0);
-			yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(HarmonyPatches), nameof(Patch_CompReloadable_UsedOnce)));
-			yield return new CodeInstruction(OpCodes.Ret);
-		}
 		static void Patch_CompReloadable_UsedOnce(CompApparelReloadable __instance)
 		{
 			if (!yayoCombat.YayoCombatCore.ammo || __instance.Wearer == null)

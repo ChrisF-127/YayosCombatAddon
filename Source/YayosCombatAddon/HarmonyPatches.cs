@@ -49,9 +49,6 @@ namespace YayosCombatAddon
 			harmony.Patch(
 				AccessTools.Method(typeof(Pawn_Tick), nameof(Pawn_Tick.Postfix)),
 				transpiler: new HarmonyMethod(typeof(HarmonyPatches), nameof(YC_Patch_Pawn_TickRare_Transpiler)));
-			harmony.Patch(
-				AccessTools.Method(typeof(CompApparelReloadable), nameof(CompApparelReloadable.UsedOnce)), 
-				postfix: new HarmonyMethod(typeof(HarmonyPatches), nameof(Patch_CompReloadable_UsedOnce)));
 
 			// patch to make original "eject ammo" right click menu only show if there is any ejectable ammo
 			harmony.Patch(
@@ -197,28 +194,6 @@ namespace YayosCombatAddon
 			// if waiting (drafted), try reloading all weapons that are out of ammo and for which ammo can be found
 			else if (job == JobDefOf.Wait_Combat)
 				ReloadUtility.TryAutoReloadAll(__instance);
-		}
-
-		static void Patch_CompReloadable_UsedOnce(CompApparelReloadable __instance)
-		{
-			if (!yayoCombat.YayoCombatCore.ammo || __instance.Wearer == null)
-				return;
-			// (new) only reload equippable weapons
-			if (__instance.ReloadableThing?.def?.equipmentType != EquipmentType.Primary)
-				return;
-			// (new) only reload valid ammo
-			if (__instance.AmmoDef.IsAmmo() != true)
-				return;
-			// (replacement) Replaced with new method
-			var pawn = __instance.Wearer;
-			var drafted = pawn.Drafted;
-			if (!ReloadUtility.TryAutoReloadSingle(
-					__instance,
-					showOutOfAmmoWarning: true,
-					ignoreDistance: !drafted,
-					returnToStartingPosition: drafted)
-				&& pawn.CurJobDef == JobDefOf.Hunt)
-				pawn.jobs.StopAll();
 		}
 
 		static IEnumerable<CodeInstruction> YC_ThingWithComps_GetFloatMenuOptions_Transpiler(IEnumerable<CodeInstruction> codeInstructions)
@@ -369,20 +344,35 @@ namespace YayosCombatAddon
 
 		static IEnumerable<CodeInstruction> YC_Patch_PawnGenerator_GenerateGearFor_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			Log.Message(string.Join("\n", instructions));
+
+			var skip = false;
 			var previous = default(OpCode);
 			foreach (var instruction in instructions)
 			{
-				if (previous == OpCodes.Ldloc_0
-					&& instruction.opcode == OpCodes.Callvirt && instruction.operand is MethodInfo mi && mi.Name == "GetEnumerator")
+				if (!skip)
 				{
-					yield return new CodeInstruction(OpCodes.Ldarg_0);
-					yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(HarmonyPatches), nameof(Patch_PawnGenerator_GenerateGearFor)));
-					yield return new CodeInstruction(OpCodes.Ret);
-					yield break;
+					if (previous == OpCodes.Ldloc_0
+						&& instruction.opcode == OpCodes.Callvirt && instruction.operand is MethodInfo mi && mi.Name == "GetEnumerator")
+					{
+						yield return new CodeInstruction(OpCodes.Ldarg_0);
+						yield return new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(HarmonyPatches), nameof(Patch_PawnGenerator_GenerateGearFor)));
+						skip = true;
+					}
+					else
+						yield return instruction;
 				}
-				yield return instruction;
+				else
+				{
+					if (instruction.opcode == OpCodes.Ret)
+					{
+						yield return instruction;
+						yield break;
+					}
+				}
 				previous = instruction.opcode;
 			}
+			
 			Log.Error($"{nameof(YayosCombatAddon)}: failed to apply '{nameof(YC_Patch_PawnGenerator_GenerateGearFor_Transpiler)}'");
 		}
 		static void Patch_PawnGenerator_GenerateGearFor(List<CompApparelReloadable> allWeaponsComps, Pawn pawn)

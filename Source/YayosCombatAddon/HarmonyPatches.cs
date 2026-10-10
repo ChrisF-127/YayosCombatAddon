@@ -344,8 +344,6 @@ namespace YayosCombatAddon
 
 		static IEnumerable<CodeInstruction> YC_Patch_PawnGenerator_GenerateGearFor_Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
-			Log.Message(string.Join("\n", instructions));
-
 			var skip = false;
 			var previous = default(OpCode);
 			foreach (var instruction in instructions)
